@@ -1,101 +1,12 @@
-# X: Convex Hull Approximation for Activation Functions
+# X
 
 This is an artifact for the tool called **X**, which over-approximates the function hulls of various activation functions (including leaky ReLU, ReLU, sigmoid, tanh, and maxpool).
 
-This artifact accompanies the paper **Convex Hull Approximation for Activation Functions**.
-
-> **TIP**: You can download our original logs and benchmark ONNX models from [Google Drive link](https://drive.google.com/drive/folders/1C4kYaKb_Pd3xCo6aCy6W80tw43CM8Nn8?usp=sharing).
-
-**Table of Contents**
-
-- [Quick Installation and Test](#quick-installation-and-test)
-- [Quick Reproduce Results](#quick-reproduce-results)
-- [Step-by-Step Installation](#step-by-step-installation)
-    - [Hardware Requirements](#hardware-requirements)
-    - [Download Repository](#download-repository)
-    - [Python Environment](#python-environment)
-    - [Python Libraries](#python-libraries)
-- [Step-by-Step Reproduce Results](#step-by-step-reproduce-results)
-    - [Quick Kick-the-Tires](#quick-kick-the-tires)
-    - [Evaluation: Function Hull Approximation](#evaluation-function-hull-approximation)
-        - [Check Achieved Results](#check-achieved-results)
-        - [Reproduce Results](#reproduce-results)
-    - [Evaluation: Local Robustness Verification](#evaluation-local-robustness-verification)
-        - [Check Achieved Results](#check-achieved-results-1)
-        - [Reproduce Results](#reproduce-results-1)
-- [Reuse the Source Code](#reuse-the-source-code)
-    - [Main Code Structure](#main-code-structure)
-    - [How to Extend the Code](#how-to-extend-the-code)
-- [License](#license)
-
-# Quick Installation and Test
-
-> You need the license of [Gurobi](https://www.gurobi.com/academia/academic-program-and-licenses/) to run the code in this repository. [Academic Named-User License](https://www.gurobi.com/features/academic-named-user-license/?_gl=1*egge2l*_up*MQ..*_gs*MQ..&gclid=CjwKCAjw3_PCBhA2EiwAkH_j4rrGVU5Rgx73EwYA6Py26R10HVHzY9Jokty2eH26q0CS7H-HFoQWihoCWw8QAvD_BwE&gbraid=0AAAAA-OoJU4jkCtivoppVlJFFFMV6UVqM) is recommended for academic users.
-
-If you're familiar with Python and the libraries we use, you can quickly install X by following these steps:
-
-```cmd
-git clone https://github.com/MrAnonymous3642/X.git X
-cd X
-bash setup_X.sh
-bash test_X.sh
-```
-
-This part includes the installation of the required libraries, downloading the benchmark ONNX models, downloading the archived logs of our paper, and running a quick test to check if the tool works well.
 
 The expected outputs of `bash test_X.sh` is to verify a small instance of local robustness verification, and it prints the instance to verify is `UNKNOWN`, which means our sound approach cannot decide this instance is verified or not. Another possible result is `SAT`, which means the instance is verified and the local robustness is satisfied. If you see the output like this, it means the installation is successful and the tool works well.
 
 
-> **NOTE**: If you encounter any issues during the installation, please refer to the [Step-by-Step Installation](#step-by-step-installation) section below for detailed instructions.
-
-# Quick Reproduce Results
-
-You can check the archived logs of our paper in the `archived_logs` folder.
-
-Or you can reproduce the results in our paper by running the following commands:
-The part 1 is about the volume evaluation of convex hull approximation for activation functions, and it will take about 30 minutes to run. The part 2 is about the local robustness verification, and it will take about 2~3 days to run.
-
-```cmd
-bash reproduce_part1.sh
-bash reproduce_part2.sh
-```
-
-> **NOTE**: If you want to run the evaluation code in detail, please refer to the [Step-by-Step Reproduce Results in the Paper](#step-by-step-reproduce-results-in-the-paper) section below for detailed instructions.
-
-# Step-by-Step Installation
-
-> **NOTE:** The following demonstrates the installation of our tool _rather than_ all the baseline approaches, e.g., [auto_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA) for [CROWN](https://arxiv.org/pdf/1811.00866), [ERAN](https://github.com/eth-sri/eran) for [DeepPoly](https://dl.acm.org/doi/pdf/10.1145/3290354) and [PRIMA](https://dl.acm.org/doi/pdf/10.1145/3498704) in the evaluation of the paper. The following installation instructions are for a [Linux](https://en.wikipedia.org/wiki/Linux) system (e.g., [Ubuntu](https://ubuntu.com/)). If you want to run the code on a [Microsoft Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) or [macOS](https://en.wikipedia.org/wiki/MacOS) system, you just need to set up a [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) environment with the corresponding Python libraries. The code is pure Python and does not depend on any system-specific libraries.
-
-
-Our code is pure [Python](https://www.python.org/), but you need a version >=3.10 (we are using 3.12) to support some functions in [typing](https://docs.python.org/3/library/typing.html). Also, you need to install the following libraries.
-
-> **TIP**: The whole installation process can be completed within **30 minutes** with a 100M network connection. The most time-consuming part is the installation of [PyTorch](https://pytorch.org/).
-
-## Hardware Requirements
-
-The code is designed to be efficient and can run on a normal PC with a good CPU and enough memory.
-> **TIP**: You can run half of the benchmarks on a very normal PC (e.g., [4th Intel i7 CPU](https://www.intel.com/content/www/us/en/ark/products/series/84979/5th-generation-intel-core-i7-processors.html) with a [GTX 1080](https://www.nvidia.com/en-my/geforce/products/10series/geforce-gtx-1080/) GPU). This is enough for the kick-the-tires experiments.
-
-All reported CPU experiments are conducted on a workstation equipped with [20 AMD EPYC 7702P 64-Core 2.00GHz CPUs](https://www.amd.com/en/products/processors/server/epyc/7002-series.html) with 100GB of main memory. GPU experiments are conducted on a workstation with [48 AMD Ryzen Threadripper PRO 5965WX 24-Core 4.5GHz CPUs](https://www.amd.com/en/products/processors/workstations/ryzen-threadripper.html), 252GB of main memory, and one [NVIDIA RTX A6000 GPU](https://www.nvidia.com/en-au/design-visualization/rtx-a6000/) with 48GB of GPU memory.
-
-## Download Repository
-
-> **TIP**: Before doing the following steps, you need to download and install [Git](https://git-scm.com/downloads) if you do not have it on your machine.
-
-First, change to the directory where you want to put the repository. Then, download the repository with the following command:
-
-```cmd
-git clone https://github.com/MrAnonymous3642/X.git X
-```
-
-Next, change to the `X` folder:
-
-```cmd
-cd X
-```
-
 ## Python Environment
-
 
 ```cmd
 conda create --name X python=3.12
@@ -145,14 +56,7 @@ cd X/evaluation_verification
 bash test.sh
 ```
 
-## Evaluation: Function Hull Approximation
-
-The `evaluation_volume` folder contains the code about volume evaluation of convex hull approximation for activation functions. To evaluate the convex hull approximation method in [PRIMA](https://dl.acm.org/doi/pdf/10.1145/3498704), you need install [ELINA](https://github.com/eth-sri/ELINA) and put it outside the `X` folder if you need test the methods in [PRIMA](https://dl.acm.org/doi/pdf/10.1145/3498704) called SBLM+PDDM. If you only want to use X, you do not need to install ELINA.
-
-### Reproduce Results
-
-
-## Evaluation: Local Robustness Verification
+## Evaluation: verify 
 
 The `evaluation_verification` folder contains the evaluation code for local robustness verification. To run the following commands, make sure you are in the corresponding subfolder:
 
@@ -207,7 +111,6 @@ X/                      # Main folder of X
 │   └── utils/               # Miscellaneous utility functions
 └── README.md
 ```
-
 
 
 - If you want to use new dataset or new models, you can take the example `evaluation_verification/exp.py` as a reference. You possibly need to modify the model arguments and the preprocessing for the dataset.
