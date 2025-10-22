@@ -219,7 +219,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             elif op_type == "Conv":
                 module = self._parse_conv2d(node, input_size, initializers)
 
-            elif node.op_type in {"Relu", "Sigmoid", "Tanh", "Elu", "Mul", "LeakyRelu"}:
+            elif node.op_type in {"Relu", "Sigmoid", "Tanh", "Mul", "LeakyRelu"}:
                 next_node = None
                 if node.op_type == "Sigmoid":
                     next_node = next(nodes_iterator)
@@ -812,14 +812,6 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         elif op_type == "Tanh":
             return self._handle_tanh(name, input_names, input_size)
 
-        elif op_type == "Elu":
-            alpha = float(node.attribute[0].f)
-
-            if alpha != 1.0:
-                raise RuntimeError(f"Unsupported alpha {alpha} for Elu function.")
-
-            return self._handle_elu(name, input_names, input_size)
-
         elif op_type == "LeakyRelu":
             alpha = float(node.attribute[0].f)
 
@@ -839,6 +831,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :param node: The Flatten or Reshape node.
         """
         if node.op_type == "Reshape":
+            print(f'node.attribute: {node.attribute}')
             allowzero = bool(node.attribute[0].i)
             if allowzero:
                 raise RuntimeError(f"Unsupported reshape with allowzero {allowzero}.")
@@ -1077,15 +1070,6 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         input_names: list[str],
         input_size: tuple[int] | tuple[int, int, int],
     ) -> TanhNode:
-        pass
-
-    @abstractmethod
-    def _handle_elu(
-        self,
-        name: str,
-        input_names: list[str],
-        input_size: tuple[int] | tuple[int, int, int],
-    ) -> ELUNode:
         pass
 
     @abstractmethod

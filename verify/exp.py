@@ -47,7 +47,7 @@ def main(args):
         opt_method=opt_method,
         first_sample_index=0,
         num_samples=100,
-        device="cuda:0",  # noqa
+        # device="cuda:0",  # noqa
         dtype="float64",
     )
 

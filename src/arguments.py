@@ -29,11 +29,11 @@ class Arguments:
     epsilon: float
     """The perturbation radius."""
 
-    bound_propagation_method: BoundPropagationMethod = BoundPropagationMethod.INEQUALITY
+    bound_propagation_method: BoundPropagate = BoundPropagate.INEQUALITY
     """
     The bound propagation method.
     
-    Refer to :class:`BoundPropagationMethod` for more details.
+    Refer to :class:`BoundPropagate` for more details.
     """
 
     act_relax_mode: RelaxMode = RelaxMode.ROVER_SN
@@ -185,6 +185,7 @@ class Arguments:
 
         dtype = torch.float64 if self.dtype == "float64" else torch.float32
         device = torch.device(self.device)
+        print('use device:', device)
 
         self.perturbation_args = PerturbationArgs(
             epsilon=self.epsilon,

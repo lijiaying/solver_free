@@ -11,8 +11,6 @@ __all__ = [
     "dsigmoid",
     "tanh",
     "dtanh",
-    "elu",
-    "delu",
     "leakyrelu",
     "dleakyrelu",
 ]

@@ -10,7 +10,6 @@ data_dict = {
     "our_tanh": [],
     "our_maxpool_dlp": [],
     "our_leakyrelu": [],
-    "our_elu": [],
 }
 
 print("[INFO] Start organizing data...")
@@ -20,7 +19,6 @@ for method in [
     "our_tanh",
     "our_maxpool_dlp",
     "our_leakyrelu",
-    "our_elu",
 ]:
     for d in dimensions:
         for n in [3]:

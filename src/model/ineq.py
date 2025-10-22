@@ -242,16 +242,6 @@ class IneqBoundModel(BasicBoundModel[T]):
 
         return TanhIneqNode(*args)
 
-    def _handle_elu(
-        self,
-        name: str,
-        input_names: list[str],
-        input_size: tuple[int] | tuple[int, int, int],
-    ) -> ELUNode:
-        args = (name, input_names, input_size, self.bp_shared_data, self.act_relax_args)
-
-        return ELUIneqNode(*args)
-
     def _handle_leakyrelu(
         self,
         name: str,

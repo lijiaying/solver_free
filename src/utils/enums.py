@@ -4,7 +4,7 @@ This module defines the enumerations.
 
 __docformat__ = "restructuredtext"
 __all__ = [
-    "BoundPropagationMethod",
+    "BoundPropagate",
     "OptimizationMethod",
     "ActivationType",
     "RelaxMode",
@@ -18,7 +18,7 @@ __all__ = [
 from enum import Enum
 
 
-class BoundPropagationMethod(Enum):
+class BoundPropagate(Enum):
     """
     The bound propagation method used in the activation relaxation.
     """

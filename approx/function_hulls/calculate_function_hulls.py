@@ -53,7 +53,6 @@ if __name__ == "__main__":
         "single_tanh",
         # "single_maxpool",
         # "single_leakyrelu",
-        # "single_elu",
         # "prima_sigmoid",
         # "prima_tanh",
         # "prima_maxpool",
@@ -61,33 +60,28 @@ if __name__ == "__main__":
         "our_tanh",
         # "our_maxpool_dlp",
         # "our_leakyrelu",
-        # "our_elu",
         "our_sigmoid-a",
         "our_sigmoid-b",
         "our_tanh-a",
         "our_tanh-b",
-        # "our_elu-a",
         # "our_maxpool_dlp-a",
     ]
     methods = [
         "single_sigmoid",
         # "single_maxpool",
         # "single_leakyrelu",
-        # "single_elu",
         # "prima_sigmoid",
         # "prima_tanh",
         # "prima_maxpool",
         "our_sigmoid",
         # "our_maxpool_dlp",
         # "our_leakyrelu",
-        # "our_elu",
         "our_sigmoid-a",
         "our_sigmoid-b",
         "single_tanh",
         "our_tanh",
         "our_tanh-a",
         "our_tanh-b",
-        # "our_elu-a",
         # "our_maxpool_dlp-a",
     ]
     methods = [
@@ -174,9 +168,6 @@ if __name__ == "__main__":
                 # elif method == "our_leakyrelu":
                 #     fun_hull = LeakyReLUHull(S=True)
                 #     output_constraints = fun_hull.cal_hull(constrs=constraints)
-                # elif method == "our_elu":
-                #     fun_hull = ELUHull(S=True)
-                #     output_constraints = fun_hull.cal_hull(constrs=constraints)
                 elif method == "our_sigmoid-a":
                     fun_hull = SigmoidHullA(S=True)
                     output_constraints = fun_hull.cal_hull(constrs=constraints)
@@ -189,9 +180,6 @@ if __name__ == "__main__":
                 elif method == "our_tanh-b":
                     fun_hull = TanhHullB(S=True)
                     output_constraints = fun_hull.cal_hull(constrs=constraints)
-                # elif method == "our_elu-a":
-                #     fun_hull = ELUHullA(S=True)
-                #     output_constraints = fun_hull.cal_hull(constrs=constraints)
                 # elif method == "our_maxpool_dlp-a":
                 #     fun_hull = MaxPoolDLPHullA(S=True)
                 #     output_constraints = fun_hull.cal_hull(constrs=constraints)
@@ -206,9 +194,6 @@ if __name__ == "__main__":
                 #     output_constraints = fun_hull.cal_hull(lower=lb, upper=ub)
                 # elif method == "single_leakyrelu":
                 #     fun_hull = LeakyReLUHull(S=True, M=False)
-                #     output_constraints = fun_hull.cal_hull(lower=lb, upper=ub)
-                # elif method == "single_elu":
-                #     fun_hull = ELUHull(S=True, M=False)
                 #     output_constraints = fun_hull.cal_hull(lower=lb, upper=ub)
                 else:
                     raise NotImplementedError(f"Method {method} is not implemented.")

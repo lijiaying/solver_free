@@ -526,58 +526,7 @@ class TanhHullB(SShapeHullB):
     @staticmethod
     def _df(x: ndarray | float) -> ndarray | float:
         return dtanh(x)
-
-
-# class ELUHullA(ELUHull):
-#     @classmethod
-#     def _construct_dlp(
-#         cls, idx: int, dim: int, l: float, u: float
-#     ) -> tuple[ndarray, float | None]:
-
-#         temp1, temp2 = [0.0] * idx, [0.0] * (dim - 1)
-
-#         yl = cls._f(l)
-#         yu = cls._f(u)
-#         if l >= _ELU_MAX_AUX_POINT or u <= _ELU_MAX_AUX_POINT:
-#             k = (yu - yl) / (u - l)
-#             b = yu - k * u
-#             aux_lines = np.asarray(
-#                 [[b] + temp1 + [k] + temp2 + [-1.0]], dtype=np.float64
-#             )
-#             return aux_lines, None
-
-#         # The intersection point of the two linear pieces should not be positive to
-#         # avoid large coefficients in the upper bound because the linear pieces are
-#         # too close to the upper bound.
-#         m = (l + u) / 2.0
-#         m = (m + l) / 2.0  # For ablation study
-#         m = min(m, _ELU_MAX_AUX_POINT)
-
-#         kp1 = (yu - cls._df(m)) / (u - m)
-#         bp1 = yu - kp1 * u
-#         kp2 = (yl - cls._df(m)) / (l - m)
-#         bp2 = yl - kp2 * l
-
-#         # Estimate the angle of the two linear pieces to avoid large coefficients.
-#         if abs((kp1 - kp2) / (1 - kp1 * kp2)) < _MIN_DLP_ANGLE:
-#             k = (yu - yl) / (u - l)
-#             b = yu - k * u
-#             aux_lines = np.asarray(
-#                 [[b] + temp1 + [k] + temp2 + [-1.0]], dtype=np.float64
-#             )
-#             return aux_lines, None
-
-#         aux_lines = np.asarray(
-#             [
-#                 [bp1] + temp1 + [kp1] + temp2 + [-1.0],
-#                 [bp2] + temp1 + [kp2] + temp2 + [-1.0],
-#             ],
-#             dtype=np.float64,
-#         )
-#         aux_point = m
-
-#         return aux_lines, aux_point
-
+    
 
 # class MaxPoolDLPHullA(MaxPoolHullDLP):
 #     @classmethod

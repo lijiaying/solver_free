@@ -13,7 +13,6 @@ __all__ = [
     "ReLUNode",
     "SigmoidNode",
     "TanhNode",
-    "ELUNode",
     "LeakyReLUNode",
     "MaxPool2DNode",
     "ResidualAddNode",
@@ -674,64 +673,6 @@ class TanhNode(NonLinearNode, ABC):
     @staticmethod
     def df(x: Tensor) -> Tensor:
         return dtanh(x)
-
-
-class ELUNode(NonLinearNode, ABC):
-    """
-    An abstract class for the ELU node.
-
-    .. tip::
-        An ELU function is defined as
-
-        .. math::
-
-            f(x) =
-            \\begin{cases}
-                x & \\text{if } x > 0, \\\\
-                \\alpha (\\exp(x) - 1) & \\text{otherwise},
-            \\end{cases}
-
-        where :math:`\\alpha` is a hyperparameter.
-        We only consider the case where :math:`\\alpha = 1`.
-
-    """
-
-    def __init__(
-        self,
-        name: str,
-        input_names: list[str],
-        input_size: tuple[int] | tuple[int, int, int],
-        shared_data: BPSharedData,
-        act_relax_args: ActRelaxArgs,
-    ):
-        NonLinearNode.__init__(
-            self, name, input_names, input_size, shared_data, act_relax_args
-        )
-        self._output_size = self._cal_output_size()
-        self._no = math.prod(self._output_size)
-        self.act_type = ActivationType.ELU
-
-    @staticmethod
-    def _get_nontrivial_neuron_mask(
-        pre_l: Tensor,
-        pre_u: Tensor,
-        l: Tensor,
-        u: Tensor,
-        act_relax_args: ActRelaxArgs,
-    ) -> Tensor:
-        return get_nontrivial_neuron_mask_elu(pre_l, pre_u, l, u, act_relax_args)
-
-    @staticmethod
-    def clamp_bounds(bound: ScalarBound) -> ScalarBound:
-        return ScalarBound(torch.clamp_min(bound.l, -1), torch.clamp_min(bound.u, -1))
-
-    @staticmethod
-    def f(x: Tensor) -> Tensor:
-        return elu(x)
-
-    @staticmethod
-    def df(x: Tensor) -> Tensor:
-        return delu(x)
 
 
 class LeakyReLUNode(NonLinearNode, ABC):

@@ -22,7 +22,6 @@ for dim in [2, 3, 4]:  # dimension
             "single_tanh",
             "single_maxpool",
             "single_leakyrelu",
-            "single_elu",
             "prima_sigmoid",
             "prima_tanh",
             "prima_maxpool",
@@ -30,12 +29,10 @@ for dim in [2, 3, 4]:  # dimension
             "our_tanh",
             "our_maxpool_dlp",
             "our_leakyrelu",
-            "our_elu",
             "our_sigmoid-a",
             "our_sigmoid-b",
             "our_tanh-a",
             "our_tanh-b",
-            "our_elu-a",
             "our_maxpool_dlp-a",
         ]:
             print(
@@ -113,14 +110,10 @@ methods = ["single_maxpool", "our_maxpool_dlp"]
 print_table(methods)
 methods = ["single_leakyrelu", "our_leakyrelu"]
 print_table(methods)
-methods = ["single_elu", "our_elu"]
-print_table(methods)
 
 methods = ["our_sigmoid-a", "our_sigmoid-b", "our_sigmoid"]
 print_table(methods)
 methods = ["our_tanh-a", "our_tanh-b", "our_tanh"]
-print_table(methods)
-methods = ["our_elu-a", "our_elu"]
 print_table(methods)
 methods = ["our_maxpool_dlp-a", "our_maxpool_dlp"]
 print_table(methods)
