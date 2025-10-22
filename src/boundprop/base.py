@@ -673,6 +673,7 @@ class TanhNode(NonLinearNode, ABC):
     def df(x: Tensor) -> Tensor:
         return dtanh(x)
 
+
 class MaxPool2DNode(NonLinearNode, ABC):
     """
     A class for the 2D MaxPool node.

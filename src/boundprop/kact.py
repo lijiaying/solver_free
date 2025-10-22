@@ -247,10 +247,8 @@ def back_substitute_grouped_constrs(
     device: torch.device,
 ) -> Tensor:
     """
-    This function calculates the input constraints of the grouped neurons by backward
-    inequality propagation.
-    The input constraints are the constraints of the input variables that are related to
-    the grouped neurons.
+    This function calculates the input constraints of the grouped neurons by backward inequality propagation.
+    The input constraints are the constraints of the input variables that are related to the grouped neurons.
     The input constraints are calculated by the backward inequality propagation.
 
     :param input_bound: The bound of the input variables.
@@ -258,8 +256,7 @@ def back_substitute_grouped_constrs(
         :class:`LinearIneqNode` or :class:`LinearIneqConv2d`.
     :param n_vars: The number of input variables.
     :param ids_grouped: The grouped indices of the neurons.
-    :param kact_max_parallel_groups: The maximum number of groups to be processed in
-        parallel.
+    :param kact_max_parallel_groups: The maximum number of groups to be processed in parallel.
     :param constr_template_shape: The template of the input constraints. Refer to
         :class:`ConstrTemplate` for more details.
     :param dtype: The data type of the input constraints.
@@ -285,8 +282,7 @@ def back_substitute_grouped_constrs(
     n_t = template.size(0)  # The number of template constraints
 
     # Allocate the constrs template for each group.
-    # The input constraints has three dimension of (g, n_t, k+1), where g is the number
-    # of groups.
+    # The input constraints has three dimension of (g, n_t, k+1), where g is the number of groups.
     max_n_g = kact_max_parallel_groups
     # The variable to store the input constraints of the grouped neurons.
     constrs = torch.empty((0, 2 * n_t, k + 1), dtype=dtype, device=device)
@@ -296,8 +292,7 @@ def back_substitute_grouped_constrs(
         ids_grouped_partial = ids_grouped[start:end]
         n_g = ids_grouped_partial.size(0)
 
-        # Fill template in the input constraints with extended dimension for bound
-        # propagation.
+        # Fill template in the input constraints with extended dimension for bound propagation.
         ineqs = torch.zeros((n_g, n_t, n_vars), dtype=dtype, device=device)
         idxs_g = torch.arange(n_g, device=device).reshape(n_g, 1, 1)
         idxs_t = torch.arange(n_t, device=device).reshape(1, n_t, 1)
@@ -307,6 +302,7 @@ def back_substitute_grouped_constrs(
         # Calculate the biases of constrs by backward inequality propagation.
         ineqs = ineqs.reshape((-1, n_vars))
         constr = LConstr(A=ineqs)
+        __import__("ipdb").set_trace()
         bound = back_substitute_to_input_kact(
             pre_module, LConstrBound(L=constr, U=constr), input_bound
         )
@@ -454,12 +450,12 @@ def _cal_func_hull(
     # list to store the output constraints. But that is for LP. For BP, the number of
     # output constraints is fixed because we want parallel  computing.
 
-    if use_multi_threads:
-        with multiprocessing.Pool() as pool:
-            results = pool.starmap(
-                fun_hull.cal_hull, zip(grouped_input_constrs, grouped_l, grouped_u)
-            )
-        return list(results)
+    # if use_multi_threads:
+    #     with multiprocessing.Pool() as pool:
+    #         results = pool.starmap(
+    #             fun_hull.cal_hull, zip(grouped_input_constrs, grouped_l, grouped_u)
+    #         )
+    #     return list(results)
     i = 0
     results = []
     for input_constrs, l, u in zip(grouped_input_constrs, grouped_l, grouped_u):
@@ -530,15 +526,18 @@ def back_substitute_to_input_kact(
             and module.next_nodes is not None
             and len(module.next_nodes) == 2
         ):
-            constr_bound, constr_bound_r, residual_second_path, new_bound = (
-                back_substitute_residual_second_path(
-                    self,
-                    module,
-                    constr_bound,
-                    constr_bound_r,
-                    residual_second_path,
-                    store_updated_bounds=False,
-                )
+            (
+                constr_bound,
+                constr_bound_r,
+                residual_second_path,
+                new_bound,
+            ) = back_substitute_residual_second_path(
+                self,
+                module,
+                constr_bound,
+                constr_bound_r,
+                residual_second_path,
+                store_updated_bounds=False,
             )
             in_residual_block = False
 

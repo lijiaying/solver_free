@@ -133,4 +133,3 @@ def delu(x: Tensor | ndarray | float) -> Tensor | ndarray | float:
     if isinstance(x, Tensor):
         return delu_torch(x)
     return delu_np(x)
-

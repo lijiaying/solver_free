@@ -157,7 +157,7 @@ class ModelFactory:
 
         for i, (sample, target_label) in enumerate(self.data_loader):
             if _skip_sample(i, self._ignored_samples, args.first_sample_index):
-                print('skip sample ', i, flush=True)
+                print("skip sample ", i, flush=True)
                 continue
             if num_samples <= 0:
                 break

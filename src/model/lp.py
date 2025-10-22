@@ -557,8 +557,8 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
             logger.info(f"Objective value is {obj_val:.4f}.")
             if return_solution:
                 solution = np.array(
-                    [var.x for var in self.model.getVars()], dtype=np.float64  # noqa
-                )
+                    [var.x for var in self.model.getVars()], dtype=np.float64
+                )  # noqa
 
         return result, obj_val, solution
 

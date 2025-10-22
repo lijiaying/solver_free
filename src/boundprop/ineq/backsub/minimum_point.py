@@ -17,33 +17,33 @@ def _cal_minimum_point_3d(A: Tensor, l: Tensor, u: Tensor) -> Tensor:
     return A_p * l + A_n * u
 
 
-_example_inputs1_f32 = (
+_example_inputs1_fp32 = (
     torch.rand((2, 3), dtype=torch.float32),
     torch.rand((3,), dtype=torch.float32),
     torch.rand((3,), dtype=torch.float32),
 )
-_example_inputs2_f32 = (
+_example_inputs2_fp32 = (
     torch.rand((2, 3, 4, 5), dtype=torch.float32),
     torch.rand((3, 4, 5), dtype=torch.float32),
     torch.rand((3, 4, 5), dtype=torch.float32),
 )
 
-_cal_minimum_point_1d_f32 = torch.jit.trace(_cal_minimum_point_1d, _example_inputs1_f32)
-_cal_minimum_point_3d_f32 = torch.jit.trace(_cal_minimum_point_3d, _example_inputs2_f32)
+_cal_minimum_point_1d_fp32 = torch.jit.trace(_cal_minimum_point_1d, _example_inputs1_fp32)
+_cal_minimum_point_3d_fp32 = torch.jit.trace(_cal_minimum_point_3d, _example_inputs2_fp32)
 
-_example_inputs1_f64 = (
+_example_inputs1_fp64 = (
     torch.rand((2, 3), dtype=torch.float64),
     torch.rand((3,), dtype=torch.float64),
     torch.rand((3,), dtype=torch.float64),
 )
-_example_inputs2_f64 = (
+_example_inputs2_fp64 = (
     torch.rand((2, 3, 4, 5), dtype=torch.float64),
     torch.rand((3, 4, 5), dtype=torch.float64),
     torch.rand((3, 4, 5), dtype=torch.float64),
 )
 
-_cal_minimum_point_1d_f64 = torch.jit.trace(_cal_minimum_point_1d, _example_inputs1_f64)
-_cal_minimum_point_3d_f64 = torch.jit.trace(_cal_minimum_point_3d, _example_inputs2_f64)
+_cal_minimum_point_1d_fp64 = torch.jit.trace(_cal_minimum_point_1d, _example_inputs1_fp64)
+_cal_minimum_point_3d_fp64 = torch.jit.trace(_cal_minimum_point_3d, _example_inputs2_fp64)
 
 
 def cal_minimum_point(A: Tensor, l: Tensor, u: Tensor) -> Tensor:
@@ -59,18 +59,18 @@ def cal_minimum_point(A: Tensor, l: Tensor, u: Tensor) -> Tensor:
 
     if dtype == torch.float32:
         if d == 2:
-            return _cal_minimum_point_1d_f32(A, l, u)
+            return _cal_minimum_point_1d_fp32(A, l, u)
         elif d == 4:
-            return _cal_minimum_point_3d_f32(A, l, u)
+            return _cal_minimum_point_3d_fp32(A, l, u)
         else:
             raise ValueError(
                 f"Unsupported dimension: " f"A: {A.shape}, l: {l.shape}, u: {u.shape}."
             )
     elif dtype == torch.float64:
         if d == 2:
-            return _cal_minimum_point_1d_f64(A, l, u)
+            return _cal_minimum_point_1d_fp64(A, l, u)
         elif d == 4:
-            return _cal_minimum_point_3d_f64(A, l, u)
+            return _cal_minimum_point_3d_fp64(A, l, u)
         else:
             raise ValueError(
                 f"Unsupported dimension: " f"A: {A.shape}, l: {l.shape}, u: {u.shape}."

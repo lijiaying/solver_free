@@ -5,7 +5,7 @@ import torch
 from torch import Tensor
 
 
-def _back_substitute_nonlinear_1d(
+def _BS_nonlinear_1d(
     A: Tensor, b: Tensor, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor]:
     Ap, An = A.clamp(min=0), A.clamp(max=0)
@@ -15,7 +15,7 @@ def _back_substitute_nonlinear_1d(
     return A, b
 
 
-def _back_substitute_nonlinear_without_bias_1d(
+def _BS_nonlinear_no_bias_1d(
     A: Tensor, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor]:
     Ap, An = A.clamp(min=0), A.clamp(max=0)
@@ -25,92 +25,92 @@ def _back_substitute_nonlinear_without_bias_1d(
     return A, b
 
 
-_A_f32 = torch.rand((2, 3), dtype=torch.float32)
-_b_f32 = torch.rand((2,), dtype=torch.float32)
-_s1_f32 = torch.rand((3,), dtype=torch.float32)
-_s2_f32 = torch.rand((3,), dtype=torch.float32)
-_s1_2d_f32 = torch.rand((3, 3), dtype=torch.float32)
-_s2_2d_f32 = torch.rand((3, 3), dtype=torch.float32)
-_t1_f32 = torch.rand((3,), dtype=torch.float32)
-_t2_f32 = torch.rand((3,), dtype=torch.float32)
+_A_fp32 = torch.rand((2, 3), dtype=torch.float32)
+_b_fp32 = torch.rand((2,), dtype=torch.float32)
+_s1_fp32 = torch.rand((3,), dtype=torch.float32)
+_s2_fp32 = torch.rand((3,), dtype=torch.float32)
+_s1_2d_fp32 = torch.rand((3, 3), dtype=torch.float32)
+_s2_2d_fp32 = torch.rand((3, 3), dtype=torch.float32)
+_t1_fp32 = torch.rand((3,), dtype=torch.float32)
+_t2_fp32 = torch.rand((3,), dtype=torch.float32)
 
-_A_3d_f32 = torch.rand((2, 3, 4), dtype=torch.float32)
-_b_3d_f32 = torch.rand((2, 3), dtype=torch.float32)
-_s1_3d_f32 = torch.rand((2, 4, 4), dtype=torch.float32)
-_s2_3d_f32 = torch.rand((2, 4, 4), dtype=torch.float32)
-_t1_3d_f32 = torch.rand((2, 4), dtype=torch.float32)
-_t2_3d_f32 = torch.rand((2, 4), dtype=torch.float32)
+_A_3d_fp32 = torch.rand((2, 3, 4), dtype=torch.float32)
+_b_3d_fp32 = torch.rand((2, 3), dtype=torch.float32)
+_s1_3d_fp32 = torch.rand((2, 4, 4), dtype=torch.float32)
+_s2_3d_fp32 = torch.rand((2, 4, 4), dtype=torch.float32)
+_t1_3d_fp32 = torch.rand((2, 4), dtype=torch.float32)
+_t2_3d_fp32 = torch.rand((2, 4), dtype=torch.float32)
 
-_A_f64 = torch.rand((2, 3), dtype=torch.float64)
-_b_f64 = torch.rand((2,), dtype=torch.float64)
-_s1_f64 = torch.rand((3,), dtype=torch.float64)
-_s2_f64 = torch.rand((3,), dtype=torch.float64)
-_s1_2d_f64 = torch.rand((3, 3), dtype=torch.float64)
-_s2_2d_f64 = torch.rand((3, 3), dtype=torch.float64)
-_t1_f64 = torch.rand((3,), dtype=torch.float64)
-_t2_f64 = torch.rand((3,), dtype=torch.float64)
+_A_fp64 = torch.rand((2, 3), dtype=torch.float64)
+_b_fp64 = torch.rand((2,), dtype=torch.float64)
+_s1_fp64 = torch.rand((3,), dtype=torch.float64)
+_s2_fp64 = torch.rand((3,), dtype=torch.float64)
+_s1_2d_fp64 = torch.rand((3, 3), dtype=torch.float64)
+_s2_2d_fp64 = torch.rand((3, 3), dtype=torch.float64)
+_t1_fp64 = torch.rand((3,), dtype=torch.float64)
+_t2_fp64 = torch.rand((3,), dtype=torch.float64)
 
-_A_3d_f64 = torch.rand((2, 3, 4), dtype=torch.float64)
-_b_3d_f64 = torch.rand((2, 3), dtype=torch.float64)
-_s1_3d_f64 = torch.rand((2, 4, 4), dtype=torch.float64)
-_s2_3d_f64 = torch.rand((2, 4, 4), dtype=torch.float64)
-_t1_3d_f64 = torch.rand((2, 4), dtype=torch.float64)
-_t2_3d_f64 = torch.rand((2, 4), dtype=torch.float64)
+_A_3d_fp64 = torch.rand((2, 3, 4), dtype=torch.float64)
+_b_3d_fp64 = torch.rand((2, 3), dtype=torch.float64)
+_s1_3d_fp64 = torch.rand((2, 4, 4), dtype=torch.float64)
+_s2_3d_fp64 = torch.rand((2, 4, 4), dtype=torch.float64)
+_t1_3d_fp64 = torch.rand((2, 4), dtype=torch.float64)
+_t2_3d_fp64 = torch.rand((2, 4), dtype=torch.float64)
 
 
-_example_input_1d_f32 = (_A_f32, _b_f32, _s1_f32, _s2_f32, _t1_f32, _t2_f32)
-_example_input_without_bias_1d_f32 = (_A_f32, _s1_f32, _s2_f32, _t1_f32, _t2_f32)
-_example_input_2d_f32 = (_A_f32, _b_f32, _s1_2d_f32, _s2_2d_f32, _t1_f32, _t2_f32)
-_example_input_without_bias_2d_f32 = (_A_f32, _s1_2d_f32, _s2_2d_f32, _t1_f32, _t2_f32)
-_example_input_3d_f32 = (
-    _A_3d_f32,
-    _b_3d_f32,
-    _s1_3d_f32,
-    _s2_3d_f32,
-    _t1_3d_f32,
-    _t2_3d_f32,
+_example_input_1d_fp32 = (_A_fp32, _b_fp32, _s1_fp32, _s2_fp32, _t1_fp32, _t2_fp32)
+_example_input_no_bias_1d_fp32 = (_A_fp32, _s1_fp32, _s2_fp32, _t1_fp32, _t2_fp32)
+_example_input_2d_fp32 = (_A_fp32, _b_fp32, _s1_2d_fp32, _s2_2d_fp32, _t1_fp32, _t2_fp32)
+_example_input_no_bias_2d_fp32 = (_A_fp32, _s1_2d_fp32, _s2_2d_fp32, _t1_fp32, _t2_fp32)
+_example_input_3d_fp32 = (
+    _A_3d_fp32,
+    _b_3d_fp32,
+    _s1_3d_fp32,
+    _s2_3d_fp32,
+    _t1_3d_fp32,
+    _t2_3d_fp32,
 )
-_example_input_without_bias_3d_f32 = (
-    _A_3d_f32,
-    _s1_3d_f32,
-    _s2_3d_f32,
-    _t1_3d_f32,
-    _t2_3d_f32,
-)
-
-_example_input_1d_f64 = (_A_f64, _b_f64, _s1_f64, _s2_f64, _t1_f64, _t2_f64)
-_example_input_without_bias_1d_f64 = (_A_f64, _s1_f64, _s2_f64, _t1_f64, _t2_f64)
-_example_input_2d_f64 = (_A_f64, _b_f64, _s1_2d_f64, _s2_2d_f64, _t1_f64, _t2_f64)
-_example_input_without_bias_2d_f64 = (_A_f64, _s1_2d_f64, _s2_2d_f64, _t1_f64, _t2_f64)
-_example_input_3d_f64 = (
-    _A_3d_f64,
-    _b_3d_f64,
-    _s1_3d_f64,
-    _s2_3d_f64,
-    _t1_3d_f64,
-    _t2_3d_f64,
-)
-_example_input_without_bias_3d_f64 = (
-    _A_3d_f64,
-    _s1_3d_f64,
-    _s2_3d_f64,
-    _t1_3d_f64,
-    _t2_3d_f64,
+_example_input_no_bias_3d_fp32 = (
+    _A_3d_fp32,
+    _s1_3d_fp32,
+    _s2_3d_fp32,
+    _t1_3d_fp32,
+    _t2_3d_fp32,
 )
 
+_example_input_1d_fp64 = (_A_fp64, _b_fp64, _s1_fp64, _s2_fp64, _t1_fp64, _t2_fp64)
+_example_input_no_bias_1d_fp64 = (_A_fp64, _s1_fp64, _s2_fp64, _t1_fp64, _t2_fp64)
+_example_input_2d_fp64 = (_A_fp64, _b_fp64, _s1_2d_fp64, _s2_2d_fp64, _t1_fp64, _t2_fp64)
+_example_input_no_bias_2d_fp64 = (_A_fp64, _s1_2d_fp64, _s2_2d_fp64, _t1_fp64, _t2_fp64)
+_example_input_3d_fp64 = (
+    _A_3d_fp64,
+    _b_3d_fp64,
+    _s1_3d_fp64,
+    _s2_3d_fp64,
+    _t1_3d_fp64,
+    _t2_3d_fp64,
+)
+_example_input_no_bias_3d_fp64 = (
+    _A_3d_fp64,
+    _s1_3d_fp64,
+    _s2_3d_fp64,
+    _t1_3d_fp64,
+    _t2_3d_fp64,
+)
 
-_back_substitute_nonlinear_1d_f32 = torch.jit.trace(
-    _back_substitute_nonlinear_1d, _example_input_1d_f32
+
+_BS_nonlinear_1d_fp32 = torch.jit.trace(
+    _BS_nonlinear_1d, _example_input_1d_fp32
 )
-_back_substitute_nonlinear_without_bias_1d_f32 = torch.jit.trace(
-    _back_substitute_nonlinear_without_bias_1d, _example_input_without_bias_1d_f32
+_BS_nonlinear_no_bias_1d_fp32 = torch.jit.trace(
+    _BS_nonlinear_no_bias_1d, _example_input_no_bias_1d_fp32
 )
 
-_back_substitute_nonlinear_1d_f64 = torch.jit.trace(
-    _back_substitute_nonlinear_1d, _example_input_1d_f64
+_BS_nonlinear_1d_fp64 = torch.jit.trace(
+    _BS_nonlinear_1d, _example_input_1d_fp64
 )
-_back_substitute_nonlinear_without_bias_1d_f64 = torch.jit.trace(
-    _back_substitute_nonlinear_without_bias_1d, _example_input_without_bias_1d_f64
+_BS_nonlinear_no_bias_1d_fp64 = torch.jit.trace(
+    _BS_nonlinear_no_bias_1d, _example_input_no_bias_1d_fp64
 )
 
 
@@ -140,11 +140,11 @@ def back_substitute_nonlinear(
 
         if b is not None:
             if A.dtype == torch.float32:
-                return _back_substitute_nonlinear_1d_f32(A, b, s1, s2, t1, t2)
-            return _back_substitute_nonlinear_1d_f64(A, b, s1, s2, t1, t2)
+                return _BS_nonlinear_1d_fp32(A, b, s1, s2, t1, t2)
+            return _BS_nonlinear_1d_fp64(A, b, s1, s2, t1, t2)
         if A.dtype == torch.float32:
-            return _back_substitute_nonlinear_without_bias_1d_f32(A, s1, s2, t1, t2)
-        return _back_substitute_nonlinear_without_bias_1d_f64(A, s1, s2, t1, t2)
+            return _BS_nonlinear_no_bias_1d_fp32(A, s1, s2, t1, t2)
+        return _BS_nonlinear_no_bias_1d_fp64(A, s1, s2, t1, t2)
 
     else:
         raise ValueError(

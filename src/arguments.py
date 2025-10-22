@@ -128,8 +128,7 @@ class Arguments:
 
         if self.epsilon < 0:
             raise ValueError(
-                f"Perturbation radius {self.epsilon} should be "
-                f"non-negative."
+                f"Perturbation radius {self.epsilon} should be " f"non-negative."
             )
 
         if self.num_labels is not None:
@@ -183,7 +182,7 @@ class Arguments:
 
         dtype = torch.float64 if self.dtype == "float64" else torch.float32
         device = torch.device(self.device)
-        print('use device:', device)
+        print("use device:", device)
 
         self.perturbation_args = PerturbationArgs(
             epsilon=self.epsilon,

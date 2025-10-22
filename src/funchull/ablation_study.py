@@ -11,7 +11,8 @@ __all__ = [
 import numpy as np
 from numpy import ndarray
 
-from . import SShapeHull #, MaxPoolHullDLP
+from . import SShapeHull  # , MaxPoolHullDLP
+
 # from .acthull import ELUHull
 from ..utils import *
 
@@ -36,13 +37,7 @@ class SShapeHullA(SShapeHull):
         klui: float,
         c: ndarray,
         return_single_neuron_constrs: bool,
-    ) -> tuple[
-        ndarray,
-        ndarray,
-        None,
-        float,
-        ndarray | None,
-    ]:
+    ) -> tuple[ndarray, ndarray, None, float, ndarray | None,]:
         f = cls._f
         blu2, klu2, su = cls._get_parallel_tangent_line(klui, get_big=False)
         su = (su + xli) / 2.0  # For ablation study
@@ -100,13 +95,7 @@ class SShapeHullA(SShapeHull):
         klui: float,
         c: ndarray,
         return_single_neuron_constrs: bool,
-    ) -> tuple[
-        ndarray,
-        ndarray,
-        float,
-        None,
-        ndarray | None,
-    ]:
+    ) -> tuple[ndarray, ndarray, float, None, ndarray | None,]:
         f = cls._f
         blu2, klu2, sl = cls._get_parallel_tangent_line(klui, get_big=True)
         sl = (sl + xui) / 2.0  # For ablation study
@@ -164,13 +153,7 @@ class SShapeHullA(SShapeHull):
         klui: float,
         c: ndarray,
         return_single_neuron_constrs: bool,
-    ) -> tuple[
-        ndarray,
-        ndarray,
-        float,
-        float,
-        ndarray | None,
-    ]:
+    ) -> tuple[ndarray, ndarray, float, float, ndarray | None,]:
         f = cls._f
         blul, klul, su = cls._get_parallel_tangent_line(klui, get_big=False)
         bluu, kluu, sl = cls._get_parallel_tangent_line(klui, get_big=True)
@@ -242,13 +225,7 @@ class SShapeHullB(SShapeHull):
         klui: float,
         c: ndarray,
         return_single_neuron_constrs: bool,
-    ) -> tuple[
-        ndarray,
-        ndarray,
-        None,
-        float,
-        ndarray | None,
-    ]:
+    ) -> tuple[ndarray, ndarray, None, float, ndarray | None,]:
 
         f = cls._f
         blu2, klu2, su = cls._get_parallel_tangent_line(klui, get_big=False)
@@ -308,13 +285,7 @@ class SShapeHullB(SShapeHull):
         klui: float,
         c: ndarray,
         return_single_neuron_constrs: bool,
-    ) -> tuple[
-        ndarray,
-        ndarray,
-        float,
-        None,
-        ndarray | None,
-    ]:
+    ) -> tuple[ndarray, ndarray, float, None, ndarray | None,]:
         f = cls._f
         blu2, klu2, sl = cls._get_parallel_tangent_line(klui, get_big=True)
         sl = sl / 2.0  # For ablation study
@@ -373,13 +344,7 @@ class SShapeHullB(SShapeHull):
         klui: float,
         c: ndarray,
         return_single_neuron_constrs: bool,
-    ) -> tuple[
-        ndarray,
-        ndarray,
-        float,
-        float,
-        ndarray | None,
-    ]:
+    ) -> tuple[ndarray, ndarray, float, float, ndarray | None,]:
 
         f = cls._f
         blul, klul, su = cls._get_parallel_tangent_line(klui, get_big=False)
@@ -437,7 +402,6 @@ class SShapeHullB(SShapeHull):
 
 
 class SigmoidHullA(SShapeHullA):
-
     @staticmethod
     def _get_second_tangent_line(
         x1: float | ndarray, get_big: bool | ndarray
@@ -460,7 +424,6 @@ class SigmoidHullA(SShapeHullA):
 
 
 class SigmoidHullB(SShapeHullB):
-
     @staticmethod
     def _get_second_tangent_line(
         x1: float | ndarray, get_big: bool | ndarray
@@ -483,7 +446,6 @@ class SigmoidHullB(SShapeHullB):
 
 
 class TanhHullA(SShapeHullA):
-
     @staticmethod
     def _get_second_tangent_line(
         x1: float | ndarray, get_big: bool | ndarray
@@ -506,7 +468,6 @@ class TanhHullA(SShapeHullA):
 
 
 class TanhHullB(SShapeHullB):
-
     @staticmethod
     def _get_second_tangent_line(
         x1: float | ndarray, get_big: bool | ndarray
@@ -526,7 +487,7 @@ class TanhHullB(SShapeHullB):
     @staticmethod
     def _df(x: ndarray | float) -> ndarray | float:
         return dtanh(x)
-    
+
 
 # class MaxPoolDLPHullA(MaxPoolHullDLP):
 #     @classmethod

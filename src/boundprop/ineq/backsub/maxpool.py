@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch import Tensor
 
 
-def _back_substitute_maxpool_naive(
+def _BS_maxpool_naive(
     A: Tensor, b: Tensor, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor]:
     d = (1, 2)
@@ -21,7 +21,7 @@ def _back_substitute_maxpool_naive(
     return A, b
 
 
-def _back_substitute_maxpool_without_bias_naive(
+def _BS_maxpool_no_bias_naive(
     A: Tensor, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor]:
     d = (1, 2)
@@ -36,84 +36,84 @@ def _back_substitute_maxpool_without_bias_naive(
     return A, b
 
 
-_A_f32 = torch.rand((2, 3, 4), dtype=torch.float32)
-_b_f32 = torch.rand((2,), dtype=torch.float32)
-_s1_f32 = torch.rand((3, 4, 5), dtype=torch.float32)
-_s2_f32 = torch.rand((3, 4, 5), dtype=torch.float32)
-_t1_f32 = torch.rand((3, 4), dtype=torch.float32)
-_t2_f32 = torch.rand((3, 4), dtype=torch.float32)
+_A_fp32 = torch.rand((2, 3, 4), dtype=torch.float32)
+_b_fp32 = torch.rand((2,), dtype=torch.float32)
+_s1_fp32 = torch.rand((3, 4, 5), dtype=torch.float32)
+_s2_fp32 = torch.rand((3, 4, 5), dtype=torch.float32)
+_t1_fp32 = torch.rand((3, 4), dtype=torch.float32)
+_t2_fp32 = torch.rand((3, 4), dtype=torch.float32)
 
-_A_4d_f32 = torch.rand((2, 3, 4, 5), dtype=torch.float32)
-_b_4d_f32 = torch.rand((2, 3), dtype=torch.float32)
-_s1_4d_f32 = torch.rand((2, 4, 5, 2), dtype=torch.float32)
-_s2_4d_f32 = torch.rand((2, 4, 5, 2), dtype=torch.float32)
-_t1_4d_f32 = torch.rand((2, 4, 5), dtype=torch.float32)
-_t2_4d_f32 = torch.rand((2, 4, 5), dtype=torch.float32)
+_A_4d_fp32 = torch.rand((2, 3, 4, 5), dtype=torch.float32)
+_b_4d_fp32 = torch.rand((2, 3), dtype=torch.float32)
+_s1_4d_fp32 = torch.rand((2, 4, 5, 2), dtype=torch.float32)
+_s2_4d_fp32 = torch.rand((2, 4, 5, 2), dtype=torch.float32)
+_t1_4d_fp32 = torch.rand((2, 4, 5), dtype=torch.float32)
+_t2_4d_fp32 = torch.rand((2, 4, 5), dtype=torch.float32)
 
-_A_f64 = torch.rand((2, 3, 4), dtype=torch.float64)
-_b_f64 = torch.rand((2,), dtype=torch.float64)
-_s1_f64 = torch.rand((3, 4, 5), dtype=torch.float64)
-_s2_f64 = torch.rand((3, 4, 5), dtype=torch.float64)
-_t1_f64 = torch.rand((3, 4), dtype=torch.float64)
-_t2_f64 = torch.rand((3, 4), dtype=torch.float64)
+_A_fp64 = torch.rand((2, 3, 4), dtype=torch.float64)
+_b_fp64 = torch.rand((2,), dtype=torch.float64)
+_s1_fp64 = torch.rand((3, 4, 5), dtype=torch.float64)
+_s2_fp64 = torch.rand((3, 4, 5), dtype=torch.float64)
+_t1_fp64 = torch.rand((3, 4), dtype=torch.float64)
+_t2_fp64 = torch.rand((3, 4), dtype=torch.float64)
 
-_A_4d_f64 = torch.rand((2, 3, 4, 5), dtype=torch.float64)
-_b_4d_f64 = torch.rand((2, 3), dtype=torch.float64)
-_s1_4d_f64 = torch.rand((2, 4, 5, 2), dtype=torch.float64)
-_s2_4d_f64 = torch.rand((2, 4, 5, 2), dtype=torch.float64)
-_t1_4d_f64 = torch.rand((2, 4, 5), dtype=torch.float64)
-_t2_4d_f64 = torch.rand((2, 4, 5), dtype=torch.float64)
+_A_4d_fp64 = torch.rand((2, 3, 4, 5), dtype=torch.float64)
+_b_4d_fp64 = torch.rand((2, 3), dtype=torch.float64)
+_s1_4d_fp64 = torch.rand((2, 4, 5, 2), dtype=torch.float64)
+_s2_4d_fp64 = torch.rand((2, 4, 5, 2), dtype=torch.float64)
+_t1_4d_fp64 = torch.rand((2, 4, 5), dtype=torch.float64)
+_t2_4d_fp64 = torch.rand((2, 4, 5), dtype=torch.float64)
 
 
-_example_inputs1_f32 = (_A_f32, _b_f32, _s1_f32, _s2_f32, _t1_f32, _t2_f32)
-_example_inputs1_without_bias_f32 = (_A_f32, _s1_f32, _s2_f32, _t1_f32, _t2_f32)
-_example_inputs2_f32 = (
-    _A_4d_f32,
-    _b_4d_f32,
-    _s1_4d_f32,
-    _s2_4d_f32,
-    _t1_4d_f32,
-    _t2_4d_f32,
+_example_inputs1_fp32 = (_A_fp32, _b_fp32, _s1_fp32, _s2_fp32, _t1_fp32, _t2_fp32)
+_example_inputs1_no_bias_fp32 = (_A_fp32, _s1_fp32, _s2_fp32, _t1_fp32, _t2_fp32)
+_example_inputs2_fp32 = (
+    _A_4d_fp32,
+    _b_4d_fp32,
+    _s1_4d_fp32,
+    _s2_4d_fp32,
+    _t1_4d_fp32,
+    _t2_4d_fp32,
 )
-_example_inputs2_without_bias_f32 = (
-    _A_4d_f32,
-    _s1_4d_f32,
-    _s2_4d_f32,
-    _t1_4d_f32,
-    _t2_4d_f32,
-)
-
-_example_inputs1_f64 = (_A_f64, _b_f64, _s1_f64, _s2_f64, _t1_f64, _t2_f64)
-_example_inputs1_without_bias_f64 = (_A_f64, _s1_f64, _s2_f64, _t1_f64, _t2_f64)
-_example_inputs2_f64 = (
-    _A_4d_f64,
-    _b_4d_f64,
-    _s1_4d_f64,
-    _s2_4d_f64,
-    _t1_4d_f64,
-    _t2_4d_f64,
-)
-_example_inputs2_without_bias_f64 = (
-    _A_4d_f64,
-    _s1_4d_f64,
-    _s2_4d_f64,
-    _t1_4d_f64,
-    _t2_4d_f64,
+_example_inputs2_no_bias_fp32 = (
+    _A_4d_fp32,
+    _s1_4d_fp32,
+    _s2_4d_fp32,
+    _t1_4d_fp32,
+    _t2_4d_fp32,
 )
 
-_back_substitute_maxpool_naive_f32 = torch.jit.trace(
-    _back_substitute_maxpool_naive, _example_inputs1_f32
+_example_inputs1_fp64 = (_A_fp64, _b_fp64, _s1_fp64, _s2_fp64, _t1_fp64, _t2_fp64)
+_example_inputs1_no_bias_fp64 = (_A_fp64, _s1_fp64, _s2_fp64, _t1_fp64, _t2_fp64)
+_example_inputs2_fp64 = (
+    _A_4d_fp64,
+    _b_4d_fp64,
+    _s1_4d_fp64,
+    _s2_4d_fp64,
+    _t1_4d_fp64,
+    _t2_4d_fp64,
 )
-_back_substitute_maxpool_without_bias_naive_f32 = torch.jit.trace(
-    _back_substitute_maxpool_without_bias_naive, _example_inputs1_without_bias_f32
+_example_inputs2_no_bias_fp64 = (
+    _A_4d_fp64,
+    _s1_4d_fp64,
+    _s2_4d_fp64,
+    _t1_4d_fp64,
+    _t2_4d_fp64,
+)
+
+_BS_maxpool_naive_fp32 = torch.jit.trace(
+    _BS_maxpool_naive, _example_inputs1_fp32
+)
+_BS_maxpool_no_bias_naive_fp32 = torch.jit.trace(
+    _BS_maxpool_no_bias_naive, _example_inputs1_no_bias_fp32
 )
 
 
-_back_substitute_maxpool_naive_f64 = torch.jit.trace(
-    _back_substitute_maxpool_naive, _example_inputs1_f64
+_BS_maxpool_naive_fp64 = torch.jit.trace(
+    _BS_maxpool_naive, _example_inputs1_fp64
 )
-_back_substitute_maxpool_without_bias_naive_f64 = torch.jit.trace(
-    _back_substitute_maxpool_without_bias_naive, _example_inputs1_without_bias_f64
+_BS_maxpool_no_bias_naive_fp64 = torch.jit.trace(
+    _BS_maxpool_no_bias_naive, _example_inputs1_no_bias_fp64
 )
 
 
@@ -162,15 +162,15 @@ def back_substitute_maxpool2d(
 
         A, b = (
             (
-                _back_substitute_maxpool_naive_f32(A, b, s1, s2, t1, t2)
+                _BS_maxpool_naive_fp32(A, b, s1, s2, t1, t2)
                 if A.dtype == torch.float32
-                else _back_substitute_maxpool_naive_f64(A, b, s1, s2, t1, t2)
+                else _BS_maxpool_naive_fp64(A, b, s1, s2, t1, t2)
             )
             if b is not None
             else (
-                _back_substitute_maxpool_without_bias_naive_f32(A, s1, s2, t1, t2)
+                _BS_maxpool_no_bias_naive_fp32(A, s1, s2, t1, t2)
                 if A.dtype == torch.float32
-                else _back_substitute_maxpool_without_bias_naive_f64(A, s1, s2, t1, t2)
+                else _BS_maxpool_no_bias_naive_fp64(A, s1, s2, t1, t2)
             )
         )
 

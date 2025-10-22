@@ -14,15 +14,16 @@ __all__ = [
     "TanhHull",
     "MaxPoolHull",
     "MaxPoolHullDLP",
-    "get_wrongs"
+    "get_wrongs",
 ]
 
 import os
 import time
-from abc import ABC # , abstractmethod
+from abc import ABC  # , abstractmethod
 import sys
 from typing import List
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from utils import *
 
 import cdd
@@ -44,6 +45,7 @@ _MIN_DLP_ANGLE = 0.1
 Mupper_wrong = 0
 Mlower_wrong = 0
 
+
 def get_wrongs(reset: bool = False) -> tuple[int, int]:
     global Mupper_wrong, Mlower_wrong
     u, l = Mupper_wrong, Mlower_wrong
@@ -51,6 +53,7 @@ def get_wrongs(reset: bool = False) -> tuple[int, int]:
         Mupper_wrong = 0
         Mlower_wrong = 0
     return u, l
+
 
 class ActHull(ABC):
     """
@@ -116,12 +119,13 @@ class ActHull(ABC):
         :param upper: The upper bounds of the input variables.
         :return: The constraints defining the convex hull.
         """
-
+        __import__("ipdb").set_trace()
         self._check_input_bounds(lower, upper)
         self._check_constrs(constrs)
         self._check_inputs(constrs, lower, upper)
 
-        print('<> call cal_hull ', flush=True)
+        print("<> call cal_hull ", flush=True)
+        print("constrs=\n", constrs, flush=True)
         d = None
         l = u = None
         c_i = c_l = c_u = None
@@ -158,7 +162,7 @@ class ActHull(ABC):
             (1) One of the input dimension has the same lower and upper bounds, which will throw a Degenerated exception.
             (2) The number of vertices is fewer than the dimension, which will call a Degenerated exception.
 
-            We will first recalculate the vertices with the fractional number if there is an exception. 
+            We will first recalculate the vertices with the fractional number if there is an exception.
             If there is still an exception, we will accept the degenerated input polytope.
             """
             v, dtype_cdd = self._cal_vertices_with_exception(c, l, u, self.dtype_cdd)
@@ -183,7 +187,6 @@ class ActHull(ABC):
         # el
         if self._add_M:
             return self._cal_hull_with_M(c, l, u)
-
 
     def _build_bounds_constraints(self, s: ndarray, is_lower: bool = True) -> ndarray:
         """
@@ -212,7 +215,7 @@ class ActHull(ABC):
         Calculate the vertices of a polytope from the constraints.
 
         .. attention::
-            The datatype of cdd is important because the precision may cause an error when calculating the vertices. 
+            The datatype of cdd is important because the precision may cause an error when calculating the vertices.
             Sometimes float number is not enough to calculate the vertices, and we need to use the fractional number to
             calculate the vertices.
 
@@ -234,10 +237,10 @@ class ActHull(ABC):
 
         return v, dtype_cdd
 
-    def _cal_hull_with_S(
-        self, l: ndarray | None, u: ndarray | None
-    ) -> ndarray:
-        assert l is not None and u is not None, "The lower and upper bounds of the input variables should be provided."
+    def _cal_hull_with_S(self, l: ndarray | None, u: ndarray | None) -> ndarray:
+        assert (
+            l is not None and u is not None
+        ), "The lower and upper bounds of the input variables should be provided."
         return self.compute_S(l, u)
 
     def _cal_hull_with_M(
@@ -255,7 +258,7 @@ class ActHull(ABC):
             (1) One of the input dimension has the same lower and upper bounds, which will throw a Degenerated exception.
             (2) The number of vertices is fewer than the dimension, which will call a Degenerated exception.
 
-            We will first recalculate the vertices with the fractional number if there is an exception. 
+            We will first recalculate the vertices with the fractional number if there is an exception.
             If there is still an exception, we will accept the degenerated input polytope.
             """
             v, dtype_cdd = self._cal_vertices_with_exception(c, l, u, self.dtype_cdd)
@@ -416,28 +419,48 @@ class ActHull(ABC):
 
     def _check_inputs(self, c: ndarray | None, l: ndarray | None, u: ndarray | None):
         if c is not None and l is not None and u is not None:
-            assert c.shape[1] - 1 == l.size == u.size, f"The dimensions of the input constraints, lower bounds, and upper bounds should be the same but {c.shape[1] - 1}, {l.size}, and {u.size} are provided."
-        assert not (c is None and l is None and u is None), "At least the input constraints, or lower bounds and upper bounds should be provided."
+            assert (
+                c.shape[1] - 1 == l.size == u.size
+            ), f"The dimensions of the input constraints, lower bounds, and upper bounds should be the same but {c.shape[1] - 1}, {l.size}, and {u.size} are provided."
+        assert not (
+            c is None and l is None and u is None
+        ), "At least the input constraints, or lower bounds and upper bounds should be provided."
 
     def _check_constrs(self, c: ndarray | None):
         if c is not None:
             d = c.shape[1] - 1
-            assert c.shape[0] >= d + 1, f"n(constraints) should >= n-D + 1. Otherwise, polytope is unbounded. The shape of the input constraints is {c.shape}."
+            assert (
+                c.shape[0] >= d + 1
+            ), f"n(constraints) should >= n-D + 1. Otherwise, polytope is unbounded. The shape of the input constraints is {c.shape}."
 
     def _check_input_bounds(self, l: ndarray | None, u: ndarray | None):
         if l is not None and u is not None:
-            assert l.ndim == u.ndim == 1, f"The lower and upper bounds of the input variables should be 1-dimensional arrays but {l.ndim} and {u.ndim} are provided."
-            assert l.size == u.size, f"The lower and upper bounds of the input variables should have the same size but {l.size} and {u.size} are provided."
-            assert np.all(l <= u), f"The lower bounds should be less than the upper bounds but {l} and {u} are provided."
+            assert (
+                l.ndim == u.ndim == 1
+            ), f"The lower and upper bounds of the input variables should be 1-dimensional arrays but {l.ndim} and {u.ndim} are provided."
+            assert (
+                l.size == u.size
+            ), f"The lower and upper bounds of the input variables should have the same size but {l.size} and {u.size} are provided."
+            assert np.all(
+                l <= u
+            ), f"The lower bounds should be less than the upper bounds but {l} and {u} are provided."
 
     def _check_vertices(self, dim: int, v: ndarray):  # noqa
         assert len(v) != 0, "Zero vertices. The input polytope is infeasible."
-        assert np.all(v[:, 0] == 1.0), f"Unbounded polytope. First column of the vertices should be 1 but {v[:, 0]} are provided."
+        assert np.all(
+            v[:, 0] == 1.0
+        ), f"Unbounded polytope. First column of the vertices should be 1 but {v[:, 0]} are provided."
 
     def _check_degenerated_input_polytope(self, v: ndarray, l: ndarray, u: ndarray):
         d = v.shape[1] - 1
-        if len(v) < d + 1: raise Degenerated(f"The {d}-d input polytope should not be with only {len(v)} vertices.")
-        if np.any(np.isclose(l, u)): raise Degenerated(f"The input polytope is degenerated because one of the input dimension has the same lower and upper bounds.")
+        if len(v) < d + 1:
+            raise Degenerated(
+                f"The {d}-d input polytope should not be with only {len(v)} vertices."
+            )
+        if np.any(np.isclose(l, u)):
+            raise Degenerated(
+                f"The input polytope is degenerated because one of the input dimension has the same lower and upper bounds."
+            )
 
     def _record_and_raise_exception(
         self, e: Exception, c: ndarray, v: ndarray, l: ndarray | None, u: ndarray | None
@@ -657,7 +680,9 @@ class ReLUHull(ReLULikeHull):
         :param u: The upper bounds of the input variables.
         :return: S of the convex hull.
         """
-        assert np.all(l<0) and np.all(u>0), f"l<0, u>0 must always hold for non-trivial case. {l}, {u}"
+        assert np.all(l < 0) and np.all(
+            u > 0
+        ), f"l<0, u>0 must always hold for non-trivial case. {l}, {u}"
 
         d = l.shape[0]
         c = np.zeros((d, 2 * d + 1), dtype=np.float64)
@@ -783,7 +808,7 @@ class SShapeHull(ActHull, ABC):
         DLP function and the lower constraints of the lower DLP function as the M.
 
     .. tip::
-        The constraints construction of the S-shaped functions is based on some tangent lines of the activation function. 
+        The constraints construction of the S-shaped functions is based on some tangent lines of the activation function.
         The tangent lines are calculated in an iterative way, resulting it is slower than the ReLU-like activation functions.
 
         Refer to the paper:
@@ -844,7 +869,9 @@ class SShapeHull(ActHull, ABC):
         l: ndarray | None = None,
         u: ndarray | None = None,
     ) -> ndarray:
-        assert l is not None and u is not None, "The lower and upper bounds should be provided for the S-shape activation function."
+        assert (
+            l is not None and u is not None
+        ), "The lower and upper bounds should be provided for the S-shape activation function."
 
         d = c.shape[1] - 1
         # S
@@ -861,11 +888,21 @@ class SShapeHull(ActHull, ABC):
 
         for i in range(d):
             args = (i, d, xl[i], xu[i], yl[i], yu[i], kl[i], ku[i], klu[i], cc_s)
-            dlp_lines_l, dlp_lines_u, dlp_point_l, dlp_point_u, cc_s = self._construct_dlp(*args, self._add_S)
+            (
+                dlp_lines_l,
+                dlp_lines_u,
+                dlp_point_l,
+                dlp_point_u,
+                cc_s,
+            ) = self._construct_dlp(*args, self._add_S)
 
             if self._add_M:
-                cc_l, v_l = self._compute_M_with_one_y(i, cc_l, v_l, dlp_lines_l, dlp_point_l, is_convex=False)
-                cc_u, v_u = self._compute_M_with_one_y(i, cc_u, v_u, dlp_lines_u, dlp_point_u, is_convex=True)
+                cc_l, v_l = self._compute_M_with_one_y(
+                    i, cc_l, v_l, dlp_lines_l, dlp_point_l, is_convex=False
+                )
+                cc_u, v_u = self._compute_M_with_one_y(
+                    i, cc_u, v_u, dlp_lines_u, dlp_point_u, is_convex=True
+                )
                 # print(f'l: v: {v_l.shape}, c: {cc_l.shape}; u: v: {v_u.shape}, c: {cc_u.shape}')
 
                 vvv = np.vstack((v_l, v_u))
@@ -885,19 +922,19 @@ class SShapeHull(ActHull, ABC):
             # print(f'{YELLOW} check M: {RESET}')
             # print(f'{cc}')
             global Mlower_wrong, Mupper_wrong
-            print(f'\n{YELLOW} check M lower: {RESET}', end=' ')
+            print(f"\n{YELLOW} check M lower: {RESET}", end=" ")
             sound = soundness_check(cc_l, vv, self._f)
             if not sound:
                 Mlower_wrong += 1
-            print(f'\n{YELLOW} check M upper: {RESET}', end=' ')
+            print(f"\n{YELLOW} check M upper: {RESET}", end=" ")
             sound = soundness_check(cc_u, vv, self._f)
             if not sound:
                 Mupper_wrong += 1
             # soundness_check(cc, vv, self._f)
             # def soundness_check(X, V, F=None):
-                # if F is None:
-                #     F = self._f
-                # return np.all(F(X) <= V)
+            # if F is None:
+            #     F = self._f
+            # return np.all(F(X) <= V)
 
         return cc
 
@@ -919,10 +956,16 @@ class SShapeHull(ActHull, ABC):
         )
 
     def _construct_dlp(
-        self, idx: int, dim: int,
-        xli: float, xui: float,
-        yli: float, yui: float,
-        kli: float, kui: float, klui: float,
+        self,
+        idx: int,
+        dim: int,
+        xli: float,
+        xui: float,
+        yli: float,
+        yui: float,
+        kli: float,
+        kui: float,
+        klui: float,
         c: ndarray,
         add_s: bool,
     ) -> tuple[
@@ -973,12 +1016,17 @@ class SShapeHull(ActHull, ABC):
         args = (idx, dim, xli, xui, yli, yui, kli, kui, klui, c)
         return resolve_case(*args, add_s)
 
-
     def _dlp_case1(
-        self, idx: int, dim: int,
-        xli: float, xui: float,
-        yli: float, yui: float,
-        kli: float, kui: float, klui: float,
+        self,
+        idx: int,
+        dim: int,
+        xli: float,
+        xui: float,
+        yli: float,
+        yui: float,
+        kli: float,
+        kui: float,
+        klui: float,
         c: ndarray,
         add_s: bool,
     ) -> tuple[ndarray, ndarray, None, float, ndarray | None]:
@@ -1028,10 +1076,16 @@ class SShapeHull(ActHull, ABC):
         return aux_lines_l, aux_lines_u, aux_point_l, aux_point_u, c
 
     def _dlp_case2(
-        self, idx: int, dim: int,
-        xli: float, xui: float,
-        yli: float, yui: float,
-        kli: float, kui: float, klui: float,
+        self,
+        idx: int,
+        dim: int,
+        xli: float,
+        xui: float,
+        yli: float,
+        yui: float,
+        kli: float,
+        kui: float,
+        klui: float,
         c: ndarray,
         add_s: bool,
     ) -> tuple[ndarray, ndarray, float, None, ndarray | None]:
@@ -1081,15 +1135,21 @@ class SShapeHull(ActHull, ABC):
         return aux_lines_l, aux_lines_u, aux_point_l, aux_point_u, c
 
     def _dlp_case3(
-        self, idx: int, dim: int,
-        xli: float, xui: float,
-        yli: float, yui: float,
-        kli: float, kui: float, klui: float,
+        self,
+        idx: int,
+        dim: int,
+        xli: float,
+        xui: float,
+        yli: float,
+        yui: float,
+        kli: float,
+        kui: float,
+        klui: float,
         c: ndarray,
         add_s: bool,
     ) -> tuple[ndarray, ndarray, float, float, ndarray | None]:
         """
-        (1) the slope of the upper linear piece is smaller than the slope of the linear piece connecting the lower and upper bounds, and 
+        (1) the slope of the upper linear piece is smaller than the slope of the linear piece connecting the lower and upper bounds, and
         (2) the slope of the lower linear piece is smaller than the slope of the linear piece connecting the lower and upper bounds.
         """
         f = self._f
@@ -1144,7 +1204,8 @@ class SShapeHull(ActHull, ABC):
 
         return aux_lines_l, aux_lines_u, aux_point_l, aux_point_u, c
 
-    def _get_second_tangent_line(self, x1: float | ndarray, get_big: bool | ndarray
+    def _get_second_tangent_line(
+        self, x1: float | ndarray, get_big: bool | ndarray
     ) -> tuple[float | ndarray, float | ndarray, float | ndarray]:
         """
         Get the second tangent line given a point x1, which is not the tangent line
@@ -1158,7 +1219,8 @@ class SShapeHull(ActHull, ABC):
 
         pass
 
-    def _get_parallel_tangent_line(self, k: float | ndarray, get_big: bool | ndarray
+    def _get_parallel_tangent_line(
+        self, k: float | ndarray, get_big: bool | ndarray
     ) -> tuple[float | ndarray, float | ndarray, float | ndarray]:
         """
         Get the parallel tangent line given the slope.
@@ -1172,11 +1234,13 @@ class SShapeHull(ActHull, ABC):
 
 
 class SigmoidHull(SShapeHull):
-    def _get_second_tangent_line(self, x1: float | ndarray, get_big: bool | ndarray
+    def _get_second_tangent_line(
+        self, x1: float | ndarray, get_big: bool | ndarray
     ) -> tuple[float | ndarray, float | ndarray, float | ndarray]:
         return get_second_tangent_line(x1, get_big, "sigmoid")
 
-    def _get_parallel_tangent_line(self, k: float | ndarray, get_big: bool | ndarray
+    def _get_parallel_tangent_line(
+        self, k: float | ndarray, get_big: bool | ndarray
     ) -> tuple[float | ndarray, float | ndarray, float | ndarray]:
         return get_parallel_tangent_line(k, get_big, "sigmoid")
 
@@ -1188,11 +1252,13 @@ class SigmoidHull(SShapeHull):
 
 
 class TanhHull(SShapeHull):
-    def _get_second_tangent_line(self, x1: float | ndarray, get_big: bool | ndarray
+    def _get_second_tangent_line(
+        self, x1: float | ndarray, get_big: bool | ndarray
     ) -> tuple[float | ndarray, float | ndarray, float | ndarray]:
         return get_second_tangent_line(x1, get_big, "tanh")
 
-    def _get_parallel_tangent_line(self, k: float | ndarray, get_big: bool | ndarray
+    def _get_parallel_tangent_line(
+        self, k: float | ndarray, get_big: bool | ndarray
     ) -> tuple[float | ndarray, float | ndarray, float | ndarray]:
         return get_parallel_tangent_line(k, get_big, "tanh")
 
@@ -1630,7 +1696,6 @@ def str_list(floatlist: List[float] | List[List[float]], precision=3, sep=", ") 
     return __str_list(floatlist, precision, sep)
 
 
-
 # def sample_more_points(V, l):
 #     # V: mxn, n points, each with m dimension
 #     # output: mxl, l points, each with m dimension
@@ -1645,9 +1710,11 @@ def str_list(floatlist: List[float] | List[List[float]], precision=3, sep=", ") 
 
 tol = 1e-3
 SampleMore = 0
+
+
 def soundness_check(X, V, F=None):
     # # print('** check whether H separate V **')
-    
+
     # if F is not None and X.shape[1] != V.shape[0]:
     #     # if SampleMore > 0:
     #     #     Vmore = sample_more_points(V, X.shape[1] * SampleMore)
@@ -1675,9 +1742,18 @@ def soundness_check(X, V, F=None):
     # print('[H*V]:\n', normalize_numpy_array(H_V))
     # print('->', ('(+' + str(XV_pos) + ',-' + str(XV_neg) + ')').ljust(10), end='', sep='', flush=True)
     Vstr = "+" + str(Vmore.shape[1]) if SampleMore > 0 else ""
-    print(f"{BLUE}*Sound*{RESET} {GRAY}[{Vstr}]{RESET} {str(X.shape)}*{str(V.shape)} => (+{XV_pos},-{XV_neg})".ljust(60), end="", flush=True,)
+    print(
+        f"{BLUE}*Sound*{RESET} {GRAY}[{Vstr}]{RESET} {str(X.shape)}*{str(V.shape)} => (+{XV_pos},-{XV_neg})".ljust(
+            60
+        ),
+        end="",
+        flush=True,
+    )
     if XV_neg > 0:
-        print(f'{RED_BK}[ERROR]{RESET} {str_list(list(XV[XV < threshold])[:20], 8)}', end="")
+        print(
+            f"{RED_BK}[ERROR]{RESET} {str_list(list(XV[XV < threshold])[:20], 8)}",
+            end="",
+        )
         # if XV_neg > 20:
         #     print("... and", XV_neg - 20, "more ...", end="")
         # if True:
@@ -1690,5 +1766,3 @@ def soundness_check(X, V, F=None):
     else:
         print(GREEN_BK, "[PASS]", RESET, sep="", end="")
     return XV_neg == 0
-
-

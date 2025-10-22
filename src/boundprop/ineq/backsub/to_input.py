@@ -44,10 +44,13 @@ def back_substitute_to_input(
             and module.next_nodes is not None
             and len(module.next_nodes) == 2
         ):
-            constr_bound, constr_bound_r, residual_second_path, _ = (
-                back_substitute_residual_second_path(
-                    self, module, constr_bound, constr_bound_r, residual_second_path
-                )
+            (
+                constr_bound,
+                constr_bound_r,
+                residual_second_path,
+                _,
+            ) = back_substitute_residual_second_path(
+                self, module, constr_bound, constr_bound_r, residual_second_path
             )
             in_residual_block = False
 
@@ -134,9 +137,9 @@ def back_substitute_residual_second_path(
     residual_second_path: list["BasicIneqNode"],  # noqa
     store_updated_bounds: bool = True,
 ) -> (
-    tuple[LConstrBound, None, list["BasicIneqNode"]]  # noqa
-    | tuple[LConstrBound, None, list["BasicIneqNode"], ScalarBound | None]  # noqa
-):
+    tuple[LConstrBound, None, list["BasicIneqNode"]]
+    | tuple[LConstrBound, None, list["BasicIneqNode"], ScalarBound | None]
+):  # noqa  # noqa
     logger = logging.getLogger("rover")
     residual_second_path: list["BasicIneqNode"]  # noqa
     for module_r in residual_second_path:

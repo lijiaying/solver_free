@@ -823,7 +823,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :param node: The Flatten or Reshape node.
         """
         if node.op_type == "Reshape":
-            print(f'node.attribute: {node.attribute}')
+            print(f"node.attribute: {node.attribute}")
             allowzero = bool(node.attribute[0].i)
             if allowzero:
                 raise RuntimeError(f"Unsupported reshape with allowzero {allowzero}.")
