@@ -15,11 +15,11 @@ from src import *
 def main(args):
 
     if args.bp == "deeppoly":
-        bp_method = ActRelaxationMode.DEEPPOLY
+        bp_method = RelaxMode.DEEPPOLY
     elif args.bp == "crown":
-        bp_method = ActRelaxationMode.CROWN
+        bp_method = RelaxMode.CROWN
     elif args.bp == "rover":
-        bp_method = ActRelaxationMode.ROVER_SN
+        bp_method = RelaxMode.ROVER_SN
     else:
         raise ValueError(f"Invalid BP method: {args.bp}")
 
@@ -38,13 +38,13 @@ def main(args):
 
     # Set arguments for the model.
     args = Arguments(
-        net_file_path=args.net_file_path,
+        net_fpath=args.net_fpath,
         dataset=args.dataset,
-        perturbation_radius=args.perturbation_radius,
+        epsilon=args.epsilon,
         log_level=logging.INFO,
         act_relax_mode=bp_method,
         log_file=log_file,
-        optimization_method=opt_method,
+        opt_method=opt_method,
         first_sample_index=0,
         num_samples=100,
         device="cuda:0",  # noqa
@@ -60,9 +60,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the experiment.")
-    parser.add_argument("--net_file_path", type=str, default=None)
+    parser.add_argument("--net_fpath", type=str, default=None)
     parser.add_argument("--dataset", type=str, default="mnist")
-    parser.add_argument("--perturbation_radius", type=float, default=0.01)
+    parser.add_argument("--epsilon", type=float, default=0.01)
     parser.add_argument("--bp", type=str, default=None)
     parser.add_argument("--opt", type=str, default=None)
     parser.add_argument("--log_name", type=str, default=None)

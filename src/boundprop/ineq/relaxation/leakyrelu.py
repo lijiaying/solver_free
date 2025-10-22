@@ -4,7 +4,7 @@ __all__ = ["cal_relaxation_leakyrelu"]
 import torch
 from torch import Tensor
 
-from ....utils import ActRelaxationMode, leakyrelu, dleakyrelu
+from ....utils import RelaxMode, leakyrelu, dleakyrelu
 
 
 def _cal_relaxation_leakyrelu(l: Tensor, u: Tensor, alpha: float):
@@ -28,6 +28,6 @@ def _cal_relaxation_leakyrelu(l: Tensor, u: Tensor, alpha: float):
 
 
 def cal_relaxation_leakyrelu(
-    l: Tensor, u: Tensor, mode: ActRelaxationMode, alpha: float = 0.01
+    l: Tensor, u: Tensor, mode: RelaxMode, alpha: float = 0.01
 ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     return _cal_relaxation_leakyrelu(l, u, alpha)

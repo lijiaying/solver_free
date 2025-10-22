@@ -4,7 +4,7 @@ __all__ = ["cal_relaxation_elu"]
 import torch
 from torch import Tensor
 
-from ....utils import ActRelaxationMode, elu, delu
+from ....utils import RelaxMode, elu, delu
 
 
 def _cal_relaxation_elu(l: Tensor, u: Tensor) -> tuple[Tensor, Tensor, Tensor, Tensor]:
@@ -31,6 +31,6 @@ def _cal_relaxation_elu(l: Tensor, u: Tensor) -> tuple[Tensor, Tensor, Tensor, T
 
 
 def cal_relaxation_elu(
-    l: Tensor, u: Tensor, mode: ActRelaxationMode
+    l: Tensor, u: Tensor, mode: RelaxMode
 ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     return _cal_relaxation_elu(l, u)

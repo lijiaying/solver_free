@@ -20,13 +20,13 @@ class Arguments:
     This is the data class for the arguments of the experiment.
     """
 
-    net_file_path: str
+    net_fpath: str
     """The path of the network file."""
 
     dataset: str
     """The dataset name."""
 
-    perturbation_radius: float
+    epsilon: float
     """The perturbation radius."""
 
     bound_propagation_method: BoundPropagationMethod = BoundPropagationMethod.INEQUALITY
@@ -36,14 +36,14 @@ class Arguments:
     Refer to :class:`BoundPropagationMethod` for more details.
     """
 
-    act_relax_mode: ActRelaxationMode = ActRelaxationMode.ROVER_SN
+    act_relax_mode: RelaxMode = RelaxMode.ROVER_SN
     """
     The activation relaxation mode.
     
-    Refer to :class:`ActRelaxationMode` for more details.
+    Refer to :class:`RelaxMode` for more details.
     """
 
-    optimization_method: OptimizationMethod | None = None
+    opt_method: OptimizationMethod | None = None
     """
     The optimization method.
     
@@ -85,7 +85,7 @@ class Arguments:
     net_dir_path: str | None = None
     """The directory path of the network file."""
 
-    net_file_name: str | None = None
+    net_fname: str | None = None
     """The name of the network file, excluding the file extension and directory path."""
 
     log_file: str | None = None
@@ -119,18 +119,18 @@ class Arguments:
 
     def __post_init__(self):
 
-        if not os.path.exists(self.net_file_path):
-            raise ValueError(f"Network file {self.net_file_path} does not exist.")
+        if not os.path.exists(self.net_fpath):
+            raise ValueError(f"Network file {self.net_fpath} does not exist.")
 
-        if not self.net_file_path.endswith(".onnx"):
-            raise ValueError(f"Network file {self.net_file_path} is not an ONNX file.")
+        if not self.net_fpath.endswith(".onnx"):
+            raise ValueError(f"Network file {self.net_fpath} is not an ONNX file.")
 
         if self.dataset not in {"mnist", "cifar10"}:
             raise ValueError(f"Dataset {self.dataset} is not supported.")
 
-        if self.perturbation_radius < 0:
+        if self.epsilon < 0:
             raise ValueError(
-                f"Perturbation radius {self.perturbation_radius} should be "
+                f"Perturbation radius {self.epsilon} should be "
                 f"non-negative."
             )
 
@@ -159,10 +159,10 @@ class Arguments:
             self.num_labels = 10
 
         if self.net_dir_path is None:
-            self.net_dir_path = os.path.dirname(self.net_file_path)
+            self.net_dir_path = os.path.dirname(self.net_fpath)
 
-        if self.net_file_name is None:
-            self.net_file_name = os.path.basename(self.net_file_path).split(".")[0]
+        if self.net_fname is None:
+            self.net_fname = os.path.basename(self.net_fpath).split(".")[0]
 
         # If the log file is not None, check the dir path.
         if self.log_file is not None:
@@ -187,7 +187,7 @@ class Arguments:
         device = torch.device(self.device)
 
         self.perturbation_args = PerturbationArgs(
-            epsilon=self.perturbation_radius,
+            epsilon=self.epsilon,
             norm=float("inf"),
             means=self.means.to(dtype=dtype, device=device),
             stds=self.stds.to(dtype=dtype, device=device),
@@ -204,11 +204,11 @@ class Arguments:
         logger.debug(f"Set activation relaxation arguments: {self.act_relax_args}.")
 
         # -------- Set LP arguments --------
-        if self.optimization_method is not None:
+        if self.opt_method is not None:
             self.lp_args = LPArgs()
             logger.debug(f"Set LP arguments: {self.lp_args}")
 
-            if self.optimization_method == OptimizationMethod.MNLP:
+            if self.opt_method == OptimizationMethod.MNLP:
                 self.kact_lp_args = KActLPArgs()
                 logger.debug(f"Set kact LP arguments: {self.kact_lp_args}")
 
@@ -234,29 +234,7 @@ class Arguments:
             else:
                 raise ValueError(f"Dataset {self.dataset} is not supported.")
 
-        if self.net_file_name in {
-            "mnist_sigmoid_6_500",
-            "mnist_tanh_6_500",
-            "mnist_sigmoid_convmed",
-            "mnist_tanh_convmed",
-            "mnist_convSmallRELU__Point",
-        }:
-            self.means = torch.tensor([0.1307])
-            self.stds = torch.tensor([0.30810001])
-
         self.normalize = True
-        if self.net_file_name in {
-            "mnist_sigmoid_6_500",
-            "mnist_tanh_6_500",
-            "mnist_sigmoid_convmed",
-            "mnist_tanh_convmed",
-            "mnist_convSmallRELU__Point",
-            "cifar_sigmoid_6_500",
-            "cifar_tanh_6_500",
-            "cifar_sigmoid_convmed",
-            "cifar_tanh_convmed",
-        }:
-            self.normalize = False
 
 
 def _build_logger(log_name: str | None, log_level=logging.INFO):

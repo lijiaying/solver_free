@@ -15,8 +15,6 @@ __all__ = [
     "delu",
     "leakyrelu",
     "dleakyrelu",
-    "silu",
-    "dsilu",
 ]
 
 import numpy as np
@@ -167,33 +165,3 @@ def dleakyrelu(x: Tensor | ndarray | float) -> Tensor | ndarray | float:
     if isinstance(x, Tensor):
         return dleakyrelu_torch(x)
     return dleakyrelu_np(x)
-
-
-def silu_np(x: ndarray | float) -> ndarray | float:
-    return np.reciprocal(1.0 + np.exp(-x)) * x
-
-
-def silu_torch(x: Tensor) -> Tensor:
-    return F.silu(x)
-
-
-def silu(x: Tensor | ndarray | float) -> Tensor | ndarray | float:
-    if isinstance(x, Tensor):
-        return silu_torch(x)
-    return silu_np(x)
-
-
-def dsilu_np(x: ndarray | float) -> ndarray | float:
-    s = sigmoid_np(x)
-    return s + x * s * (1.0 - s)
-
-
-def dsilu_torch(x: Tensor) -> Tensor:
-    s = F.sigmoid(x)
-    return s + x * s * (1.0 - s)
-
-
-def dsilu(x: Tensor | ndarray | float) -> Tensor | ndarray | float:
-    if isinstance(x, Tensor):
-        return dsilu_torch(x)
-    return dsilu_np(x)

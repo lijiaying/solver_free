@@ -7,7 +7,7 @@ import torch
 from torch import Tensor
 
 from src.utils import (
-    ActRelaxationMode,
+    RelaxMode,
     DEEPPOLY,
     CROWN,
     ROVER_SN,
@@ -95,7 +95,7 @@ def cal_relaxation_sshape(
     u: Tensor,
     f: Callable,
     df: Callable,
-    mode: ActRelaxationMode,
+    mode: RelaxMode,
 ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     yl, yu, kl, ku = f(l), f(u), df(l), df(u)
 
@@ -117,12 +117,12 @@ def cal_relaxation_sshape(
 def cal_relaxation_sigmoid(
     l: Tensor,
     u: Tensor,
-    mode: ActRelaxationMode,
+    mode: RelaxMode,
 ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     return cal_relaxation_sshape(l, u, sigmoid, dsigmoid, mode)
 
 
 def cal_relaxation_tanh(
-    l: Tensor, u: Tensor, mode: ActRelaxationMode
+    l: Tensor, u: Tensor, mode: RelaxMode
 ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     return cal_relaxation_sshape(l, u, tanh, dtanh, mode)

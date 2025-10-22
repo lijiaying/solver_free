@@ -16,12 +16,12 @@ def main():
     current_time = datetime.now().strftime("%Y%m%d%H%M%S")
     # Set arguments for the model.
     args = Arguments(
-        net_file_path="../nets/leaky_relu/mnist_leaky_relu_3_500.onnx",
+        net_fpath="../nets/mnist_leaky_relu_3_500.onnx",
         dataset="mnist",
-        perturbation_radius=0.03,
+        epsilon=0.03,
         log_level=logging.INFO,
-        act_relax_mode=ActRelaxationMode.CROWN,
-        optimization_method=OptimizationMethod.MNLP,
+        act_relax_mode=RelaxMode.CROWN,
+        opt_method=OptimizationMethod.MNLP,
         first_sample_index=0,
         num_samples=1,
         device="cuda:0",

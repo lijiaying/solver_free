@@ -56,7 +56,7 @@ from src.utils import *
 class KActLPBoundModel(LPBoundModel):
     def __init__(
         self,
-        net_file_path: str,
+        net_fpath: str,
         perturbation_args: PerturbationArgs,
         act_relax_args: ActRelaxArgs,
         lp_args: LPArgs,
@@ -70,7 +70,7 @@ class KActLPBoundModel(LPBoundModel):
         This class is used to build a linear programming model to verify the neural
         network with k-activation constraints.
 
-        :param net_file_path: The path of the neural network file.
+        :param net_fpath: The path of the neural network file.
         :param perturbation_args: The perturbation arguments.
         :param act_relax_args: The activation relaxation arguments.
         :param multi_act_relax_args: The multi-neuron activation relaxation arguments.
@@ -83,7 +83,7 @@ class KActLPBoundModel(LPBoundModel):
         """
         LPBoundModel.__init__(
             self,
-            net_file_path,
+            net_fpath,
             perturbation_args,
             act_relax_args,
             lp_args=lp_args,

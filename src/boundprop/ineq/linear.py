@@ -691,7 +691,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
     def _cal_relaxation(
         l: Tensor,
         u: Tensor,
-        mode: ActRelaxationMode,
+        mode: RelaxMode,
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         pass
 
@@ -717,7 +717,7 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
     def _cal_relaxation(
         l: Tensor,
         u: Tensor,
-        mode: ActRelaxationMode,
+        mode: RelaxMode,
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         return cal_relaxation_relu(l, u, mode)
 
@@ -774,7 +774,7 @@ class LeakyReLUIneqNode(NonLinearIneqNode, LeakyReLUNode):
     def _cal_relaxation(
         l: Tensor,
         u: Tensor,
-        mode: ActRelaxationMode,
+        mode: RelaxMode,
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         return cal_relaxation_leakyrelu(l, u, mode)
 
@@ -800,7 +800,7 @@ class ELUIneqNode(NonLinearIneqNode, ELUNode):
     def _cal_relaxation(
         l: Tensor,
         u: Tensor,
-        mode: ActRelaxationMode,
+        mode: RelaxMode,
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         return cal_relaxation_elu(l, u, mode)
 
@@ -826,7 +826,7 @@ class SigmoidIneqNode(NonLinearIneqNode, SigmoidNode):
     def _cal_relaxation(
         l: Tensor,
         u: Tensor,
-        mode: ActRelaxationMode,
+        mode: RelaxMode,
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         return cal_relaxation_sigmoid(l, u, mode)
 
@@ -852,7 +852,7 @@ class TanhIneqNode(NonLinearIneqNode, TanhNode):
     def _cal_relaxation(
         l: Tensor,
         u: Tensor,
-        mode: ActRelaxationMode,
+        mode: RelaxMode,
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         return cal_relaxation_tanh(l, u, mode)
 
@@ -918,7 +918,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
     def _cal_relaxation(
         l: Tensor,
         u: Tensor,
-        mode: ActRelaxationMode,
+        mode: RelaxMode,
         l_max: Tensor = None,
         l_argmax: Tensor = None,
         mask: Tensor = None,

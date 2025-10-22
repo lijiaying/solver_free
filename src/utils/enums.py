@@ -7,7 +7,7 @@ __all__ = [
     "BoundPropagationMethod",
     "OptimizationMethod",
     "ActivationType",
-    "ActRelaxationMode",
+    "RelaxMode",
     "ConstrTemplate",
     "VerificationStatus",
     "CROWN",
@@ -65,7 +65,7 @@ class ActivationType(Enum):
     """The MaxPool2D activation function."""
 
 
-class ActRelaxationMode(Enum):
+class RelaxMode(Enum):
     """
     The activation relaxation mode.
     """
@@ -80,9 +80,9 @@ class ActRelaxationMode(Enum):
     """DeepPoly Relaxation."""
 
 
-CROWN = ActRelaxationMode.CROWN
-DEEPPOLY = ActRelaxationMode.DEEPPOLY
-ROVER_SN = ActRelaxationMode.ROVER_SN
+CROWN = RelaxMode.CROWN
+DEEPPOLY = RelaxMode.DEEPPOLY
+ROVER_SN = RelaxMode.ROVER_SN
 
 
 class ConstrTemplate(Enum):

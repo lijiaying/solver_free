@@ -805,6 +805,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             if next_node is not None:
                 logger.debug(f"Get a SiLU activation funciton.")
                 name = _reformat(next_node.output[0])
+                assert False, "Incomplete SiLU handling."
                 return self._handle_silu(name, input_names, input_size)
             return self._handle_sigmoid(name, input_names, input_size)
 

@@ -11,8 +11,6 @@ __all__ = [
     "SShapeHull",
     "ReLUHull",
     # "LeakyReLUHull",
-    # "ELUHull",
-    # "SiLUHull",
     "SigmoidHull",
     "TanhHull",
     # "MaxPoolHull",

@@ -152,20 +152,20 @@ class ActRelaxArgs:
     """
     Arguments for the activation relaxation.
 
-    :exception ValueError: If the `mode` is not of `ActRelaxationMode`.
+    :exception ValueError: If the `mode` is not of `RelaxMode`.
     :exception ValueError: If the `min_range` is not positive.
     :exception ValueError: If the `min_half_range` is not positive.
     :exception ValueError: If the `sigmoid_limit_bound` is not positive.
     :exception ValueError: If the `tanh_limit_bound` is not positive.
     """
 
-    mode: ActRelaxationMode = ActRelaxationMode.ROVER_SN
+    mode: RelaxMode = RelaxMode.ROVER_SN
     """
     The mode of the activation relaxation. The default value is 
-    `ActRelaxationMode.ROVER_SN`.
+    `RelaxMode.ROVER_SN`.
     
     ..seealso::
-        Refer to the `ActRelaxationMode` for the details
+        Refer to the `RelaxMode` for the details
     """
 
     min_range: float = 0.1
@@ -242,8 +242,8 @@ class ActRelaxArgs:
     """
 
     def __post_init__(self):
-        if not isinstance(self.mode, ActRelaxationMode):
-            raise ValueError(f"mode should be of ActRelaxationMode, got {self.mode}")
+        if not isinstance(self.mode, RelaxMode):
+            raise ValueError(f"mode should be of RelaxMode, got {self.mode}")
         if self.min_range < 0:
             raise ValueError(f"min_range should be nono-negative, got {self.min_range}")
         if self.min_half_range < 0:

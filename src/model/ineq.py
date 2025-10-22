@@ -25,7 +25,7 @@ class IneqBoundModel(BasicBoundModel[T]):
     This is an implementation of bound propagation with symbolic inequalities, where one
     lower bound and one upper bound are calculated for each neuron in the network.
 
-    :param net_file_path: The path of the network file.
+    :param net_fpath: The path of the network file.
     :param perturbation_args: The perturbation arguments.
     :param act_relax_args: The activation relaxation arguments.
     :param ada_act_relax_args: The adaptive constraint arguments.
@@ -36,7 +36,7 @@ class IneqBoundModel(BasicBoundModel[T]):
 
     def __init__(
         self,
-        net_file_path: str,
+        net_fpath: str,
         perturbation_args: PerturbationArgs,
         act_relax_args: ActRelaxArgs,
         dtype: torch.dtype = torch.float32,
@@ -45,7 +45,7 @@ class IneqBoundModel(BasicBoundModel[T]):
         **kwargs,
     ):
         super(IneqBoundModel, self).__init__(
-            net_file_path, perturbation_args, dtype, device, *args, **kwargs
+            net_fpath, perturbation_args, dtype, device, *args, **kwargs
         )
 
         self.act_relax_args: ActRelaxArgs = act_relax_args

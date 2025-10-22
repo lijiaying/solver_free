@@ -33,12 +33,6 @@ def _load_eran_dataset(
     elif dataset == "cifar10":
         file_path = dir_path + "/cifar10_test_5000.csv"
         shape = (1, 3, 32, 32)
-    elif dataset == "fmnist":
-        file_path = dir_path + "/fmnist_test_2000.csv"
-        shape = (1, 1, 28, 28)
-    elif dataset == "emnist":
-        file_path = dir_path + "/emnist_test_2000.csv"
-        shape = (1, 1, 28, 28)
     else:
         raise NotImplementedError(f"Dataset {dataset} is not supported.")
 
@@ -104,10 +98,6 @@ def load_dataset(
         test_set = MNIST(root=dir_path, **kwargs)
     elif dataset == "cifar10":
         test_set = CIFAR10(root=dir_path + "/CIFAR10", **kwargs)
-    elif dataset == "fmnist":
-        test_set = FashionMNIST(root=dir_path, **kwargs)
-    elif dataset == "emnist":
-        test_set = EMNIST(root=dir_path, split="letters", **kwargs)
     else:
         raise NotImplementedError(f"Dataset {dataset} is not supported.")
 

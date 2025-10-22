@@ -70,10 +70,10 @@ class ModelFactory:
 
         logger.debug("Prepare dataset.")
 
-        logger.debug(f"Find the ignored samples for the model {args.net_file_path}.")
+        logger.debug(f"Find the ignored samples for the model {args.net_fpath}.")
         self._ignored_samples = _load_ignored_samples(
-            "../.temp/ignored_samples/" + args.net_file_name + ".txt",
-            args.net_file_path,
+            "../.temp/ignored_samples/" + args.net_fname + ".txt",
+            args.net_fpath,
             load_dataset(
                 args.dataset,
                 dir_path="../.temp/datasets",
@@ -106,7 +106,7 @@ class ModelFactory:
 
         if lp_args is None:
             self.model = IneqBoundModel(
-                self.arguments.net_file_path,
+                self.arguments.net_fpath,
                 perturbation_args,
                 act_relax_args,
                 dtype=dtype,
@@ -115,7 +115,7 @@ class ModelFactory:
         else:
             if kact_lp_args is None:
                 self.model = LPBoundModel(
-                    self.arguments.net_file_path,
+                    self.arguments.net_fpath,
                     perturbation_args,
                     act_relax_args,
                     lp_args,
@@ -124,7 +124,7 @@ class ModelFactory:
                 )
             else:
                 self.model = KActLPBoundModel(
-                    self.arguments.net_file_path,
+                    self.arguments.net_fpath,
                     perturbation_args,
                     act_relax_args,
                     lp_args,
@@ -285,7 +285,7 @@ def _record_ignored_samples(file_path: str, ignored_samples: set):
 
 
 def _get_ignored_samples(
-    net_file_path: str,
+    net_fpath: str,
     data_loader: torch.utils.data.DataLoader,  # type: ignore
     num_samples: int,
     start_index: int,
@@ -293,7 +293,7 @@ def _get_ignored_samples(
     logger = logging.getLogger("rover")
     logger.debug("Get ignored samples by original model.")
 
-    sess = ort.InferenceSession(net_file_path)
+    sess = ort.InferenceSession(net_fpath)
     # input_name = sess.get_inputs()[0]._idx
     # output_name = sess.get_outputs()[0]._idx
     input_name = sess.get_inputs()[0].name
@@ -323,7 +323,7 @@ def _get_ignored_samples(
 
 def _load_ignored_samples(
     file_path: str,
-    net_file_path: str,
+    net_fpath: str,
     data_loader: torch.utils.data.DataLoader,  # type: ignore
     num_samples: int,
     start_index: int,
@@ -338,7 +338,7 @@ def _load_ignored_samples(
 
     if check_ignored_samples:
         ignored_samples = _get_ignored_samples(
-            net_file_path, data_loader, num_samples, start_index
+            net_fpath, data_loader, num_samples, start_index
         )
         _record_ignored_samples(file_path, ignored_samples)
 

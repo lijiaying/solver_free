@@ -4,7 +4,7 @@ __all__ = ["cal_relaxation_maxpool2d"]
 import torch
 from torch import Tensor
 
-from ....utils import ActRelaxationMode
+from ....utils import RelaxMode
 
 
 def _cal_relaxation_maxpool2d(
@@ -45,7 +45,7 @@ def _cal_relaxation_maxpool2d(
 def cal_relaxation_maxpool2d(
     l: Tensor,
     u: Tensor,
-    mode: ActRelaxationMode,
+    mode: RelaxMode,
     l_max: Tensor,
     l_argmax: Tensor,
     mask: Tensor,

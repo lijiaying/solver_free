@@ -56,7 +56,7 @@ _TOLERANCE = 1e-6
 class LPBoundModel(IneqBoundModel, Generic[T]):
     def __init__(
         self,
-        net_file_path: str,
+        net_fpath: str,
         perturbation_args: PerturbationArgs,
         act_relax_args: ActRelaxArgs,
         lp_args: LPArgs,
@@ -73,7 +73,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         form, and it is taken as the objective function of the linear program. The
         linear program is solved by Gurobi.
 
-        :param net_file_path: The path of the neural network file.
+        :param net_fpath: The path of the neural network file.
         :param perturbation_args: The perturbation arguments.
         :param act_relax_args: The activation relaxation arguments.
         :param multi_act_relax_args: The multi-neuron activation relaxation arguments.
@@ -85,7 +85,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         """
         IneqBoundModel.__init__(
             self,
-            net_file_path,
+            net_fpath,
             perturbation_args,
             act_relax_args,
             dtype=dtype,
@@ -543,11 +543,11 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
             if self.model.Status == GRB.INFEASIBLE:
                 logger.info("The model is still infeasible.")
                 current_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
-                file_name = f"infeasible_model_IIS_{current_time}.ilp"
+                fname = f"infeasible_model_IIS_{current_time}.ilp"
                 try:
                     self.model.computeIIS()
-                    self.model.write(file_name)
-                    logger.error(f"The infeasible model IIS is written to {file_name}.")
+                    self.model.write(fname)
+                    logger.error(f"The infeasible model IIS is written to {fname}.")
                     # logger.error(f"The model is infeasible.")
                 except Exception as e:
                     logger.error(f"Failed to write the infeasible model IIS: {e}")
