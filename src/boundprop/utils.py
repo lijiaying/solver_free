@@ -45,15 +45,11 @@ def cal_conv_data_size(
     temp1 = 2 * padding
     temp2 = dilation * (kernel_size - 1)
     size_before = (input_data_size + temp1 - temp2 - 1) / stride + 1
-    output_data_size = (
-        torch.ceil(size_before) if ceil_mode else torch.floor(size_before)
-    )
+    output_data_size = torch.ceil(size_before) if ceil_mode else torch.floor(size_before)
     height, width = output_data_size.int().tolist()
 
     # Calculate the output padding
-    output_padding = input_data_size - (
-        (output_data_size - 1) * stride - temp1 + temp2 + 1
-    )
+    output_padding = input_data_size - ((output_data_size - 1) * stride - temp1 + temp2 + 1)
     output_padding = tuple(output_padding.int().tolist())
 
     return height, width, output_padding

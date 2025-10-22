@@ -71,9 +71,7 @@ def back_substitute_to_input(
 
         module = module.pre_nodes[0]
 
-    logger.debug(
-        f"Finish back-substitution in {time.perf_counter() - start:.4f} seconds."
-    )
+    logger.debug(f"Finish back-substitution in {time.perf_counter() - start:.4f} seconds.")
 
     return constr_bound
 
@@ -154,14 +152,9 @@ def back_substitute_residual_second_path(
 
     bound = None
     # Handle the non-linear module in the beginning of the residual block.
-    if (
-        isinstance(module, NonLinearNode)
-        and module.act_relax_args.update_scalar_bounds_per_layer
-    ):
+    if isinstance(module, NonLinearNode) and module.act_relax_args.update_scalar_bounds_per_layer:
         logger.debug(f"Update scalar bounds by {module}.")
-        pre_scalar_bound = module.all_bounds[module.name].reshape(
-            *constr_bound.L.A.shape[1:]
-        )
+        pre_scalar_bound = module.all_bounds[module.name].reshape(*constr_bound.L.A.shape[1:])
 
         bound, _ = self.cal_bounds(constr_bound, pre_scalar_bound)
         if store_updated_bounds:

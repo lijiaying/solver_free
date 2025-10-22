@@ -101,17 +101,13 @@ _example_inputs2_no_bias_fp64 = (
     _t2_4d_fp64,
 )
 
-_BS_maxpool_naive_fp32 = torch.jit.trace(
-    _BS_maxpool_naive, _example_inputs1_fp32
-)
+_BS_maxpool_naive_fp32 = torch.jit.trace(_BS_maxpool_naive, _example_inputs1_fp32)
 _BS_maxpool_no_bias_naive_fp32 = torch.jit.trace(
     _BS_maxpool_no_bias_naive, _example_inputs1_no_bias_fp32
 )
 
 
-_BS_maxpool_naive_fp64 = torch.jit.trace(
-    _BS_maxpool_naive, _example_inputs1_fp64
-)
+_BS_maxpool_naive_fp64 = torch.jit.trace(_BS_maxpool_naive, _example_inputs1_fp64)
 _BS_maxpool_no_bias_naive_fp64 = torch.jit.trace(
     _BS_maxpool_no_bias_naive, _example_inputs1_no_bias_fp64
 )

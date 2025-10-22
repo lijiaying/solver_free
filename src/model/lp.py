@@ -198,9 +198,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
 
         # Convert all modules to LP modules
         for module in self.submodules.values():
-            logger.debug(
-                f"Create LP module of {module.__class__.__name__}({module.name})."
-            )
+            logger.debug(f"Create LP module of {module.__class__.__name__}({module.name}).")
             lp_module = convert_to_lp_module(module)
             self.lp_submodules[lp_module.name] = lp_module
 
@@ -237,9 +235,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
                 f"being {lp_module.next_nodes}."
             )
 
-        logger.info(
-            f"Finish building LP module in {time.perf_counter() - time_start:.4f}s."
-        )
+        logger.info(f"Finish building LP module in {time.perf_counter() - time_start:.4f}s.")
 
     def build_lp(self):
         logger = logging.getLogger("rover")
@@ -257,9 +253,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         self.model = self._init_gurobi_model()
 
         gvars = None
-        for module, lp_module in zip(
-            self.submodules.values(), self.lp_submodules.values()
-        ):
+        for module, lp_module in zip(self.submodules.values(), self.lp_submodules.values()):
             logger.debug(
                 f"Add variables and constraints for {lp_module.__class__.__name__} "
                 f"({lp_module.name})."
@@ -335,9 +329,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
 
         self.model.update()
         self.output_vars = gvars
-        logger.debug(
-            f"Finish building LP model in {time.perf_counter() - time_start:.4f}s"
-        )
+        logger.debug(f"Finish building LP model in {time.perf_counter() - time_start:.4f}s")
         logger.info(
             f"Current LP model has {self.model.NumVars} variables "
             f"and {self.model.NumConstrs} constraints"
@@ -415,9 +407,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
             adv_labels = list(range(num_labels))
             adv_labels.pop(label)
 
-        results = [
-            False if label in adv_labels else True for label in range(num_labels)
-        ]
+        results = [False if label in adv_labels else True for label in range(num_labels)]
 
         for adv_label in adv_labels:
             logger.info(f"Verify label {adv_label} vs. {label}.")
@@ -494,40 +484,33 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         logger = logging.getLogger("rover")
 
         logger.info(
-            f"Result status: {self.model.Status}-"
-            f"{GRB_STATUS_MAP.get(self.model.status)}."
+            f"Result status: {self.model.Status}-" f"{GRB_STATUS_MAP.get(self.model.status)}."
         )
 
         # If the model is infeasible or unbounded, reoptimize to get definitive status.
         if self.model.Status == GRB.INF_OR_UNBD:
             logger.warning(
-                "The model is infeasible or unbounded. "
-                "Reoptimize to get definitive status."
+                "The model is infeasible or unbounded. " "Reoptimize to get definitive status."
             )
             self.model.setParam(GRB.Param.DualReductions, 0)
             self.model.optimize()
             logger.info(
-                f"Result status: {self.model.Status}-"
-                f"{GRB_STATUS_MAP.get(self.model.status)}."
+                f"Result status: {self.model.Status}-" f"{GRB_STATUS_MAP.get(self.model.status)}."
             )
 
         # If the model is infeasible, output the infeasible constraints.
         if self.model.Status == GRB.INFEASIBLE:
             # Set the numeric focus to 3 to get higher precision.
-            logger.info(
-                "The model is infeasible. Set numeric focus to 3 and recompute."
-            )
+            logger.info("The model is infeasible. Set numeric focus to 3 and recompute.")
             self.model.setParam(GRB.Param.NumericFocus, 3)
             self.model.optimize()
             logger.info(
-                f"Result status: {self.model.Status}-"
-                f"{GRB_STATUS_MAP.get(self.model.status)}."
+                f"Result status: {self.model.Status}-" f"{GRB_STATUS_MAP.get(self.model.status)}."
             )
 
             if self.model.Status == GRB.INF_OR_UNBD:
                 logger.warning(
-                    "The model is infeasible or unbounded. "
-                    "Reoptimize to get definitive status."
+                    "The model is infeasible or unbounded. " "Reoptimize to get definitive status."
                 )
                 self.model.setParam(GRB.Param.DualReductions, 0)
                 self.model.optimize()

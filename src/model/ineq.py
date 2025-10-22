@@ -90,9 +90,7 @@ class IneqBoundModel(BasicBoundModel[T]):
 
         bound, minimum_input = self.bound_propagate(input_bound, return_minimum_input)
 
-        logger.debug(
-            f"Finish bound propagation in {time.perf_counter() - time_start:.4f}s"
-        )
+        logger.debug(f"Finish bound propagation in {time.perf_counter() - time_start:.4f}s")
 
         return bound, minimum_input
 
@@ -149,13 +147,10 @@ class IneqBoundModel(BasicBoundModel[T]):
             if logger.level <= logging.DEBUG and bound is not None:
                 logger.debug(f"Lower bound: {bound.l.flatten()[:5]}")
                 logger.debug(
-                    f"Upper bound: "
-                    f"{bound.u.flatten()[:5] if bound.u is not None else None}"
+                    f"Upper bound: " f"{bound.u.flatten()[:5] if bound.u is not None else None}"
                 )
 
-            logger.debug(
-                f"Finish processing {module} in " f"{time.perf_counter() - start:.4f}s"
-            )
+            logger.debug(f"Finish processing {module} in " f"{time.perf_counter() - start:.4f}s")
 
             module = next(modules_iter, None)
 

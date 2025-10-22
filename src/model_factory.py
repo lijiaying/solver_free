@@ -38,9 +38,7 @@ class ModelFactory:
         logger = logging.getLogger("rover")
         logger.info(f"Arguments:\n{arguments}")
 
-        _init_calculation_settings(
-            arguments.random_seed, arguments.device, arguments.dtype
-        )
+        _init_calculation_settings(arguments.random_seed, arguments.device, arguments.dtype)
 
         self.dtype = torch.float64 if arguments.dtype == "float64" else torch.float32
         self.device = torch.device(arguments.device)
@@ -88,9 +86,7 @@ class ModelFactory:
         logger.info(f"Ignored samples: {self._ignored_samples}")
 
         logger.debug(f"Load dataset {args.dataset}.")
-        self.data_loader = load_dataset(
-            args.dataset, dir_path="../.temp/datasets", normalize=False
-        )
+        self.data_loader = load_dataset(args.dataset, dir_path="../.temp/datasets", normalize=False)
 
     def build(self):
         """
@@ -338,16 +334,13 @@ def _load_ignored_samples(
     logger.debug(f"Load ignored samples from {file_path}.")
 
     if check_ignored_samples:
-        ignored_samples = _get_ignored_samples(
-            net_fpath, data_loader, num_samples, start_index
-        )
+        ignored_samples = _get_ignored_samples(net_fpath, data_loader, num_samples, start_index)
         _record_ignored_samples(file_path, ignored_samples)
 
     else:
         if not os.path.exists(file_path):
             logger.debug(
-                f"Ignored samples file {file_path} does not exist. "
-                f"There is no ignored samples."
+                f"Ignored samples file {file_path} does not exist. " f"There is no ignored samples."
             )
             return set()
         logger.debug(f"Read existing ignored samples file {file_path}.")

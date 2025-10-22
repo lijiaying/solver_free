@@ -127,20 +127,14 @@ class Arguments:
             raise ValueError(f"Dataset {self.dataset} is not supported.")
 
         if self.epsilon < 0:
-            raise ValueError(
-                f"Perturbation radius {self.epsilon} should be " f"non-negative."
-            )
+            raise ValueError(f"Perturbation radius {self.epsilon} should be " f"non-negative.")
 
         if self.num_labels is not None:
             if self.num_labels < 2:
-                raise ValueError(
-                    f"Number of labels {self.num_labels} should be at least 2."
-                )
+                raise ValueError(f"Number of labels {self.num_labels} should be at least 2.")
 
         if self.num_samples < 1:
-            raise ValueError(
-                f"Number of samples {self.num_samples} should be at least 1."
-            )
+            raise ValueError(f"Number of samples {self.num_samples} should be at least 1.")
 
         if self.first_sample_index < 0:
             raise ValueError(
@@ -148,9 +142,7 @@ class Arguments:
             )
 
         if self.input_limited_range[0] > self.input_limited_range[1]:
-            raise ValueError(
-                f"Input limited range {self.input_limited_range} is invalid."
-            )
+            raise ValueError(f"Input limited range {self.input_limited_range} is invalid.")
 
         if self.dataset in {"mnist", "cifar10"}:
             self.num_labels = 10
@@ -196,9 +188,7 @@ class Arguments:
         logger.debug(f"Set perturbation arguments: {self.perturbation_args}.")
         # -------- Set activation relaxation arguments --------
         self.act_relax_args = ActRelaxArgs(mode=self.act_relax_mode)
-        self.act_relax_args.update_scalar_bounds_per_layer = (
-            self.act_relax_mode != CROWN
-        )
+        self.act_relax_args.update_scalar_bounds_per_layer = self.act_relax_mode != CROWN
         logger.debug(f"Set activation relaxation arguments: {self.act_relax_args}.")
 
         # -------- Set LP arguments --------
@@ -212,9 +202,7 @@ class Arguments:
 
     def __str__(self) -> str:
         return (
-            f"Arguments(\n"
-            + ",\n".join(f"\t{k:<25}: {v}" for k, v in self.__dict__.items())
-            + "\n"
+            f"Arguments(\n" + ",\n".join(f"\t{k:<25}: {v}" for k, v in self.__dict__.items()) + "\n"
             f")"
         )
 

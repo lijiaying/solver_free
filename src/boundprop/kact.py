@@ -45,8 +45,7 @@ class _Cache:
     sparse_covers: dict[tuple[int, int, int], list[list[int]]] = {}
 
     # We store this cache in disk, because they are universal.
-    # This contains the templates of the constraints of the input variables with a group
-    # size of k.
+    # This contains constraint template for the input variables with a k-sized group
     # The key is the group size.
     # The value is the template tensor.
     hexagon_templates: dict[int, Tensor] = {}
@@ -67,8 +66,7 @@ def generate_groups_lp(
 
     :param pre_l: The lower bounds of the pre-activation values.
     :param pre_u: The upper bounds of the pre-activation values.
-    :param mask_mn: The mask of the neurons that are not trivial for multi-neuron
-        constraints.
+    :param mask_mn: The mask of the neurons that are not trivial for multi-neuron constraints.
     :param act_type: The type of the activation function. Refer to
         :class:`ActivationType` for more details.
     :param kact_args: The arguments of the k-activation function. Refer to

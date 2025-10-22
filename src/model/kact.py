@@ -109,9 +109,7 @@ class KActLPBoundModel(LPBoundModel):
             adv_labels = list(range(num_labels))
             adv_labels.pop(label)
 
-        results = [
-            False if label in adv_labels else True for label in range(num_labels)
-        ]
+        results = [False if label in adv_labels else True for label in range(num_labels)]
 
         for adv_label in adv_labels:
             logger.info(f"Verify label {adv_label} vs. {label}.")
@@ -119,13 +117,8 @@ class KActLPBoundModel(LPBoundModel):
             obj = self.output_vars[label] - self.output_vars[adv_label]
             self.model.setObjective(obj)
 
-            success, obj_val, solution = self.solve_lp(
-                call_back=False, return_solution=True
-            )
-            if (
-                obj_val is not None
-                and 0 > obj_val > self.kact_lp_args.gurobi_lazy_callback_objval
-            ):
+            success, obj_val, solution = self.solve_lp(call_back=False, return_solution=True)
+            if obj_val is not None and 0 > obj_val > self.kact_lp_args.gurobi_lazy_callback_objval:
                 if not self._has_built_kact_constrs:
                     self.build_kact_lp()
                 if self.kact_lp_args.use_lazy_constraints:
@@ -255,9 +248,9 @@ class KActLPBoundModel(LPBoundModel):
                 # The following operation does not support integers.
                 pool_input_ids = (
                     F.unfold(
-                        torch.arange(
-                            math.prod(module.input_size), **self.data_settings
-                        ).reshape(module.input_size),
+                        torch.arange(math.prod(module.input_size), **self.data_settings).reshape(
+                            module.input_size
+                        ),
                         **kwargs,
                     )
                     .to(dtype=torch.long)  # shape=(n_c*n_kx, :)
@@ -351,8 +344,7 @@ class KActLPBoundModel(LPBoundModel):
             self.model.update()
 
         logger.info(
-            f"Finish building KAct constraints in "
-            f"{time.perf_counter() - time_start:.4f}s"
+            f"Finish building KAct constraints in " f"{time.perf_counter() - time_start:.4f}s"
         )
         logger.info(
             f"Current LP model has {self.model.NumVars} variables "
@@ -392,9 +384,7 @@ class KActLPBoundModel(LPBoundModel):
 
         # The matrix as a scipy.sparse matrix in CSR format.
         self._kact_constrs_A = model_with_act_constrs.getA()
-        self._kact_constrs_RHS = np.array(
-            model_with_act_constrs.getAttr("RHS"), dtype=np.float64
-        )
+        self._kact_constrs_RHS = np.array(model_with_act_constrs.getAttr("RHS"), dtype=np.float64)
 
         logger.debug(f"KAct constraints number: {self._kact_constrs_A.shape[0]}")
 
@@ -414,8 +404,7 @@ class KActLPBoundModel(LPBoundModel):
         self._kact_constr_counter = 0
 
         logger.info(
-            f"Finish separating KAct constraints in "
-            f"{time.perf_counter() - time_start:.4f}s"
+            f"Finish separating KAct constraints in " f"{time.perf_counter() - time_start:.4f}s"
         )
 
     def _add_violated_kact_constrs(self, solution: np.ndarray):
@@ -431,9 +420,7 @@ class KActLPBoundModel(LPBoundModel):
             vars_ = np.asarray([var for var in self.model.getVars()])
             for i in range(constrs_A.shape[0]):
                 m, b = constrs_A[i], constrs_RHS.item(i)
-                mx = gurobipy.LinExpr(
-                    [m[0, c] for c in m.indices], [vars_[c] for c in m.indices]
-                )
+                mx = gurobipy.LinExpr([m[0, c] for c in m.indices], [vars_[c] for c in m.indices])
                 self.model.addLConstr(
                     lhs=mx,
                     sense=GRB.GREATER_EQUAL,

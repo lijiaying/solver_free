@@ -117,12 +117,8 @@ _example_input_no_bias_3d_fp64 = (
 )
 
 
-_BS_relu_1d_lower_fp32 = torch.jit.trace(
-    _BS_relu_1d_lower, _example_input_1d_fp32
-)
-_BS_relu_1d_upper_fp32 = torch.jit.trace(
-    _BS_relu_1d_upper, _example_input_1d_fp32
-)
+_BS_relu_1d_lower_fp32 = torch.jit.trace(_BS_relu_1d_lower, _example_input_1d_fp32)
+_BS_relu_1d_upper_fp32 = torch.jit.trace(_BS_relu_1d_upper, _example_input_1d_fp32)
 _BS_relu_no_bias_1d_lower_fp32 = torch.jit.trace(
     _BS_relu_no_bias_1d_lower, _example_input_no_bias_1d_fp32
 )
@@ -130,12 +126,8 @@ _BS_relu_no_bias_1d_upper_fp32 = torch.jit.trace(
     _BS_relu_no_bias_1d_upper, _example_input_no_bias_1d_fp32
 )
 
-_BS_relu_1d_lower_fp64 = torch.jit.trace(
-    _BS_relu_1d_lower, _example_input_1d_fp64
-)
-_BS_relu_1d_upper_fp64 = torch.jit.trace(
-    _BS_relu_1d_upper, _example_input_1d_fp64
-)
+_BS_relu_1d_lower_fp64 = torch.jit.trace(_BS_relu_1d_lower, _example_input_1d_fp64)
+_BS_relu_1d_upper_fp64 = torch.jit.trace(_BS_relu_1d_upper, _example_input_1d_fp64)
 _BS_relu_no_bias_1d_lower_fp64 = torch.jit.trace(
     _BS_relu_no_bias_1d_lower, _example_input_no_bias_1d_fp64
 )

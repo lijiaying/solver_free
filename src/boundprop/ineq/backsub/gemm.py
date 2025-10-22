@@ -5,16 +5,12 @@ import torch
 from torch import Tensor
 
 
-def _BS_gemm_no_bias1(
-    A: Tensor, b: Tensor, weight: Tensor
-) -> tuple[Tensor, Tensor]:
+def _BS_gemm_no_bias1(A: Tensor, b: Tensor, weight: Tensor) -> tuple[Tensor, Tensor]:
     A = A @ weight
     return A, b
 
 
-def _BS_gemm_no_bias2(
-    A: Tensor, weight: Tensor, bias: Tensor
-) -> tuple[Tensor, Tensor]:
+def _BS_gemm_no_bias2(A: Tensor, weight: Tensor, bias: Tensor) -> tuple[Tensor, Tensor]:
     b = (A * bias).sum(dim=1)
     A = _BS_gemm_no_bias1(A, b, weight)[0]
     return A, b
@@ -26,9 +22,7 @@ def _BS_gemm_no_bias3(A: Tensor, weight: Tensor) -> Tensor:
     return A
 
 
-def _BS_gemm(
-    A: Tensor, b: Tensor, weight: Tensor, bias: Tensor
-) -> tuple[Tensor, Tensor]:
+def _BS_gemm(A: Tensor, b: Tensor, weight: Tensor, bias: Tensor) -> tuple[Tensor, Tensor]:
     b = b + (A * bias).sum(dim=1)
     A = _BS_gemm_no_bias1(A, b, weight)[0]
     return A, b
@@ -56,27 +50,15 @@ _example_inputs3_fp64 = (_A_fp64, _weight_fp64)
 _example_inputs4_fp64 = (_A_fp64, _b_fp64, _weight_fp64, _bias_fp64)
 
 
-_BS_gemm_no_bias1_fp32 = torch.jit.trace(
-    _BS_gemm_no_bias1, _example_inputs1_fp32
-)
-_BS_gemm_no_bias2_fp32 = torch.jit.trace(
-    _BS_gemm_no_bias2, _example_inputs2_fp32
-)
-_BS_gemm_no_bias3_fp32 = torch.jit.trace(
-    _BS_gemm_no_bias3, _example_inputs3_fp32
-)
+_BS_gemm_no_bias1_fp32 = torch.jit.trace(_BS_gemm_no_bias1, _example_inputs1_fp32)
+_BS_gemm_no_bias2_fp32 = torch.jit.trace(_BS_gemm_no_bias2, _example_inputs2_fp32)
+_BS_gemm_no_bias3_fp32 = torch.jit.trace(_BS_gemm_no_bias3, _example_inputs3_fp32)
 _BS_gemm_fp32 = torch.jit.trace(_BS_gemm, _example_inputs4_fp32)
 
 
-_BS_gemm_no_bias1_fp64 = torch.jit.trace(
-    _BS_gemm_no_bias1, _example_inputs1_fp64
-)
-_BS_gemm_no_bias2_fp64 = torch.jit.trace(
-    _BS_gemm_no_bias2, _example_inputs2_fp64
-)
-_BS_gemm_no_bias3_fp64 = torch.jit.trace(
-    _BS_gemm_no_bias3, _example_inputs3_fp64
-)
+_BS_gemm_no_bias1_fp64 = torch.jit.trace(_BS_gemm_no_bias1, _example_inputs1_fp64)
+_BS_gemm_no_bias2_fp64 = torch.jit.trace(_BS_gemm_no_bias2, _example_inputs2_fp64)
+_BS_gemm_no_bias3_fp64 = torch.jit.trace(_BS_gemm_no_bias3, _example_inputs3_fp64)
 _BS_gemm_fp64 = torch.jit.trace(_BS_gemm, _example_inputs4_fp64)
 
 

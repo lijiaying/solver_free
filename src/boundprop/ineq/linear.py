@@ -165,9 +165,7 @@ class BasicIneqNode(BasicNode, ABC):
         :return: The scalar bounds and the minimum input.
         """
         bound = ScalarBound(
-            l=cal_scalar_bound(
-                constr_bound.L.A, constr_bound.L.b, scalar_bound.l, scalar_bound.u
-            )
+            l=cal_scalar_bound(constr_bound.L.A, constr_bound.L.b, scalar_bound.l, scalar_bound.u)
         )
 
         # Calculate the input such that the output is the minimum.
@@ -843,9 +841,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
         NonLinearIneqNode.__init__(self, *args)
         MaxPool2DNode.__init__(self, *args, **kwargs)
 
-    def cal_relaxation(
-        self, input_bound: ScalarBound, shared_data: BPSharedData
-    ) -> LConstrBound:
+    def cal_relaxation(self, input_bound: ScalarBound, shared_data: BPSharedData) -> LConstrBound:
         logger = logging.getLogger("rover")
         logger.debug(f"Calculate single-neuron relaxation.")
 
@@ -854,9 +850,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
         l, u = self.get_unfolded_pre_bound(pre_bound)
         l_max, l_argmax = self._get_l_argmax(pre_bound)
         mask = self.get_nontrivial_neuron_mask(pre_bound)
-        sl, su, tl, tu = self._cal_relaxation(
-            l, u, self.act_relax_args.mode, l_max, l_argmax, mask
-        )
+        sl, su, tl, tu = self._cal_relaxation(l, u, self.act_relax_args.mode, l_max, l_argmax, mask)
 
         return LConstrBound(L=LConstr(A=sl, b=tl), U=LConstr(A=su, b=tu))  # noqa
 

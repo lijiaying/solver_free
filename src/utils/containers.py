@@ -221,8 +221,7 @@ class LConstr:
 
     def __str__(self):
         return (
-            f"LConstr(A={self.A.tolist()}, b"
-            f"={self.b.tolist() if self.b is not None else None})"
+            f"LConstr(A={self.A.tolist()}, b" f"={self.b.tolist() if self.b is not None else None})"
         )
 
     def __repr__(self):

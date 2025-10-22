@@ -190,11 +190,7 @@ def get_parallel_tangent_line(
     k: float | ndarray | Tensor,
     get_big: bool,
     func: Literal["sigmoid", "tanh"],
-) -> tuple[
-    float | ndarray | Tensor,
-    float | ndarray | Tensor,
-    float | ndarray | Tensor,
-]:
+) -> tuple[float | ndarray | Tensor, float | ndarray | Tensor, float | ndarray | Tensor,]:
     """
     Get the tangent line with a given slope :math:`k` and the tangent point.
 
@@ -249,11 +245,7 @@ def get_second_tangent_line(
     x: float | ndarray | Tensor,
     get_big: bool,
     func: Literal["sigmoid", "tanh"],
-) -> tuple[
-    float | ndarray | Tensor,
-    float | ndarray | Tensor,
-    float | ndarray | Tensor,
-]:
+) -> tuple[float | ndarray | Tensor, float | ndarray | Tensor, float | ndarray | Tensor,]:
     """
     Get the second tangent line crossing a given point :math:`x` such that the tangent
     line does not take :math:`x` as the tangent point.

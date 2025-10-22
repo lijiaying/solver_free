@@ -120,8 +120,7 @@ def cal_scalar_bound(A: Tensor, b: Tensor | None, s1: Tensor, s2: Tensor) -> Ten
                 return _cal_scalar_bound_no_bias_3d_fp32(A, s1, s2)
             else:
                 raise ValueError(
-                    f"Unsupported dimension: "
-                    f"A: {A.shape} l: {s1.shape}, u: {s2.shape}."
+                    f"Unsupported dimension: " f"A: {A.shape} l: {s1.shape}, u: {s2.shape}."
                 )
     elif dtype == torch.float64:
         if b is not None:
@@ -141,8 +140,7 @@ def cal_scalar_bound(A: Tensor, b: Tensor | None, s1: Tensor, s2: Tensor) -> Ten
                 return _cal_scalar_bound_no_bias_3d_fp64(A, s1, s2)
             else:
                 raise ValueError(
-                    f"Unsupported dimension: "
-                    f"A: {A.shape} l: {s1.shape}, u: {s2.shape}."
+                    f"Unsupported dimension: " f"A: {A.shape} l: {s1.shape}, u: {s2.shape}."
                 )
     else:
         raise ValueError(f"Unsupported dtype: {dtype}.")
