@@ -404,8 +404,6 @@ def cal_grouped_acthull(
 def _get_func_hull(act_type: ActivationType) -> ActHull:
     hull_classes = {
         ActivationType.RELU: ReLUHull,
-        ActivationType.LEAKY_RELU: LeakyReLUHull,
-        ActivationType.ELU: ELUHull,
         ActivationType.SIGMOID: SigmoidHull,
         ActivationType.TANH: TanhHull,
         ActivationType.MAXPOOL2D: MaxPoolHullDLP,

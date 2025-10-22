@@ -238,10 +238,6 @@ class KActLPBoundModel(LPBoundModel):
                 act_type = ActivationType.SIGMOID
             elif isinstance(module, TanhNode):
                 act_type = ActivationType.TANH
-            elif isinstance(module, LeakyReLUNode):
-                act_type = ActivationType.LEAKY_RELU
-            elif isinstance(module, ELUNode):
-                act_type = ActivationType.ELU
             elif isinstance(module, MaxPool2DNode):
                 act_type = ActivationType.MAXPOOL2D
 

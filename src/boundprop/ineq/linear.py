@@ -12,7 +12,6 @@ __all__ = [
     "Conv2DIneqNode",
     "NonLinearIneqNode",
     "ReLUIneqNode",
-    "LeakyReLUIneqNode",
     "SigmoidIneqNode",
     "TanhIneqNode",
     "MaxPool2DIneqNode",
@@ -750,32 +749,6 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
         )
 
         return result_constr_bound
-
-
-class LeakyReLUIneqNode(NonLinearIneqNode, LeakyReLUNode):
-    """
-    The back propagation node for the Leaky ReLU layer with linear relaxation.
-    """
-
-    def __init__(
-        self,
-        name: str,
-        input_names: list[str],
-        input_size: tuple[int] | tuple[int, int, int],
-        shared_data: BPSharedData,
-        act_relax_args: ActRelaxArgs,
-    ):
-        args = (name, input_names, input_size, shared_data, act_relax_args)
-        NonLinearIneqNode.__init__(self, *args)
-        LeakyReLUNode.__init__(self, *args)
-
-    @staticmethod
-    def _cal_relaxation(
-        l: Tensor,
-        u: Tensor,
-        mode: RelaxMode,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
-        return cal_relaxation_leakyrelu(l, u, mode)
 
 
 class SigmoidIneqNode(NonLinearIneqNode, SigmoidNode):

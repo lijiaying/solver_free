@@ -24,7 +24,6 @@ class SamplePointsGenerator:
             "box_sigmoid",
             "box_tanh",
             "box_maxpool",
-            "box_leakyrelu",
         }, f"Shape {samples_area_shape} is not supported."
         if points_num == 0:
             return None
@@ -34,14 +33,11 @@ class SamplePointsGenerator:
             "box",
             "box_sigmoid",
             "box_tanh",
-            "box_leakyrelu",
         ]:
             if samples_area_shape == "box_sigmoid":
                 f = lambda x: 1.0 / (1.0 + np.exp(-x))
             elif samples_area_shape == "box_tanh":
                 f = lambda x: np.tanh(x)
-            elif samples_area_shape == "box_leakyrelu":
-                f = lambda x: np.maximum(0.01 * x, x)
             else:
                 f = lambda x: x
             lb = self.lower_bounds + [f(x) for x in self.lower_bounds]
@@ -254,8 +250,6 @@ if __name__ == "__main__":
             sample_area_shape = "box_tanh"
         elif "maxpool" in method:
             sample_area_shape = "box_maxpool"
-        elif "leakyrelu" in method in method:
-            sample_area_shape = "box_leakyrelu"
         else:
             sample_area_shape = "box"
 

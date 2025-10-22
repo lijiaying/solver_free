@@ -157,11 +157,12 @@ class ModelFactory:
 
         for i, (sample, target_label) in enumerate(self.data_loader):
             if _skip_sample(i, self._ignored_samples, args.first_sample_index):
+                print('skip sample ', i, flush=True)
                 continue
             if num_samples <= 0:
                 break
 
-            logger.info(f"Sample {i}".center(100, "="))
+            print(f"Sample {i}".center(100, "="))
             time_sample = time.perf_counter()
 
             target_label = int(target_label.item())
@@ -229,10 +230,10 @@ class ModelFactory:
             logger.debug(f"Verified: {samples_v}")
             num_samples -= 1
 
-        logger.info(f"Stats: {samples_stats}")
+        print(f"Stats: {samples_stats}")
         time_total = sum(time_sample_list)
-        logger.info(f"Finish verification. Cost Time:{time_total:.4f}s")
-        logger.info(f"Total {len(samples_v)}/{len(time_sample_list)} verified samples.")
+        print(f"Finish verification. Cost Time:{time_total:.4f}s")
+        print(f"Total {len(samples_v)}/{len(time_sample_list)} verified samples.")
 
 
 def _init_calculation_settings(random_seed: int, device: str, dtype: str):

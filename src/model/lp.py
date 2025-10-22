@@ -177,10 +177,6 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
                     lp_m = SigmoidLPNode(*args, act_relax_args=act_relax_args)
                 elif isinstance(m, TanhNode):
                     lp_m = TanhLPNode(*args, act_relax_args=act_relax_args)
-                elif isinstance(m, ELUNode):
-                    lp_m = ELULPNode(*args, act_relax_args=act_relax_args)
-                elif isinstance(m, LeakyReLUNode):
-                    lp_m = LeakyReLULPNode(*args, act_relax_args=act_relax_args)
                 elif isinstance(m, MaxPool2DNode):
                     lp_m = MaxPool2DLPNode(
                         *args,

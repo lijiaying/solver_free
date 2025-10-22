@@ -115,8 +115,6 @@ class Arguments:
     kact_lp_args: KActLPArgs | None = None
     """The kact LP arguments."""
 
-    use_adv_attack: bool = False
-
     def __post_init__(self):
 
         if not os.path.exists(self.net_fpath):

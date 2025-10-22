@@ -11,8 +11,6 @@ __all__ = [
     "dsigmoid",
     "tanh",
     "dtanh",
-    "leakyrelu",
-    "dleakyrelu",
 ]
 
 import numpy as np
@@ -136,30 +134,3 @@ def delu(x: Tensor | ndarray | float) -> Tensor | ndarray | float:
         return delu_torch(x)
     return delu_np(x)
 
-
-def leakyrelu_np(x: ndarray | float) -> ndarray | float:
-    return np.where(x > 0, x, 0.01 * x)
-
-
-def leakyrelu_torch(x: Tensor) -> Tensor:
-    return F.leaky_relu(x)
-
-
-def leakyrelu(x: Tensor | ndarray | float) -> Tensor | ndarray | float:
-    if isinstance(x, Tensor):
-        return leakyrelu_torch(x)
-    return leakyrelu_np(x)
-
-
-def dleakyrelu_np(x: ndarray | float) -> ndarray | float:
-    return np.where(x > 0, 1.0, 0.01)
-
-
-def dleakyrelu_torch(x: Tensor) -> Tensor:
-    return torch.where(x > 0, 1.0, 0.01)
-
-
-def dleakyrelu(x: Tensor | ndarray | float) -> Tensor | ndarray | float:
-    if isinstance(x, Tensor):
-        return dleakyrelu_torch(x)
-    return dleakyrelu_np(x)

@@ -52,14 +52,12 @@ if __name__ == "__main__":
         "single_sigmoid",
         "single_tanh",
         # "single_maxpool",
-        # "single_leakyrelu",
         # "prima_sigmoid",
         # "prima_tanh",
         # "prima_maxpool",
         "our_sigmoid",
         "our_tanh",
         # "our_maxpool_dlp",
-        # "our_leakyrelu",
         "our_sigmoid-a",
         "our_sigmoid-b",
         "our_tanh-a",
@@ -69,13 +67,11 @@ if __name__ == "__main__":
     methods = [
         "single_sigmoid",
         # "single_maxpool",
-        # "single_leakyrelu",
         # "prima_sigmoid",
         # "prima_tanh",
         # "prima_maxpool",
         "our_sigmoid",
         # "our_maxpool_dlp",
-        # "our_leakyrelu",
         "our_sigmoid-a",
         "our_sigmoid-b",
         "single_tanh",
@@ -165,9 +161,6 @@ if __name__ == "__main__":
                 # elif method == "our_maxpool_dlp":
                 #     fun_hull = MaxPoolHullDLP(S=True)
                 #     output_constraints = fun_hull.cal_hull(constrs=constraints)
-                # elif method == "our_leakyrelu":
-                #     fun_hull = LeakyReLUHull(S=True)
-                #     output_constraints = fun_hull.cal_hull(constrs=constraints)
                 elif method == "our_sigmoid-a":
                     fun_hull = SigmoidHullA(S=True)
                     output_constraints = fun_hull.cal_hull(constrs=constraints)
@@ -191,9 +184,6 @@ if __name__ == "__main__":
                     output_constraints = fun_hull.cal_hull(lower=lb, upper=ub)
                 # elif method == "single_maxpool":
                 #     fun_hull = MaxPoolHullDLP(S=True, M=False)
-                #     output_constraints = fun_hull.cal_hull(lower=lb, upper=ub)
-                # elif method == "single_leakyrelu":
-                #     fun_hull = LeakyReLUHull(S=True, M=False)
                 #     output_constraints = fun_hull.cal_hull(lower=lb, upper=ub)
                 else:
                     raise NotImplementedError(f"Method {method} is not implemented.")

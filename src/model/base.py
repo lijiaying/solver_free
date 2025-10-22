@@ -219,7 +219,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             elif op_type == "Conv":
                 module = self._parse_conv2d(node, input_size, initializers)
 
-            elif node.op_type in {"Relu", "Sigmoid", "Tanh", "Mul", "LeakyRelu"}:
+            elif node.op_type in {"Relu", "Sigmoid", "Tanh", "Mul"}:
                 next_node = None
                 if node.op_type == "Sigmoid":
                     next_node = next(nodes_iterator)
@@ -812,14 +812,6 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         elif op_type == "Tanh":
             return self._handle_tanh(name, input_names, input_size)
 
-        elif op_type == "LeakyRelu":
-            alpha = float(node.attribute[0].f)
-
-            if abs(alpha - 0.01) > 1e-6:
-                raise RuntimeError(f"Unsupported alpha {alpha} for LeakyReLU function.")
-
-            return self._handle_leakyrelu(name, input_names, input_size)
-
         else:
             raise NotImplementedError(f"Unsupported activation {op_type}.")
 
@@ -1070,15 +1062,6 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         input_names: list[str],
         input_size: tuple[int] | tuple[int, int, int],
     ) -> TanhNode:
-        pass
-
-    @abstractmethod
-    def _handle_leakyrelu(
-        self,
-        name: str,
-        input_names: list[str],
-        input_size: tuple[int] | tuple[int, int, int],
-    ) -> LeakyReLUNode:
         pass
 
     @abstractmethod

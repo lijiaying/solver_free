@@ -29,7 +29,7 @@ fig.subplots_adjust(
 plt.tight_layout()
 
 indices = ["a", "b"]
-methods = ["our_sigmoid", "our_tanh", "our_maxpool_dlp", "our_leakyrelu"]
+methods = ["our_sigmoid", "our_tanh", "our_maxpool_dlp"]
 dimensions = [2, 3, 4, 5, 6, 7, 8]
 ax = plt.subplot(1, 1, 1)
 ax.set_xlabel("Input Dimension", fontsize=16)
@@ -41,7 +41,7 @@ ax.grid(which="major", axis="y", linestyle="--", alpha=0.6)
 
 
 styles = ["ks-", "k^--", "ko:", "kD-.", "kx-"]
-legends = ["Sigmoid", "Tanh", "MaxPool", "LeakyReLU"]
+legends = ["Sigmoid", "Tanh", "MaxPool"]
 
 for i in range(len(methods)):
     method = methods[i]
