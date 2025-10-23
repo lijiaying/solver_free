@@ -5,7 +5,7 @@ This module provides arguments for different approaches.
 __docformat__ = "restructuredtext"
 __all__ = [
     "LoggerArgs",
-    "PerturbationArgs",
+    "PerturbArgs",
     "ActRelaxArgs",
     "LPArgs",
     "KActLPArgs",
@@ -72,7 +72,7 @@ class LoggerArgs:
 
 
 @dataclass
-class PerturbationArgs:
+class PerturbArgs:
     """
     Arguments for the perturbation.
 
@@ -116,7 +116,14 @@ class PerturbationArgs:
         """
         self.means = self.means.to(device=x.device)
         self.stds = self.stds.to(device=x.device)
+        # __import__('ipdb').set_trace()
 
+        # print('x:', x)
+        # print('epsilon:', self.epsilon)
+        # print('means:', self.means)
+        # print('stds:', self.stds)
+        # print('lower_limit:', self.lower_limit)
+        # print('upper_limit:', self.upper_limit)
         l = (
             x.detach()
             .clone()
@@ -138,7 +145,7 @@ class PerturbationArgs:
 
     def __str__(self):
         return (
-            f"PerturbationArgs("
+            f"PerturbArgs("
             f"epsilon={self.epsilon}, "
             f"means={self.means.tolist()}, "
             f"stds={self.stds.tolist()}, "

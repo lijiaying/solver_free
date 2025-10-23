@@ -68,16 +68,16 @@ class BasicBoundModel(Module, ABC, Generic[T]):
     """
     The basic bound module that builds the bound module from the neural network file.
 
-    :param net_file_path: The path of the neural network file.
-    :param perturbation_args: The perturbation arguments.
+    :param net_fpath: The path of the neural network file.
+    :param perturb_args: The perturbation arguments.
     :param dtype: The data type used in torch.
     :param device: The device used in torch.
     """
 
     def __init__(
         self,
-        net_file_path: str,
-        perturbation_args: PerturbationArgs,
+        net_fpath: str,
+        perturb_args: PerturbArgs,
         dtype: torch.dtype = torch.float32,
         device: torch.device = torch.device("cpu"),
         *args,
@@ -85,10 +85,10 @@ class BasicBoundModel(Module, ABC, Generic[T]):
     ):
         super(BasicBoundModel, self).__init__()
         # Check the file is existed.
-        if not os.path.exists(net_file_path):
-            raise ValueError(f"Model file {net_file_path} does not exist.")
+        if not os.path.exists(net_fpath):
+            raise ValueError(f"Model file {net_fpath} does not exist.")
 
-        self._net_file_path = net_file_path
+        self._net_fpath = net_fpath
         self._dtype = dtype
         self._device = device
         self._data_settings = {"dtype": dtype, "device": device}
@@ -99,7 +99,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         self._ori_last_weight: Tensor | None = None
         self._ori_last_bias: Tensor | None = None
 
-        self._perturb_args = perturbation_args
+        self._perturb_args = perturb_args
 
         self.submodules: dict[str, T] = OrderedDict()
         """
@@ -117,7 +117,10 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         logger = logging.getLogger("stm")
         logger.debug("Get input bound from the input sample.")
 
+        print('**** input_sample:', input_sample)
         l, u = self.perturb_args.normalize(input_sample)
+        print('**** normalized l:', l)
+        print('**** normalized u:', u)
 
         return ScalarBound(l, u).to(**self.data_settings)
 
@@ -163,12 +166,12 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :param output_bias: The output bias.
         """
         logger = logging.getLogger("stm")
-        logger.debug(f"Start building bound module from {self.net_file_path}.")
+        logger.debug(f"Start building bound module from {self.net_fpath}.")
 
         time_total = time.perf_counter()
 
-        logger.debug(f"Load onnx model from {self.net_file_path}.")
-        model = onnx.load(self.net_file_path)
+        logger.debug(f"Load onnx model from {self.net_fpath}.")
+        model = onnx.load(self.net_fpath)
 
         logger.debug("Parse inputs.")
         self._parse_onnx_input(model)
@@ -622,7 +625,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         logger.debug("Check output size of each module.")
 
         # Check the shape is correct.
-        model = onnx.load(self.net_file_path)
+        model = onnx.load(self.net_fpath)
         inferred_model = shape_inference.infer_shapes(model)
 
         for value_info in inferred_model.graph.value_info:
@@ -1064,9 +1067,9 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         return self._perturb_args
 
     @property
-    def net_file_path(self) -> str:
+    def net_fpath(self) -> str:
         """The path of the neural network file."""
-        return self._net_file_path
+        return self._net_fpath
 
     @property
     def input_name(self) -> str:

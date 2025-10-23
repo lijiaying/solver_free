@@ -26,7 +26,7 @@ class IneqBoundModel(BasicBoundModel[T]):
     lower bound and one upper bound are calculated for each neuron in the network.
 
     :param net_fpath: The path of the network file.
-    :param perturbation_args: The perturbation arguments.
+    :param perturb_args: The perturbation arguments.
     :param act_relax_args: The activation relaxation arguments.
     :param ada_act_relax_args: The adaptive constraint arguments.
     :param log_args: The logger arguments.
@@ -37,7 +37,7 @@ class IneqBoundModel(BasicBoundModel[T]):
     def __init__(
         self,
         net_fpath: str,
-        perturbation_args: PerturbationArgs,
+        perturb_args: PerturbArgs,
         act_relax_args: ActRelaxArgs,
         dtype: torch.dtype = torch.float32,
         device: torch.device = torch.device("cpu"),
@@ -45,7 +45,7 @@ class IneqBoundModel(BasicBoundModel[T]):
         **kwargs,
     ):
         super(IneqBoundModel, self).__init__(
-            net_fpath, perturbation_args, dtype, device, *args, **kwargs
+            net_fpath, perturb_args, dtype, device, *args, **kwargs
         )
 
         self.act_relax_args: ActRelaxArgs = act_relax_args
@@ -132,7 +132,7 @@ class IneqBoundModel(BasicBoundModel[T]):
 
         module = next(modules_iter)
         while module is not None:
-
+            print('Process {}'.format(module))
             logger.debug(f"Process {module}".center(100, "~"))
             start = time.perf_counter()
 

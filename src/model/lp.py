@@ -57,7 +57,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
     def __init__(
         self,
         net_fpath: str,
-        perturbation_args: PerturbationArgs,
+        perturb_args: PerturbArgs,
         act_relax_args: ActRelaxArgs,
         lp_args: LPArgs,
         dtype: torch.dtype = torch.float32,
@@ -74,7 +74,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         linear program is solved by Gurobi.
 
         :param net_fpath: The path of the neural network file.
-        :param perturbation_args: The perturbation arguments.
+        :param perturb_args: The perturbation arguments.
         :param act_relax_args: The activation relaxation arguments.
         :param multi_act_relax_args: The multi-neuron activation relaxation arguments.
         :param ada_act_relax_args: The adaptive constraints arguments.
@@ -86,7 +86,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         IneqBoundModel.__init__(
             self,
             net_fpath,
-            perturbation_args,
+            perturb_args,
             act_relax_args,
             dtype=dtype,
             device=device,

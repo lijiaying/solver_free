@@ -36,6 +36,10 @@ def main(args):
         log_file = args.log_name
         log_file = "./logs/" + log_file + f"_{current_time}.log"
 
+    if args.dataset == 'deeppoly':
+        input_limited_range = (-1.0, 1.0)
+    else:
+        input_limited_range = (0.0, 1.0)
     # Set arguments for the model.
     args = Arguments(
         net_fpath=args.net_fpath,
@@ -47,6 +51,7 @@ def main(args):
         opt_method=opt_method,
         first_sample_index=0,
         num_samples=100,
+        input_limited_range=input_limited_range,
         # device="cuda:0",  # noqa
         dtype="float64",
     )

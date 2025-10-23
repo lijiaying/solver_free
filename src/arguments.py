@@ -68,7 +68,7 @@ class Arguments:
     device: str = "cpu"
     """The device that torch uses."""
 
-    perturbation_args: PerturbationArgs | None = None
+    perturb_args: PerturbArgs | None = None
     """The perturbation arguments."""
 
     act_relax_args: ActRelaxArgs | None = None
@@ -153,7 +153,7 @@ class Arguments:
         device = torch.device(self.device)
         print("use device:", device)
 
-        self.perturbation_args = PerturbationArgs(
+        self.perturb_args = PerturbArgs(
             epsilon=self.epsilon,
             norm=float("inf"),
             means=self.means.to(dtype=dtype, device=device),
@@ -162,7 +162,7 @@ class Arguments:
             upper_limit=self.input_limited_range[1],
         )
 
-        logger.debug(f"Set perturbation arguments: {self.perturbation_args}.")
+        logger.debug(f"Set perturbation arguments: {self.perturb_args}.")
         # -------- Set activation relaxation arguments --------
         self.act_relax_args = ActRelaxArgs(mode=self.act_relax_mode)
         self.act_relax_args.update_scalar_bounds_per_layer = self.act_relax_mode != CROWN

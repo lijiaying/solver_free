@@ -50,20 +50,20 @@ def _load_eran_dataset(
     print('**** dir_path:', dir_path)
 
     if dataset == "mnist":
-        file_path = dir_path + "/mnist_test_full.csv"
+        fpath = dir_path + "/mnist_test_full.csv"
         shape = (1, 1, 28, 28)
     elif dataset == "cifar10":
-        file_path = dir_path + "/cifar10_test_5000.csv"
+        fpath = dir_path + "/cifar10_test_5000.csv"
         shape = (1, 3, 32, 32)
     elif dataset == "deeppoly":
-        file_path = dir_path + "/deeppoly_test.csv"
+        fpath = dir_path + "/deeppoly_test.csv"
         shape = (2,)
     else:
         raise NotImplementedError(f"Dataset {dataset} is not supported.")
 
     logger.debug(f"Load only first {max_samples_num} samples.")
     data_loader = []
-    with open(file_path, "r") as f:
+    with open(fpath, "r") as f:
         for _ in range(max_samples_num):
             line = f.readline().strip().split(",")
             label = torch.tensor([int(line[0])])

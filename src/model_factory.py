@@ -92,7 +92,7 @@ class ModelFactory:
         """
         Build the model based on the arguments.
         """
-        perturbation_args = self.arguments.perturbation_args
+        perturb_args = self.arguments.perturb_args
         act_relax_args = self.arguments.act_relax_args
         lp_args = self.arguments.lp_args
         kact_lp_args = self.arguments.kact_lp_args
@@ -103,7 +103,7 @@ class ModelFactory:
         if lp_args is None:
             self.model = IneqBoundModel(
                 self.arguments.net_fpath,
-                perturbation_args,
+                perturb_args,
                 act_relax_args,
                 dtype=dtype,
                 device=device,
@@ -112,7 +112,7 @@ class ModelFactory:
             if kact_lp_args is None:
                 self.model = LPBoundModel(
                     self.arguments.net_fpath,
-                    perturbation_args,
+                    perturb_args,
                     act_relax_args,
                     lp_args,
                     dtype=dtype,
@@ -121,7 +121,7 @@ class ModelFactory:
             else:
                 self.model = KActLPBoundModel(
                     self.arguments.net_fpath,
-                    perturbation_args,
+                    perturb_args,
                     act_relax_args,
                     lp_args,
                     kact_lp_args,
@@ -268,16 +268,16 @@ def _init_calculation_settings(random_seed: int, device: str, dtype: str):
         torch.backends.cudnn.allow_tf32 = dtype == "float32"
 
 
-def _record_ignored_samples(file_path: str, ignored_samples: set):
+def _record_ignored_samples(fpath: str, ignored_samples: set):
     logger = logging.getLogger("stm")
-    logger.debug(f"Write ignored samples in {file_path}.")
+    logger.debug(f"Write ignored samples in {fpath}.")
 
-    if not file_path.endswith(".txt"):
-        raise ValueError(f"File path must end with .txt, not {file_path}.")
+    if not fpath.endswith(".txt"):
+        raise ValueError(f"File path must end with .txt, not {fpath}.")
 
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    os.makedirs(os.path.dirname(fpath), exist_ok=True)
 
-    with open(file_path, "w") as f:
+    with open(fpath, "w") as f:
         f.write(str(ignored_samples))
 
 
@@ -323,7 +323,7 @@ def _get_ignored_samples(
 
 
 def _load_ignored_samples(
-    file_path: str,
+    fpath: str,
     net_fpath: str,
     data_loader: torch.utils.data.DataLoader,  # type: ignore
     num_samples: int,
@@ -332,23 +332,23 @@ def _load_ignored_samples(
 ) -> set:
     logger = logging.getLogger("stm")
 
-    if not file_path.endswith(".txt"):
-        raise ValueError(f"File path must end with .txt, not {file_path}.")
+    if not fpath.endswith(".txt"):
+        raise ValueError(f"File path must end with .txt, not {fpath}.")
 
-    logger.debug(f"Load ignored samples from {file_path}.")
+    logger.debug(f"Load ignored samples from {fpath}.")
 
     if check_ignored_samples:
         ignored_samples = _get_ignored_samples(net_fpath, data_loader, num_samples, start_index)
-        _record_ignored_samples(file_path, ignored_samples)
+        _record_ignored_samples(fpath, ignored_samples)
 
     else:
-        if not os.path.exists(file_path):
+        if not os.path.exists(fpath):
             logger.debug(
-                f"Ignored samples file {file_path} does not exist. " f"There is no ignored samples."
+                f"Ignored samples file {fpath} does not exist. " f"There is no ignored samples."
             )
             return set()
-        logger.debug(f"Read existing ignored samples file {file_path}.")
-        with open(file_path, "r") as f:
+        logger.debug(f"Read existing ignored samples file {fpath}.")
+        with open(fpath, "r") as f:
             ignored_samples = eval(f.readline())
 
         logger.debug(f"Get ignored samples: {ignored_samples}.")

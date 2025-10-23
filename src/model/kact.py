@@ -57,7 +57,7 @@ class KActLPBoundModel(LPBoundModel):
     def __init__(
         self,
         net_fpath: str,
-        perturbation_args: PerturbationArgs,
+        perturb_args: PerturbArgs,
         act_relax_args: ActRelaxArgs,
         lp_args: LPArgs,
         kact_lp_args: KActLPArgs,
@@ -71,7 +71,7 @@ class KActLPBoundModel(LPBoundModel):
         network with k-activation constraints.
 
         :param net_fpath: The path of the neural network file.
-        :param perturbation_args: The perturbation arguments.
+        :param perturb_args: The perturbation arguments.
         :param act_relax_args: The activation relaxation arguments.
         :param multi_act_relax_args: The multi-neuron activation relaxation arguments.
         :param ada_act_relax_args: The adaptive constraints arguments.
@@ -84,7 +84,7 @@ class KActLPBoundModel(LPBoundModel):
         LPBoundModel.__init__(
             self,
             net_fpath,
-            perturbation_args,
+            perturb_args,
             act_relax_args,
             lp_args=lp_args,
             dtype=dtype,
@@ -214,8 +214,6 @@ class KActLPBoundModel(LPBoundModel):
     def build_kact_lp(self):
         """
         Build the multi-neuron constraints for the linear program.
-
-
         """
         logger = logging.getLogger("stm")
         logger.info("Start building KAct constraints.")

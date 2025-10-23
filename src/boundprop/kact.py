@@ -241,9 +241,9 @@ def BS_grouped_constrs(
     device: torch.device,
 ) -> Tensor:
     """
-    This function calculates the input constraints of the grouped neurons by backward inequality propagation.
+    This function calculates the input constraints of the grouped neurons by backward substitution.
     The input constraints are the constraints of the input variables that are related to the grouped neurons.
-    The input constraints are calculated by the backward inequality propagation.
+    The input constraints are calculated by the backward substitution.
 
     :param input_bound: The bound of the input variables.
     :param pre_module: The previous linear module and it should be
