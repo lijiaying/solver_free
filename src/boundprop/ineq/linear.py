@@ -124,7 +124,7 @@ class BasicIneqNode(BasicNode, ABC):
             return LConstrBound(L=constr)
         return LConstrBound(L=constr, U=constr)
 
-    def back_substitute_to_input(self, constr_bound: LConstrBound) -> LConstrBound:
+    def BS_to_input(self, constr_bound: LConstrBound) -> LConstrBound:
         """
         Back-substitute the linear relaxation of the layer to the input layer and
         obtain a linear relaxation represented by input variables.
@@ -133,10 +133,10 @@ class BasicIneqNode(BasicNode, ABC):
 
         :return: The linear relaxation represented by input variables.
         """
-        return back_substitute_to_input(self, constr_bound)
+        return BS_to_input(self, constr_bound)
 
     @abstractmethod
-    def back_substitute_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def BS_once(self, constr_bound: LConstrBound) -> LConstrBound:
         """
         Back-substitute the linear relaxations to the previous layers.
 
@@ -281,7 +281,7 @@ class InputIneqNode(BasicIneqNode, InputNode):
             f"Because the input do not need a forward pass."
         )
 
-    def back_substitute_to_input(self, constr_bound: LConstrBound) -> LConstrBound:
+    def BS_to_input(self, constr_bound: LConstrBound) -> LConstrBound:
         """
         .. attention::
             This method is a placeholder. The input node does not need back
@@ -292,7 +292,7 @@ class InputIneqNode(BasicIneqNode, InputNode):
             f"Because the input do not need back substitution."
         )
 
-    def back_substitute_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def BS_once(self, constr_bound: LConstrBound) -> LConstrBound:
         """
         Back-substitute the linear relaxations to the previous layers.
 
@@ -358,7 +358,7 @@ class LinearIneqNode(BasicIneqNode, LinearNode, ABC):
         :return: The scalar bounds of the neurons in the layer, and the minimum input
         """
         bound, minimum_input = self.cal_bounds(
-            self.back_substitute_to_input(self.init_constr_bound(only_lower_bound)),
+            self.BS_to_input(self.init_constr_bound(only_lower_bound)),
             input_bound,
             return_minimum_point=return_minimum_input,
         )
@@ -396,7 +396,7 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
         LinearIneqNode.__init__(self, *args, weight, bias)  # noqa
         GemmNode.__init__(self, *args, weight, bias)  # noqa
 
-    def back_substitute_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def BS_once(self, constr_bound: LConstrBound) -> LConstrBound:
         """
         Back-substitute the linear relaxations to the previous layers.
 
@@ -412,7 +412,7 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
 
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_substitute_gemm(
+                *BS_gemm(
                     constr_bound.L.A.reshape(-1, *self.output_size),
                     constr_bound.L.b,
                     *args,
@@ -423,7 +423,7 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
             return result_constr_bound
 
         result_constr_bound.U = LConstr(
-            *back_substitute_gemm(
+            *BS_gemm(
                 constr_bound.U.A.reshape(-1, *self.output_size), constr_bound.U.b, *args
             )
         )
@@ -477,7 +477,7 @@ class Conv2DIneqNode(LinearIneqNode, Conv2DNode):
         LinearIneqNode.__init__(self, *args)
         Conv2DNode.__init__(self, *args, **kwargs)
 
-    def back_substitute_once(
+    def BS_once(
         self,
         constr_bound: LConstrBound,
     ) -> LConstrBound:
@@ -504,7 +504,7 @@ class Conv2DIneqNode(LinearIneqNode, Conv2DNode):
 
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_substitute_conv2d(
+                *BS_conv2d(
                     constr_bound.L.A.reshape(-1, *self.output_size),
                     constr_bound.L.b,
                     *args,
@@ -515,7 +515,7 @@ class Conv2DIneqNode(LinearIneqNode, Conv2DNode):
             return result_constr_bound
 
         result_constr_bound.U = LConstr(
-            *back_substitute_conv2d(
+            *BS_conv2d(
                 constr_bound.U.A.reshape(-1, *self.output_size), constr_bound.U.b, *args
             )
         )
@@ -591,7 +591,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
             # If the next layer is MaxPool layer, we need to calculate the scalar bounds
             # of the neurons in the current layer.
             bound, minimum_input = self.cal_bounds(
-                self.back_substitute_to_input(self.init_constr_bound(only_lower_bound)),
+                self.BS_to_input(self.init_constr_bound(only_lower_bound)),
                 input_bound,
                 return_minimum_point=return_minimum_input,
             )
@@ -619,12 +619,12 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
 
         return old_bound
 
-    def back_substitute_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def BS_once(self, constr_bound: LConstrBound) -> LConstrBound:
         relaxation = self.all_relaxations[self.name]
 
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_substitute_nonlinear(
+                *BS_nonlinear(
                     constr_bound.L.A.reshape(-1, math.prod(self.output_size)),
                     constr_bound.L.b,
                     relaxation.L.A,
@@ -639,7 +639,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
             return result_constr_bound
 
         result_constr_bound.U = LConstr(
-            *back_substitute_nonlinear(
+            *BS_nonlinear(
                 constr_bound.U.A.reshape(-1, math.prod(self.output_size)),
                 constr_bound.U.b,
                 relaxation.U.A,
@@ -717,11 +717,11 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         return cal_relaxation_relu(l, u, mode)
 
-    def back_substitute_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def BS_once(self, constr_bound: LConstrBound) -> LConstrBound:
         relaxation = self.all_relaxations[self.name]
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_substitute_relu(
+                *BS_relu(
                     constr_bound.L.A.reshape(-1, math.prod(self.output_size)),
                     constr_bound.L.b,
                     relaxation.L.A,
@@ -736,7 +736,7 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
         # NOTE: Here, it is different from other functions. Pay attension to the order
         # of the arguments.
         result_constr_bound.U = LConstr(
-            *back_substitute_relu(
+            *BS_relu(
                 constr_bound.U.A.reshape(-1, math.prod(self.output_size)),
                 constr_bound.U.b,
                 relaxation.L.A,
@@ -865,7 +865,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         return cal_relaxation_maxpool2d(l, u, mode, l_max, l_argmax, mask)
 
-    def back_substitute_once(
+    def BS_once(
         self,
         constr_bound: LConstrBound,
     ) -> LConstrBound:
@@ -881,7 +881,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
 
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_substitute_maxpool2d(
+                *BS_maxpool2d(
                     constr_bound.L.A.reshape((-1, self._co * self._nk)),
                     constr_bound.L.b,
                     relaxation.L.A,
@@ -897,7 +897,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
             return result_constr_bound
 
         result_constr_bound.U = LConstr(
-            *back_substitute_maxpool2d(
+            *BS_maxpool2d(
                 constr_bound.U.A.reshape((-1, self._co * self._nk)),
                 constr_bound.U.b,
                 relaxation.U.A,
@@ -954,7 +954,7 @@ class ResidualAddIneqNode(LinearIneqNode, ResidualAddNode):
         LinearIneqNode.__init__(self, *args, weight)  # noqa
         ResidualAddNode.__init__(self, *args)
 
-    def back_substitute_once(
+    def BS_once(
         self,
         constr_bound: LConstrBound,
     ) -> LConstrBound:

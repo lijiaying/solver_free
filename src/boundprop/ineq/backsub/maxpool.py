@@ -1,5 +1,5 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["back_substitute_maxpool2d"]
+__all__ = ["BS_maxpool2d"]
 
 import torch
 import torch.nn.functional as F
@@ -113,7 +113,7 @@ _BS_maxpool_no_bias_naive_fp64 = torch.jit.trace(
 )
 
 
-def back_substitute_maxpool2d(
+def BS_maxpool2d(
     A: Tensor,
     b: Tensor,
     s1: Tensor,

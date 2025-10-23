@@ -1,11 +1,11 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["back_substitute_conv2d"]
+__all__ = ["BS_conv2d"]
 
 import torch.nn.functional as F
 from torch import Tensor
 
 
-def back_substitute_conv2d(
+def BS_conv2d(
     A: Tensor,
     b: Tensor | None,
     weight: Tensor,

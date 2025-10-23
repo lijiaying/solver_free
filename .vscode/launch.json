@@ -1,0 +1,131 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "Deeppoly Example",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/verify/",
+            "program": "exp.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--net_fpath", "../nets/deeppoly.onnx",
+                "--epsilon", "1",
+                "--bp", "stm",
+                "--opt", "mnlp"
+            ]
+        },
+    ]
+}
+
+
+// {
+//     // Use IntelliSense to learn about possible attributes.
+//     // Hover to view descriptions of existing attributes.
+//     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "name": "QTC modelB",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/",
+//             "program": "${workspaceFolder}/qtc",
+//             "preLaunchTask": "Delete Artifacts",
+//             "console": "integratedTerminal",
+//             "args": [
+//                 "modelb"
+//             ]
+//         },
+//         {
+//             "name": "CSP unittest",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/quartz/test/qconfigsolver/regression/",
+//             "program": "test_qsolver.py",
+//             "console": "integratedTerminal",
+//             "justMyCode": false
+//         },
+//         {
+//             "name": "OVMV unittest",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/quartz/test/ovmv/regression/",
+//             "program": "test_visualizer.py",
+//             "console": "integratedTerminal",
+//             "justMyCode": false
+//         },    
+//         {
+//             "name": "OVQ test_ron_optimization",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/quartz/test/ovq/harness/",
+//             "program": "test_ron_optimization.py",
+//             "console": "integratedTerminal",
+//             "args": [
+//                 "-m",  "1"
+//             ]
+//         },
+//         {
+//             "name": "modelB serialize-desearialize",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/quartz/ModelB/",
+//             "program": "${workspaceFolder}/quartz/ModelB/test.py",
+//             "console": "integratedTerminal"
+//         },
+//         {
+//             "name": "[OVQ Model B] RunThrough",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/quartz/test/ovq/harness/",
+//             "program": "${workspaceFolder}/quartz/test/ovq/harness/test_ron_optimization.py",
+//             "preLaunchTask": "Delete Artifacts",
+//             "console": "integratedTerminal",
+//             "args": [
+//                 "-m",  "1", 
+//                 "-n", "rnpu", "-al"
+//             ]
+//         },
+//         {
+//             "name": "SMA test_read_write",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/quartz/test/sma/",
+//             "program": "${workspaceFolder}/quartz/test/sma/test_read_write.py",
+//             "console": "integratedTerminal"
+//         },
+//         {
+//             "name": "SMA test_export_load",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/quartz/test/sma/",
+//             "program": "${workspaceFolder}/quartz/test/sma/test_export_load.py",
+//             "console": "integratedTerminal"
+//         },
+//         {
+//             "name": "MobileNetV2 ovm sim",
+//             "type": "debugpy",
+//             "request": "launch",
+//             "cwd": "${workspaceFolder}/quartz/test/ovq/harness",
+//             "program": "${workspaceFolder}/quartz/test/ovq/harness/test_ron_optimization.py",
+//             "preLaunchTask": "Delete Artifacts",
+//             "console": "integratedTerminal",
+//             "args": [
+//                 "-m",  "2", "-al", "-std", "-s", "-time"
+//             ]
+//         }
+//     ]
+// }

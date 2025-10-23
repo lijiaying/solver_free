@@ -1,5 +1,5 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["back_substitute_nonlinear"]
+__all__ = ["BS_nonlinear"]
 
 import torch
 from torch import Tensor
@@ -110,7 +110,7 @@ _BS_nonlinear_no_bias_1d_fp64 = torch.jit.trace(
 )
 
 
-def back_substitute_nonlinear(
+def BS_nonlinear(
     A: Tensor, b: Tensor | None, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor | None]:
     """

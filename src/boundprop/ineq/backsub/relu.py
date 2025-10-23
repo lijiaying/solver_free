@@ -4,7 +4,7 @@ the ReLU activation function.
 """
 
 __docformat__ = ["restructuredtext"]
-__all__ = ["back_substitute_relu"]
+__all__ = ["BS_relu"]
 
 import torch
 from torch import Tensor
@@ -136,7 +136,7 @@ _BS_relu_no_bias_1d_upper_fp64 = torch.jit.trace(
 )
 
 
-def back_substitute_relu(
+def BS_relu(
     A: Tensor,
     b: Tensor | None,
     sl: Tensor,
