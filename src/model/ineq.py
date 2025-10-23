@@ -83,7 +83,7 @@ class IneqBoundModel(BasicBoundModel[T]):
         :return: The scalar bound of the output and the minimum input point if enabled.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug(f"Start bound propagation.")
 
         time_start = time.perf_counter()
@@ -116,7 +116,7 @@ class IneqBoundModel(BasicBoundModel[T]):
             output bound.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         bound = minimum_input = None
 
@@ -281,7 +281,7 @@ class IneqBoundModel(BasicBoundModel[T]):
         Clear the cached data in the current sample to verify the next sample.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug("Clear cache of bound propagation.")
 
         self.bp_shared_data.clear()

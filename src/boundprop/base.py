@@ -434,7 +434,7 @@ class NonLinearNode(BasicNode, ABC):
         BasicNode.__init__(self, name, input_names, input_size, shared_data)
 
         self.act_relax_args = act_relax_args
-        self.act_type: ActivationType
+        self.act_type: ActType
 
         self._cached_nontrivial_mask: Tensor | None = None
 
@@ -550,7 +550,7 @@ class ReLUNode(NonLinearNode, ABC):
         )
         self._output_size = self._cal_output_size()
         self._no = math.prod(self._output_size)
-        self.act_type = ActivationType.RELU
+        self.act_type = ActType.RELU
 
     @staticmethod
     def _get_nontrivial_neuron_mask(
@@ -598,7 +598,7 @@ class SigmoidNode(NonLinearNode, ABC):
         NonLinearNode.__init__(self, name, input_names, input_size, shared_data, act_relax_args)
         self._output_size = self._cal_output_size()
         self._no = math.prod(self._output_size)
-        self.act_type = ActivationType.SIGMOID
+        self.act_type = ActType.SIGMOID
 
     @staticmethod
     def _get_nontrivial_neuron_mask(
@@ -645,7 +645,7 @@ class TanhNode(NonLinearNode, ABC):
         NonLinearNode.__init__(self, name, input_names, input_size, shared_data, act_relax_args)
         self._output_size = self._cal_output_size()
         self._no = math.prod(self._output_size)
-        self.act_type = ActivationType.TANH
+        self.act_type = ActType.TANH
 
     @staticmethod
     def _get_nontrivial_neuron_mask(
@@ -728,7 +728,7 @@ class MaxPool2DNode(NonLinearNode, ABC):
         self._nk = math.prod(self.output_size[1:])  # number of kernels
         self._nks = math.prod(self.kernel_size)  # number of kernel elements
 
-        self.act_type = ActivationType.MAXPOOL2D
+        self.act_type = ActType.MAXPOOL2D
 
         # Cache
         self._cached_l: Tensor | None = None  # unfolded lower bound

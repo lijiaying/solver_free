@@ -159,10 +159,10 @@ class ActRelaxArgs:
     :exception ValueError: If the `tanh_limit_bound` is not positive.
     """
 
-    mode: RelaxMode = RelaxMode.ROVER_SN
+    mode: RelaxMode = RelaxMode.STM_SN
     """
     The mode of the activation relaxation. The default value is 
-    `RelaxMode.ROVER_SN`.
+    `RelaxMode.STM_SN`.
     
     ..seealso::
         Refer to the `RelaxMode` for the details

@@ -126,8 +126,11 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         :param output_weight: The output weight matrix.
         :param output_bias: The output bias.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
+        print('**** Building LP module ****')
+        print('output_weight:', output_weight)
+        print('output_bias:', output_bias)
         super().build(output_weight, output_bias)
 
         logger.debug("Start building LP module.")
@@ -238,7 +241,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         logger.info(f"Finish building LP module in {time.perf_counter() - time_start:.4f}s.")
 
     def build_lp(self):
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         logger.debug("Start building LP model.")
         time_start = time.perf_counter()
@@ -368,7 +371,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
             Currently, this method only supports local robustness verification.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         last_module = self.submodules[self.output_name]
         if not isinstance(last_module, GemmNode):
@@ -400,7 +403,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
             means the property is verified, and False means the property is not
             verified.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         num_labels = len(self.output_vars)
         if adv_labels is None:
@@ -455,7 +458,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
               objective value and the solution will be None.
             - If return_solution is False, the solution will be None.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.info("Start solving LP model.")
         start = time.perf_counter()
 
@@ -481,7 +484,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
     def _process_model_status(
         self, return_solution: bool = False
     ) -> tuple[bool, float | None, np.ndarray | None]:
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         logger.info(
             f"Result status: {self.model.Status}-" f"{GRB_STATUS_MAP.get(self.model.status)}."
@@ -576,7 +579,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         """
         super().clear()
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug("Clear cache of linear programming model.")
 
         self.lp_shared_data.clear()

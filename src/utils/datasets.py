@@ -13,19 +13,41 @@ import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from torchvision.datasets import CIFAR10, EMNIST, FashionMNIST, MNIST
+from torchvision.datasets import CIFAR10, MNIST
+
+
+class MyDataset(torch.utils.data.Dataset):
+    def __init__(self, root, train=True, transform=None, download=False):
+        # mimic torchvision.datasets.MNIST interface
+        data = np.load(root + ('/train_data.npy' if train else '/test_data.npy'))
+        labels = np.load(root + ('/train_labels.npy' if train else '/test_labels.npy'))
+        self.images = data
+        self.labels = labels
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        img, label = self.images[idx], int(self.labels[idx])
+        img = torch.tensor(img, dtype=torch.float32)
+        # if self.transform:
+        #     img = self.transform(img)
+        return img, label
+
 
 
 def _load_eran_dataset(
     dataset: str, dir_path: str = None, max_samples_num: int = 1000
 ) -> list[tuple[torch.Tensor, torch.Tensor]]:
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
 
     dir_path = "../../datasets" if dir_path is None else dir_path
     logger.debug(
         f"Load ERAN dataset {dataset} in {dir_path} "
         f"(It has a different index order for image data)."
     )
+    print('**** dir_path:', dir_path)
 
     if dataset == "mnist":
         file_path = dir_path + "/mnist_test_full.csv"
@@ -33,6 +55,9 @@ def _load_eran_dataset(
     elif dataset == "cifar10":
         file_path = dir_path + "/cifar10_test_5000.csv"
         shape = (1, 3, 32, 32)
+    elif dataset == "deeppoly":
+        file_path = dir_path + "/deeppoly_test.csv"
+        shape = (2,)
     else:
         raise NotImplementedError(f"Dataset {dataset} is not supported.")
 
@@ -67,12 +92,13 @@ def load_dataset(
     :return:
     """
 
-    logger = logging.getLogger("rover")
+    # __import__('ipdb').set_trace()
+    logger = logging.getLogger("stm")
 
     # Create the directory if it does not exist.
     os.makedirs(dir_path, exist_ok=True)
 
-    logger.debug(f"Load dataset {dataset} in {dir_path}")
+    print(f"Load dataset {dataset} in {dir_path}")
 
     transform = transforms.Compose([transforms.ToTensor()])
 
@@ -98,6 +124,9 @@ def load_dataset(
         test_set = MNIST(root=dir_path, **kwargs)
     elif dataset == "cifar10":
         test_set = CIFAR10(root=dir_path + "/CIFAR10", **kwargs)
+    elif dataset == 'deeppoly':
+        # __import__('ipdb').set_trace()
+        test_set = MyDataset(root=dir_path + "/DeepPoly", train=False, transform=transform, download=False)
     else:
         raise NotImplementedError(f"Dataset {dataset} is not supported.")
 

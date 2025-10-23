@@ -92,7 +92,7 @@ class ScalarBound:
 
     def intersect(self, other: "ScalarBound") -> "ScalarBound":
         """This function computes the intersection of two scalar bounds as intervals."""
-        # logger = logging.getLogger("rover")
+        # logger = logging.getLogger("stm")
 
         l = torch.maximum(self.l, other.l)
         # logger.debug(

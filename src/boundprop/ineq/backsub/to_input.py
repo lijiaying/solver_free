@@ -25,7 +25,7 @@ def back_substitute_to_input(
 
     :return: The linear relaxation represented by input variables.
     """
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     logger.debug(f"Back-substitute to input for {self}.")
     start = time.perf_counter()
 
@@ -83,7 +83,7 @@ def back_substitute_once_with_update_bound(
     in_residual_block: bool,
     store_updated_bounds: bool = True,
 ) -> LConstrBound | tuple[LConstrBound, ScalarBound | None]:
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     constr_bound = module.back_substitute_once(constr_bound)
     pre_module = module.pre_nodes[0] if module.pre_nodes else None
     bound = None
@@ -138,7 +138,7 @@ def back_substitute_residual_second_path(
     tuple[LConstrBound, None, list["BasicIneqNode"]]
     | tuple[LConstrBound, None, list["BasicIneqNode"], ScalarBound | None]
 ):  # noqa  # noqa
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     residual_second_path: list["BasicIneqNode"]  # noqa
     for module_r in residual_second_path:
         constr_bound_r = module_r.back_substitute_once(constr_bound_r)

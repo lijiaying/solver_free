@@ -10,7 +10,7 @@ from src.utils import (
     RelaxMode,
     DEEPPOLY,
     CROWN,
-    ROVER_SN,
+    STM_SN,
     sigmoid,
     dsigmoid,
     tanh,
@@ -108,7 +108,7 @@ def cal_relaxation_sshape(
     ym = f(m)
     km = df(m)
 
-    if mode in {CROWN, ROVER_SN}:
+    if mode in {CROWN, STM_SN}:
         return _cal_relaxation_sshape(l, u, yl, yu, kl, ku, klu, m, ym, km)
 
     raise ValueError(f"Unsupported mode: {mode}")

@@ -57,7 +57,7 @@ def generate_groups_lp(
     pre_l: Tensor,
     pre_u: Tensor,
     mask_mn: Tensor,
-    act_type: ActivationType,
+    act_type: ActType,
     kact_args: KActLPArgs,
     pool_input_ids: Tensor | None = None,
 ) -> Tensor | None:
@@ -67,25 +67,21 @@ def generate_groups_lp(
     :param pre_l: The lower bounds of the pre-activation values.
     :param pre_u: The upper bounds of the pre-activation values.
     :param mask_mn: The mask of the neurons that are not trivial for multi-neuron constraints.
-    :param act_type: The type of the activation function. Refer to
-        :class:`ActivationType` for more details.
-    :param kact_args: The arguments of the k-activation function. Refer to
-        :class:`KActLPArgs` for more details.
+    :param act_type: The type of the activation function. Refer to `ActType` for more details.
+    :param kact_args: The arguments of the k-activation function. Refer to `KActLPArgs` for more details.
     :param pool_input_ids: The indices of the neurons in the max pooling layer.
 
     :return: The grouped indices of the neurons.
     """
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     logger.debug(f"Start generating groups for {act_type}.")
     time_start = time.perf_counter()
 
     # Filter out unnecessary neurons
     if act_type in {
-        ActivationType.RELU,
-        ActivationType.LEAKY_RELU,
-        ActivationType.ELU,
-        ActivationType.SIGMOID,
-        ActivationType.TANH,
+        ActType.RELU,
+        ActType.SIGMOID,
+        ActType.TANH,
     }:
         # Filter out the neurons with big ranges.
         ids = torch.arange(mask_mn.numel(), device=mask_mn.device)[mask_mn]
@@ -102,11 +98,11 @@ def generate_groups_lp(
             kact_args.max_overlap_size,
         )
 
-    elif act_type == ActivationType.MAXPOOL2D:
+    elif act_type == ActType.MAXPOOL2D:
         grouped_ids = pool_input_ids[mask_mn]
 
     else:
-        raise NotImplementedError(f"Activation function {act_type} is not supported.")
+        raise NotImplementedError(f"ActType function {act_type} is not supported.")
 
     grouped_ids = grouped_ids[: kact_args.max_groups].to(pre_l.device)
 
@@ -262,7 +258,7 @@ def back_substitute_grouped_constrs(
 
     :return: The input constraints of the grouped neurons.
     """
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     logger.debug("Start calculating input constraints of convex hulls.")
     time_start = time.time()
 
@@ -336,7 +332,7 @@ def cal_grouped_acthull(
     mask_mn: Tensor,
     grouped_ids: Tensor,
     grouped_input_constrs: Tensor,
-    act_type: ActivationType,
+    act_type: ActType,
     pool_input_l: Tensor | None = None,
     pool_input_u: Tensor | None = None,
     use_multi_threads: bool = True,
@@ -353,7 +349,7 @@ def cal_grouped_acthull(
     :param grouped_ids: The grouped indices of the neurons.
     :param grouped_input_constrs: The input constraints of the grouped neurons.
     :param act_type: The type of the activation function. Refer to
-        :class:`ActivationType` for more details.
+        :class:`ActType` for more details.
         constraint, which is used for bound propagation with multi-neuron constraints.
     :param pool_input_l: The lower bounds of the input neurons in the max pooling layer.
     :param pool_input_u: The upper bounds of the input neurons in the max pooling layer.
@@ -365,7 +361,7 @@ def cal_grouped_acthull(
 
     :return: The function hulls of the grouped neurons.
     """
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     logger.debug("Start calculating convex hulls.")
     time_start = time.perf_counter()
 
@@ -386,7 +382,7 @@ def cal_grouped_acthull(
 
     if return_trivial_pool_idxs:
         trivial_pool_idxs = None
-        if act_type == ActivationType.MAXPOOL2D:
+        if act_type == ActType.MAXPOOL2D:
             grouped_constrs, trivial_pool_idxs = _collect_trivial_pool_idxs(
                 grouped_constrs, mask_mn
             )
@@ -395,23 +391,23 @@ def cal_grouped_acthull(
     return grouped_constrs
 
 
-def _get_func_hull(act_type: ActivationType) -> ActHull:
+def _get_func_hull(act_type: ActType) -> ActHull:
     hull_classes = {
-        ActivationType.RELU: ReLUHull,
-        ActivationType.SIGMOID: SigmoidHull,
-        ActivationType.TANH: TanhHull,
-        ActivationType.MAXPOOL2D: MaxPoolHullDLP,
+        ActType.RELU: ReLUHull,
+        ActType.SIGMOID: SigmoidHull,
+        ActType.TANH: TanhHull,
+        ActType.MAXPOOL2D: MaxPoolHullDLP,
     }
 
     if act_type not in hull_classes:
-        raise NotImplementedError(f"Activation function {act_type} is not supported.")
+        raise NotImplementedError(f"ActType function {act_type} is not supported.")
 
     HullClass = hull_classes[act_type]
     return HullClass()
 
 
 def _group_input_bounds(
-    act_type: ActivationType,
+    act_type: ActType,
     pre_l: Tensor,
     pre_u: Tensor,
     mask_mn: Tensor,
@@ -420,7 +416,7 @@ def _group_input_bounds(
     pool_input_u: Tensor | None = None,
 ) -> tuple[list[Tensor], list[Tensor]]:
     # Group lower bounds and upper bounds by the ids_grouped.
-    if act_type != ActivationType.MAXPOOL2D:
+    if act_type != ActType.MAXPOOL2D:
         grouped_ids = grouped_ids.cpu().numpy()
         pre_l = pre_l.cpu().numpy()
         pre_u = pre_u.cpu().numpy()
@@ -471,7 +467,7 @@ def _collect_trivial_pool_idxs(
     Collect the trivial pool detected by the function hull algorithm.
     """
 
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
 
     # Find the next non-None element to get the shape of the constraints.
     pool_mask_idxs = torch.arange(len(mask_mn), device=mask_mn.device)[mask_mn]
@@ -503,7 +499,7 @@ def back_substitute_to_input_kact(
 
     :return: The linear relaxation represented by input variables.
     """
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     logger.debug(f"Back-substitute to input for {self}.")
     start = time.perf_counter()
 

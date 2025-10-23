@@ -2,7 +2,7 @@
 This module provides the logger builder for the experiment.
 
 .. tip::
-    There will be a global logger named "rover" for the experiment.
+    There will be a global logger named "stm" for the experiment.
 """
 
 __docformat__ = "restructuredtext"

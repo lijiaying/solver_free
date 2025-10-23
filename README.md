@@ -1,6 +1,6 @@
 # X
 
-This is an artifact for the tool called **X**, which over-approximates the function hulls of various activation functions (including leaky ReLU, ReLU, sigmoid, tanh, and maxpool).
+This is an artifact for the tool called **X**, which over-approximates the function hulls of various activation functions (including ReLU, sigmoid, tanh, and maxpool).
 
 
 The expected outputs of `bash test_X.sh` is to verify a small instance of local robustness verification, and it prints the instance to verify is `UNKNOWN`, which means our sound approach cannot decide this instance is verified or not. Another possible result is `SAT`, which means the instance is verified and the local robustness is satisfied. If you see the output like this, it means the installation is successful and the tool works well.
@@ -69,8 +69,6 @@ You need to first download the benchmark ONNX models from [Google Drive link](ht
 - `mnist_sshape.sh`: for S-shape functions (sigmoid, tanh) on the MNIST dataset (Table 4 in the paper)
 - `cifar10_sshape.sh`: for S-shape functions (sigmoid, tanh) on the CIFAR-10 dataset (Table 4 in the paper)
 - `maxpool.sh`: for maxpool on the MNIST and CIFAR-10 datasets (Table 4 in the paper)
-- `mnist_relulike.sh`: for ReLU-like functions (elu, leaky ReLU) on the MNIST dataset (Table 5 in the paper)
-- `cifar10_relulike.sh`: for ReLU-like functions (elu, leaky ReLU) on the CIFAR-10 dataset (Table 5 in the paper)
 - `resnet.sh`: for the ResNet benchmark on the CIFAR-10 dataset (Table 6 in the paper)
 
 Run the above bash files, and you can collect the log files in the `evaluation_verification/logs` folder.

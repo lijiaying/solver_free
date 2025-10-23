@@ -13,55 +13,20 @@ import torch
 
 from src.utils import *
 
+repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @dataclass
 class Arguments:
-    """
-    This is the data class for the arguments of the experiment.
-    """
-
     net_fpath: str
-    """The path of the network file."""
-
     dataset: str
-    """The dataset name."""
-
     epsilon: float
-    """The perturbation radius."""
-
     bound_propagation_method: BoundPropagate = BoundPropagate.INEQUALITY
-    """
-    The bound propagation method.
-    
-    Refer to :class:`BoundPropagate` for more details.
-    """
-
-    act_relax_mode: RelaxMode = RelaxMode.ROVER_SN
-    """
-    The activation relaxation mode.
-    
-    Refer to :class:`RelaxMode` for more details.
-    """
-
+    act_relax_mode: RelaxMode = RelaxMode.STM_SN
     opt_method: OptimizationMethod | None = None
-    """
-    The optimization method.
-    
-    Refer to :class:`OptimizationMethod` for more details.
-    """
-
     num_labels: int | None = None
-    """The number of labels."""
 
     check_ignored_samples: bool = True
-    """
-    Whether to check ignored samples, which are samples that are not classified 
-    correctly by the given model.
-    """
-
     num_samples: int = 1
-    """The number of samples to verify."""
-
     first_sample_index: int = 0
     """The index of the first sample to verify."""
 
@@ -123,8 +88,8 @@ class Arguments:
         if not self.net_fpath.endswith(".onnx"):
             raise ValueError(f"Network file {self.net_fpath} is not an ONNX file.")
 
-        if self.dataset not in {"mnist", "cifar10"}:
-            raise ValueError(f"Dataset {self.dataset} is not supported.")
+        # if self.dataset not in {"mnist", "cifar10", "custom"}:
+        #     raise ValueError(f"Dataset {self.dataset} is not supported.")
 
         if self.epsilon < 0:
             raise ValueError(f"Perturbation radius {self.epsilon} should be " f"non-negative.")
@@ -144,8 +109,17 @@ class Arguments:
         if self.input_limited_range[0] > self.input_limited_range[1]:
             raise ValueError(f"Input limited range {self.input_limited_range} is invalid.")
 
-        if self.dataset in {"mnist", "cifar10"}:
+        # if self.dataset in {"mnist", "cifar10"}:
+        #     self.num_labels = 10
+        net_lower = self.net_fpath.lower()
+        if self.dataset == 'deeppoly':
+            self.num_labels = 2
+        elif self.dataset == 'mnist':
             self.num_labels = 10
+        elif self.dataset == 'cifar10':
+            self.num_labels = 10
+        else:
+            assert False, f'net_fpath {self.net_fpath} not recognized for dataset setting.'
 
         if self.net_dir_path is None:
             self.net_dir_path = os.path.dirname(self.net_fpath)
@@ -154,10 +128,13 @@ class Arguments:
             self.net_fname = os.path.basename(self.net_fpath).split(".")[0]
 
         # If the log file is not None, check the dir path.
-        if self.log_file is not None:
-            log_dir_path = os.path.dirname(self.log_file)
-            if not os.path.exists(log_dir_path):
-                os.makedirs(log_dir_path)
+        if self.log_file is None:
+            self.log_file = os.path.join(repo_dir, "logs", f"{self.net_fname}_{self.epsilon}_{self.bound_propagation_method}_{self.act_relax_mode}.log")
+        print('log file:', self.log_file)
+        
+        log_dir_path = os.path.dirname(self.log_file)
+        if not os.path.exists(log_dir_path):
+            os.makedirs(log_dir_path)    
 
         _build_logger(self.log_file, self.log_level)
         self._set_means_stds()
@@ -169,7 +146,7 @@ class Arguments:
 
     def _set_args(self):
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         # -------- Set perturbation arguments --------
 
         dtype = torch.float64 if self.dtype == "float64" else torch.float32
@@ -217,6 +194,11 @@ class Arguments:
             elif self.dataset == "cifar10":
                 self.means = torch.tensor([[[0.4914]], [[0.4822]], [[0.4465]]])
                 self.stds = torch.tensor([[[0.2023]], [[0.1994]], [[0.201]]])
+            elif self.dataset == "deeppoly":
+                self.means = torch.tensor([0.0])
+                self.stds = torch.tensor([1.0])
+                self.normalize = False
+                return
             else:
                 raise ValueError(f"Dataset {self.dataset} is not supported.")
 
@@ -227,7 +209,7 @@ def _build_logger(log_name: str | None, log_level=logging.INFO):
 
     logger = build_logger(
         LoggerArgs(log_level=log_level, log_file=log_name, log_console=True),
-        name="rover",
+        name="stm",
     )
 
     logger.debug("Setup logger.")

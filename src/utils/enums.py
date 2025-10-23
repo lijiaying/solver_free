@@ -6,13 +6,13 @@ __docformat__ = "restructuredtext"
 __all__ = [
     "BoundPropagate",
     "OptimizationMethod",
-    "ActivationType",
+    "ActType",
     "RelaxMode",
     "ConstrTemplate",
     "VerificationStatus",
     "CROWN",
     "DEEPPOLY",
-    "ROVER_SN",
+    "STM_SN",
 ]
 
 from enum import Enum
@@ -41,7 +41,7 @@ class OptimizationMethod(Enum):
     linear programming problem with multi-neuron constraints."""
 
 
-class ActivationType(Enum):
+class ActType(Enum):
     """
     The activation function type.
     """
@@ -55,11 +55,11 @@ class ActivationType(Enum):
     TANH = 2
     """The Tanh activation function."""
 
-    ELU = 3
-    """The ELU activation function."""
+    # ELU = 3
+    # """The ELU activation function."""
 
-    LEAKY_RELU = 4
-    """The Leaky ReLU activation function."""
+    # LEAKY_RELU = 4
+    # """The Leaky ReLU activation function."""
 
     MAXPOOL2D = 6
     """The MaxPool2D activation function."""
@@ -70,7 +70,7 @@ class RelaxMode(Enum):
     The activation relaxation mode.
     """
 
-    ROVER_SN = 0
+    STM_SN = 0
     """Single-Neuron Relaxation."""
 
     CROWN = 7
@@ -82,7 +82,7 @@ class RelaxMode(Enum):
 
 CROWN = RelaxMode.CROWN
 DEEPPOLY = RelaxMode.DEEPPOLY
-ROVER_SN = RelaxMode.ROVER_SN
+STM_SN = RelaxMode.STM_SN
 
 
 class ConstrTemplate(Enum):

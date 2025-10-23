@@ -35,7 +35,7 @@ class ModelFactory:
 
         self._ignored_samples = None
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.info(f"Arguments:\n{arguments}")
 
         _init_calculation_settings(arguments.random_seed, arguments.device, arguments.dtype)
@@ -63,7 +63,7 @@ class ModelFactory:
              `../.temp/ignored_samples`.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         args = self.arguments
 
         logger.debug("Prepare dataset.")
@@ -137,7 +137,7 @@ class ModelFactory:
         Verify the model with the given dataset and arguments.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         args = self.arguments
         dtype = self.dtype
@@ -234,7 +234,7 @@ class ModelFactory:
 
 def _init_calculation_settings(random_seed: int, device: str, dtype: str):
 
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
 
     logger.debug(f"Set print options.")
     torch.set_printoptions(precision=4, sci_mode=False, linewidth=200, profile="full")
@@ -269,7 +269,7 @@ def _init_calculation_settings(random_seed: int, device: str, dtype: str):
 
 
 def _record_ignored_samples(file_path: str, ignored_samples: set):
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     logger.debug(f"Write ignored samples in {file_path}.")
 
     if not file_path.endswith(".txt"):
@@ -287,7 +287,7 @@ def _get_ignored_samples(
     num_samples: int,
     start_index: int,
 ) -> set:
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     logger.debug("Get ignored samples by original model.")
 
     sess = ort.InferenceSession(net_fpath)
@@ -301,6 +301,10 @@ def _get_ignored_samples(
             continue
         if num_samples <= 0:
             break
+
+        print(f'-> checking sample', i, flush=True)
+        print('    sample:', sample)
+        print('    label:', label)
 
         output = sess.run(
             [output_name],
@@ -326,7 +330,7 @@ def _load_ignored_samples(
     start_index: int,
     check_ignored_samples: bool = True,
 ) -> set:
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
 
     if not file_path.endswith(".txt"):
         raise ValueError(f"File path must end with .txt, not {file_path}.")
@@ -353,7 +357,7 @@ def _load_ignored_samples(
 
 
 def _skip_sample(i: int, ignored_samples: set, start_index: int):
-    logger = logging.getLogger("rover")
+    logger = logging.getLogger("stm")
     skip = (i in ignored_samples) or (i < start_index)
     if skip:
         logger.debug(f"Sample {i} is skipped.")

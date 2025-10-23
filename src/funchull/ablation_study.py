@@ -4,8 +4,7 @@ __all__ = [
     "SigmoidHullB",
     "TanhHullA",
     "TanhHullB",
-    # "ELUHullA",
-    # "MaxPoolDLPHullA",
+    "MaxPoolDLPHullA",
 ]
 
 import numpy as np
@@ -13,7 +12,6 @@ from numpy import ndarray
 
 from . import SShapeHull  # , MaxPoolHullDLP
 
-# from .acthull import ELUHull
 from ..utils import *
 
 _TOL = 1e-4
@@ -489,37 +487,37 @@ class TanhHullB(SShapeHullB):
         return dtanh(x)
 
 
-# class MaxPoolDLPHullA(MaxPoolHullDLP):
-#     @classmethod
-#     def _construct_dlp(cls, v: ndarray, nt_idxs: list[int]) -> ndarray:
-#         # When constructing the DLP function as the upper bound of the MaxPool
-#         # function, we only need to consider the nontrivial coordinates.
+class MaxPoolDLPHullA(MaxPoolHullDLP):
+    @classmethod
+    def _construct_dlp(cls, v: ndarray, nt_idxs: list[int]) -> ndarray:
+        # When constructing the DLP function as the upper bound of the MaxPool
+        # function, we only need to consider the nontrivial coordinates.
 
-#         d = v.shape[1] - 1
+        d = v.shape[1] - 1
 
-#         # Get the lower and upper bounds of the non-trivial indices based on vertices.
-#         l = np.min(v[:, 1:], axis=0)
-#         u = np.max(v[:, 1:], axis=0)
+        # Get the lower and upper bounds of the non-trivial indices based on vertices.
+        l = np.min(v[:, 1:], axis=0)
+        u = np.max(v[:, 1:], axis=0)
 
-#         r = u - l
-#         # Get the indices of r in descending order.
-#         ordered_r_idx = np.argsort(r)[::-1]
+        r = u - l
+        # Get the indices of r in descending order.
+        ordered_r_idx = np.argsort(r)[::-1]
 
-#         # Remove the trivial cases.
-#         ordered_r_idx = np.asarray([idx for idx in ordered_r_idx if idx in nt_idxs])
+        # Remove the trivial cases.
+        ordered_r_idx = np.asarray([idx for idx in ordered_r_idx if idx in nt_idxs])
 
-#         # Group ordered_r_idx into two groups:
-#         # the first group contains the odd indices of ordered_r_idx,
-#         # the second group contains the even indices of ordered_r_idx.
-#         n = len(ordered_r_idx)
-#         r_idx1 = ordered_r_idx[: n // 2]  # For ablation study
-#         r_idx2 = ordered_r_idx[n // 2 :]  # For ablation study
+        # Group ordered_r_idx into two groups:
+        # the first group contains the odd indices of ordered_r_idx,
+        # the second group contains the even indices of ordered_r_idx.
+        n = len(ordered_r_idx)
+        r_idx1 = ordered_r_idx[: n // 2]  # For ablation study
+        r_idx2 = ordered_r_idx[n // 2 :]  # For ablation study
 
-#         dlp_lines = np.zeros((2, 2 + d), dtype=np.float64)
-#         # y >= \sum x_{r_idx_odd}
-#         # y >= \sum x_{r_idx_even}
-#         dlp_lines[:, -1] = 1.0
-#         dlp_lines[0, r_idx1 + 1] = -1.0
-#         dlp_lines[1, r_idx2 + 1] = -1.0
+        dlp_lines = np.zeros((2, 2 + d), dtype=np.float64)
+        # y >= \sum x_{r_idx_odd}
+        # y >= \sum x_{r_idx_even}
+        dlp_lines[:, -1] = 1.0
+        dlp_lines[0, r_idx1 + 1] = -1.0
+        dlp_lines[1, r_idx2 + 1] = -1.0
 
-#         return dlp_lines
+        return dlp_lines

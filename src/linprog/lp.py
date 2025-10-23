@@ -117,7 +117,7 @@ class BasicLPNode(ABC):
 
         :return: A list of gurobi variables.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         if bound is not None:
             lower_bounds = bound.l.flatten().tolist()
@@ -408,7 +408,7 @@ class GemmLPNode(LinearLPNode):
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         constrs = []
         for i in range(len(gvars)):
@@ -525,7 +525,7 @@ class Conv2DLPNode(LinearLPNode):
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         n_in = int(math.prod(self.input_size))
         stride = self.stride
@@ -661,7 +661,7 @@ class NonLinearLPNode(BasicLPNode, ABC):
         if pre_bound is None:
             raise ValueError("pre_bounds are not provided.")
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         pre_lower_bounds = pre_bound.l.flatten().tolist()
         pre_upper_bounds = pre_bound.u.flatten().tolist()
@@ -724,7 +724,7 @@ class NonLinearLPNode(BasicLPNode, ABC):
         :return: A list of Guorbi constraints.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         k = len(grouped_input_ids[0])
         gconstrs = []
 
@@ -1182,7 +1182,7 @@ class MaxPool2DLPNode(NonLinearLPNode):
         :exception ValueError: If the preceding variables are not provided.
         :exception ValueError: If the preceding bounds are not provided.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
@@ -1288,7 +1288,7 @@ class MaxPool2DLPNode(NonLinearLPNode):
         :return: A list of Guorbi constraints.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         k = len(grouped_input_ids[0])
         gconstrs = []
 

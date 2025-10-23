@@ -114,7 +114,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The scalar bound (lower and upper bound) of the input sample.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug("Get input bound from the input sample.")
 
         l, u = self.perturb_args.normalize(input_sample)
@@ -140,7 +140,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :return: The output weight matrix. For classification tasks, the output bias is
             None.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug(
             f"Get output weight matrix from target label {target_label} of "
             f"total {num_labels} labels."
@@ -162,7 +162,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :param output_weight: The output weight matrix.
         :param output_bias: The output bias.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug(f"Start building bound module from {self.net_file_path}.")
 
         time_total = time.perf_counter()
@@ -208,6 +208,12 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         input_size = module.output_size
         pre_module = module
         module = None
+        # first_node = node
+        # while node:
+        #     print(f"Process node {node.op_type}.")
+        #     op_type = node.op_type
+        #     node = next(nodes_iterator, None)
+        # node = first_node
         while node:
             logger.debug(f"Process node {node.op_type}.")
             op_type = node.op_type
@@ -265,6 +271,10 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             elif node.op_type == "Pad":
                 self._parse_pad(node, constants)
 
+            # elif node.op_type == "Identity":
+            #     node = next(nodes_iterator, None)
+            #     continue
+
             else:
                 raise NotImplementedError(f"Unsupported op type {node.op_type}")
 
@@ -305,7 +315,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param onnx_node: The current ONNX node.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         pre_module = next(reversed(self.submodules.values()))
         new_name = _reformat(onnx_node.output[0])
@@ -366,7 +376,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param onnx_nodes: The iterator of the ONNX nodes.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         constants = {}
         while True:
@@ -486,7 +496,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The convolutional arguments.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         groups = 1
         dilation = (1, 1)
@@ -531,7 +541,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The pooling arguments
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         ceil_mode = False
         dilation = (1, 1)
@@ -574,7 +584,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         return kwargs
 
     def _update_pre_next_nodes(self):
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug("Set the pre and next nodes for each module.")
 
         # Set the pre and next nodes for each module.
@@ -608,7 +618,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         Check the output size of each module in the bound module by comparing with the
         inferred shape from the ONNX model.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug("Check output size of each module.")
 
         # Check the shape is correct.
@@ -650,7 +660,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         logger.debug("Update output constraints for the last layer.")
 
         last_module = self.submodules[self.output_name]
@@ -677,7 +687,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         output weight matrix and bias from the merged layer.
         """
 
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
 
         last_module = self.submodules[self.output_name]
         if not isinstance(last_module, GemmNode):
@@ -780,7 +790,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The activation node.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         input_names, name = self._parse_names(node)
         op_type = node.op_type
 
@@ -842,7 +852,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param node: The residual Add node.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         input_names = _reformat(list(node.input))  # We need all input names.
 
         if len(input_names) != 2:
@@ -913,7 +923,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :return: True if the output layer is added, False if the output constraints
             are merged in the last layer.
         """
-        logger = logging.getLogger("rover")
+        logger = logging.getLogger("stm")
         if weight is None:
             weight = torch.eye(self.output_shape[0], **self.data_settings)
 

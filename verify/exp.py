@@ -18,8 +18,8 @@ def main(args):
         bp_method = RelaxMode.DEEPPOLY
     elif args.bp == "crown":
         bp_method = RelaxMode.CROWN
-    elif args.bp == "rover":
-        bp_method = RelaxMode.ROVER_SN
+    elif args.bp == "stm":
+        bp_method = RelaxMode.STM_SN
     else:
         raise ValueError(f"Invalid BP method: {args.bp}")
 
@@ -61,11 +61,20 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the experiment.")
     parser.add_argument("--net_fpath", type=str, default=None)
-    parser.add_argument("--dataset", type=str, default="mnist")
+    parser.add_argument("--dataset", type=str, default=None)
     parser.add_argument("--epsilon", type=float, default=0.01)
     parser.add_argument("--bp", type=str, default=None)
     parser.add_argument("--opt", type=str, default=None)
     parser.add_argument("--log_name", type=str, default=None)
 
     args = parser.parse_args()
+    if args.dataset is None:
+        net_lower = args.net_fpath.lower()
+        if 'deeppoly' in net_lower:
+            args.dataset = 'deeppoly'
+        elif 'mnist' in net_lower:
+            args.dataset = "mnist"
+        elif 'cifar10' in net_lower:
+            args.dataset = "cifar10"
+        
     main(args)
