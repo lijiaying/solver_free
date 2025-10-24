@@ -83,3 +83,6 @@ if __name__ == "__main__":
             args.dataset = "cifar10"
         
     main(args)
+
+
+# python3 exp.py --net_fpath ../nets/deeppoly.onnx --epsilon 1 --bp stm --opt mnlp
