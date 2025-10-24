@@ -98,7 +98,7 @@ def BS_once_with_update_bound(
             *constr_bound.L.A.shape[1:]
         )
 
-        bound, _ = self.cal_bounds(constr_bound, pre_scalar_bound)
+        bound = self.cal_bounds(constr_bound, pre_scalar_bound)
         if store_updated_bounds:
             bound = self.store_bounds(self.all_bounds, self.name, bound)
 

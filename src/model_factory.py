@@ -172,11 +172,10 @@ class ModelFactory:
             input_bound = self.model.get_input_bound(sample)
 
             # ======================= Incomplete Verification =======================
-            bound, minimum_input = self.model(
+            bound = self.model(
                 target_label,
                 sample,
-                input_bound,
-                return_minimum_input=False,
+                input_bound
             )
             l = bound.l
             logger.info(f"Verified lower bound: {l}")

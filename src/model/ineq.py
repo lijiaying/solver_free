@@ -58,7 +58,6 @@ class IneqBoundModel(BasicBoundModel[T]):
         target_label: int,
         input_sample: Tensor,
         input_bound: ScalarBound,
-        return_minimum_input: bool = False,
         *args,
         **kwargs,
     ) -> tuple[ScalarBound, Tensor | None]:
@@ -77,8 +76,6 @@ class IneqBoundModel(BasicBoundModel[T]):
         :param target_label: The target label for the output.
         :param input_sample: The input sample point.
         :param input_bound: The scalar bound (lower and upper bounds) of the input.
-        :param return_minimum_input: When enabled, the minimum input point making the
-            minimum lower output bound will be returned.
 
         :return: The scalar bound of the output and the minimum input point if enabled.
         """
@@ -88,37 +85,28 @@ class IneqBoundModel(BasicBoundModel[T]):
 
         time_start = time.perf_counter()
 
-        bound, minimum_input = self.bound_propagate(input_bound, return_minimum_input)
+        bound = self.bound_propagate(input_bound)
 
         logger.debug(f"Finish bound propagation in {time.perf_counter() - time_start:.4f}s")
 
-        return bound, minimum_input
+        return bound
 
     def bound_propagate(
         self,
         input_bound: ScalarBound,
-        return_minimum_input: bool = False,
     ) -> tuple[ScalarBound, Tensor | None]:
         """
         This is the specific method to implement bound propagation in the
         :func:`forward`.
 
         :param input_bound: The scalar bound of the input.
-        :param return_minimum_input: When enabled, the minimum input point making the
-            minimum output bound will be returned.
 
-        .. tip::
-            The minimum input point is the input point making the minimum lower bound.
-            It provides an upper bound of the minimal value in the given input domain.
-            This is used in BaB (branch and bound) approach.
-
-        :return: The scalar bound of the output and the input point make the minimum
-            output bound.
+        :return: The scalar bound of the output.
         """
 
         logger = logging.getLogger("stm")
 
-        bound = minimum_input = None
+        bound = None
 
         self.all_bounds[self.input_name] = input_bound
 
@@ -138,9 +126,8 @@ class IneqBoundModel(BasicBoundModel[T]):
 
             module.clear()
 
-            bound, minimum_input = module.forward(
+            bound = module.forward(
                 input_bound,
-                return_minimum_input=return_minimum_input,
                 only_lower_bound=module.next_nodes is None,
             )
 
@@ -154,7 +141,7 @@ class IneqBoundModel(BasicBoundModel[T]):
 
             module = next(modules_iter, None)
 
-        return bound, minimum_input
+        return bound
 
     def _handle_input(
         self,

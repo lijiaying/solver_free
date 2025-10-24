@@ -61,7 +61,6 @@ class BasicIneqNode(BasicNode, ABC):
     def forward(
         self,
         input_bound: ScalarBound,
-        return_minimum_input: bool = False,
         only_lower_bound: bool = False,
         debug: bool = False,
     ) -> tuple[ScalarBound | None, Tensor | None]:
@@ -76,14 +75,11 @@ class BasicIneqNode(BasicNode, ABC):
         is constructed.
 
         :param input_bound: The scalar bounds of the input.
-        :param return_minimum_input: When enabled, return the input point that makes
-            the lower scalar bound the minimum.
         :param only_lower_bound: When enabled, return only the lower bound, which is
             commonly used for the output layer.
         :param debug: When enabled, activate the debug mode.
 
-        :return: The scalar bounds of the neurons in the layer, and the minimum input
-            that makes the lower bound minimal if return_minimum_input is True.
+        :return: The scalar bounds of the neurons in the layer.
         """
         pass
 
@@ -150,8 +146,7 @@ class BasicIneqNode(BasicNode, ABC):
     @staticmethod
     def cal_bounds(
         constr_bound: LConstrBound,
-        scalar_bound: ScalarBound,
-        return_minimum_point: bool = False,
+        scalar_bound: ScalarBound
     ) -> tuple[ScalarBound, Tensor | None]:
         """
         Calculate the scalar bounds of the given linear inequalities by the given
@@ -159,30 +154,21 @@ class BasicIneqNode(BasicNode, ABC):
 
         :param constr_bound: The linear inequalities represented by specified variables.
         :param scalar_bound: The scalar bounds of the specified variables.
-        :param return_minimum_point: When enabled, return the point that makes
-            the lower bound minimal.
 
-        :return: The scalar bounds and the minimum input.
+        :return: The scalar bounds.
         """
         bound = ScalarBound(
             l=cal_scalar_bound(constr_bound.L.A, constr_bound.L.b, scalar_bound.l, scalar_bound.u)
         )
 
-        # Calculate the input such that the output is the minimum.
-        minimum_point = (
-            cal_minimum_point(constr_bound.L.A, scalar_bound.l, scalar_bound.u)
-            if return_minimum_point
-            else None
-        )
-
         if constr_bound.U is None:
-            return bound, minimum_point
+            return bound
 
         bound.u = cal_scalar_bound(
             constr_bound.U.A, constr_bound.U.b, scalar_bound.u, scalar_bound.l
         )
 
-        return bound, minimum_point
+        return bound
 
     @staticmethod
     def store_bounds(
@@ -268,7 +254,6 @@ class InputIneqNode(BasicIneqNode, InputNode):
     def forward(
         self,
         input_bound: ScalarBound,
-        return_minimum_input: bool = False,
         only_lower_bound: bool = False,
         debug: bool = False,
     ) -> tuple[ScalarBound | None, Tensor | None]:
@@ -341,7 +326,6 @@ class LinearIneqNode(BasicIneqNode, LinearNode, ABC):
     def forward(
         self,
         input_bound: ScalarBound,
-        return_minimum_input: bool = False,
         only_lower_bound: bool = False,
         debug: bool = False,
     ) -> tuple[ScalarBound | None, Tensor | None]:
@@ -351,20 +335,18 @@ class LinearIneqNode(BasicIneqNode, LinearNode, ABC):
         relaxation from the layer to the input layer.
 
         :param input_bound: The scalar bound of the input.
-        :param return_minimum_input: Return the input that makes the scalar bound the
         :param only_lower_bound: Return only the lower bound.
         :param debug: When enabled, activate the debug mode.
 
-        :return: The scalar bounds of the neurons in the layer, and the minimum input
+        :return: The scalar bounds of the neurons in the layer.
         """
-        bound, minimum_input = self.cal_bounds(
+        bound = self.cal_bounds(
             self.BS_to_input(self.init_constr_bound(only_lower_bound)),
             input_bound,
-            return_minimum_point=return_minimum_input,
         )
 
         bound = self.store_bounds(self.all_bounds, self.name, bound)
-        return bound, minimum_input
+        return bound
 
     def clear(self):
         self._cached_init_constr = None
@@ -552,7 +534,6 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
     def forward(
         self,
         input_bound: ScalarBound,
-        return_minimum_input: bool = False,
         only_lower_bound: bool = False,
         debug: bool = False,
     ) -> tuple[ScalarBound | None, Tensor | None]:
@@ -573,13 +554,10 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
 
 
         :param input_bound: The scalar bound of the input.
-        :param return_minimum_input: When enabled, return the input that makes the
-            scalar bound the minimum.
         :param only_lower_bound: When enabled, return only the lower bound.
         :param debug: When enabled, activate the debug mode.
 
-        :return: The scalar bounds of the neurons in the layer, and the minimum input
-            that makes the linear bound the minimum if return_minimum_input is True.
+        :return: The scalar bounds of the neurons in the layer.
         """
         relaxation = self.cal_relaxation(input_bound, self.shared_data)
         self.store_relaxations(self.all_relaxations, self.name, relaxation)
@@ -590,18 +568,17 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
         ):
             # If the next layer is MaxPool layer, we need to calculate the scalar bounds
             # of the neurons in the current layer.
-            bound, minimum_input = self.cal_bounds(
+            bound = self.cal_bounds(
                 self.BS_to_input(self.init_constr_bound(only_lower_bound)),
-                input_bound,
-                return_minimum_point=return_minimum_input,
+                input_bound
             )
 
             # ----- Tighten the bounds with activation function -----
             bound = self.update_bounds_by_act_func(bound)
             bound = self.store_bounds(self.all_bounds, self.name, bound)
 
-            return bound, minimum_input
-        return None, None
+            return bound
+        return None
 
     def update_bounds_by_act_func(self, old_bound: ScalarBound) -> ScalarBound:
         """
