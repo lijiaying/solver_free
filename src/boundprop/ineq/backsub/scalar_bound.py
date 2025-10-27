@@ -37,25 +37,25 @@ def _cal_scalar_bound_no_bias_3d(A: Tensor, s1: Tensor, s2: Tensor) -> Tensor:
     return sb
 
 
-_A_fp32 = torch.rand((2, 3), dtype=torch.float32)
-_b_fp32 = torch.rand((2,), dtype=torch.float32)
-_s1_fp32 = torch.rand((3,), dtype=torch.float32)
-_s2_fp32 = torch.rand((3,), dtype=torch.float32)
+_A_fp32 = torch.ones((2, 3), dtype=torch.float32)
+_b_fp32 = torch.ones((2,), dtype=torch.float32)
+_s1_fp32 = torch.ones((3,), dtype=torch.float32)
+_s2_fp32 = torch.ones((3,), dtype=torch.float32)
 
-_A_3d_fp32 = torch.rand((2, 3, 4, 5), dtype=torch.float32)
-_b_3d_fp32 = torch.rand((2,), dtype=torch.float32)
-_s1_3d_fp32 = torch.rand((3, 4, 5), dtype=torch.float32)
-_s2_3d_fp32 = torch.rand((3, 4, 5), dtype=torch.float32)
+_A_3d_fp32 = torch.ones((2, 3, 4, 5), dtype=torch.float32)
+_b_3d_fp32 = torch.ones((2,), dtype=torch.float32)
+_s1_3d_fp32 = torch.ones((3, 4, 5), dtype=torch.float32)
+_s2_3d_fp32 = torch.ones((3, 4, 5), dtype=torch.float32)
 
-_A_fp64 = torch.rand((2, 3), dtype=torch.float64)
-_b_fp64 = torch.rand((2,), dtype=torch.float64)
-_s1_fp64 = torch.rand((3,), dtype=torch.float64)
-_s2_fp64 = torch.rand((3,), dtype=torch.float64)
+_A_fp64 = torch.ones((2, 3), dtype=torch.float64)
+_b_fp64 = torch.ones((2,), dtype=torch.float64)
+_s1_fp64 = torch.ones((3,), dtype=torch.float64)
+_s2_fp64 = torch.ones((3,), dtype=torch.float64)
 
-_A_3d_fp64 = torch.rand((2, 3, 4, 5), dtype=torch.float64)
-_b_3d_fp64 = torch.rand((2,), dtype=torch.float64)
-_s1_3d_fp64 = torch.rand((3, 4, 5), dtype=torch.float64)
-_s2_3d_fp64 = torch.rand((3, 4, 5), dtype=torch.float64)
+_A_3d_fp64 = torch.ones((2, 3, 4, 5), dtype=torch.float64)
+_b_3d_fp64 = torch.ones((2,), dtype=torch.float64)
+_s1_3d_fp64 = torch.ones((3, 4, 5), dtype=torch.float64)
+_s2_3d_fp64 = torch.ones((3, 4, 5), dtype=torch.float64)
 
 
 _example_inputs1_fp32 = (_A_fp32, _b_fp32, _s1_fp32, _s2_fp32)
