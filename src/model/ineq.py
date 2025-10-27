@@ -120,7 +120,7 @@ class IneqBoundModel(BasicBoundModel[T]):
 
         module = next(modules_iter)
         while module is not None:
-            print('Process {}'.format(module))
+            print(f"{BLUE}>>> Process {module}{RESET}")
             logger.debug(f"Process {module}".center(100, "~"))
             start = time.perf_counter()
 
@@ -131,6 +131,11 @@ class IneqBoundModel(BasicBoundModel[T]):
                 only_lower_bound=module.next_nodes is None,
             )
 
+            print(f"    INPUT bound: {input_bound}")
+            print(f"    O Lower bound: {bound.l.flatten()[:5]}")
+            print(f"    O Upper bound: {bound.u.flatten()[:5] if bound.u is not None else None}")
+
+
             if logger.level <= logging.DEBUG and bound is not None:
                 logger.debug(f"Lower bound: {bound.l.flatten()[:5]}")
                 logger.debug(
@@ -138,7 +143,7 @@ class IneqBoundModel(BasicBoundModel[T]):
                 )
 
             logger.debug(f"Finish processing {module} in " f"{time.perf_counter() - start:.4f}s")
-
+            print(f"{GREEN}<<< Finish processing {module} in " f"{time.perf_counter() - start:.4f}s{RESET}")
             module = next(modules_iter, None)
 
         return bound

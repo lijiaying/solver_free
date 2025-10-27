@@ -1,11 +1,11 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["BS_nonlinear"]
+__all__ = ["back_sub_nonlinear"]
 
 import torch
 from torch import Tensor
 
 
-def _BS_nonlinear_1d(
+def _back_sub_nonlinear_1d(
     A: Tensor, b: Tensor, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor]:
     Ap, An = A.clamp(min=0), A.clamp(max=0)
@@ -15,7 +15,7 @@ def _BS_nonlinear_1d(
     return A, b
 
 
-def _BS_nonlinear_no_bias_1d(
+def _back_sub_nonlinear_no_bias_1d(
     A: Tensor, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor]:
     Ap, An = A.clamp(min=0), A.clamp(max=0)
@@ -99,18 +99,18 @@ _example_input_no_bias_3d_fp64 = (
 )
 
 
-_BS_nonlinear_1d_fp32 = torch.jit.trace(_BS_nonlinear_1d, _example_input_1d_fp32)
-_BS_nonlinear_no_bias_1d_fp32 = torch.jit.trace(
-    _BS_nonlinear_no_bias_1d, _example_input_no_bias_1d_fp32
+_back_sub_nonlinear_1d_fp32 = torch.jit.trace(_back_sub_nonlinear_1d, _example_input_1d_fp32)
+_back_sub_nonlinear_no_bias_1d_fp32 = torch.jit.trace(
+    _back_sub_nonlinear_no_bias_1d, _example_input_no_bias_1d_fp32
 )
 
-_BS_nonlinear_1d_fp64 = torch.jit.trace(_BS_nonlinear_1d, _example_input_1d_fp64)
-_BS_nonlinear_no_bias_1d_fp64 = torch.jit.trace(
-    _BS_nonlinear_no_bias_1d, _example_input_no_bias_1d_fp64
+_back_sub_nonlinear_1d_fp64 = torch.jit.trace(_back_sub_nonlinear_1d, _example_input_1d_fp64)
+_back_sub_nonlinear_no_bias_1d_fp64 = torch.jit.trace(
+    _back_sub_nonlinear_no_bias_1d, _example_input_no_bias_1d_fp64
 )
 
 
-def BS_nonlinear(
+def back_sub_nonlinear(
     A: Tensor, b: Tensor | None, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor | None]:
     """
@@ -136,11 +136,11 @@ def BS_nonlinear(
 
         if b is not None:
             if A.dtype == torch.float32:
-                return _BS_nonlinear_1d_fp32(A, b, s1, s2, t1, t2)
-            return _BS_nonlinear_1d_fp64(A, b, s1, s2, t1, t2)
+                return _back_sub_nonlinear_1d_fp32(A, b, s1, s2, t1, t2)
+            return _back_sub_nonlinear_1d_fp64(A, b, s1, s2, t1, t2)
         if A.dtype == torch.float32:
-            return _BS_nonlinear_no_bias_1d_fp32(A, s1, s2, t1, t2)
-        return _BS_nonlinear_no_bias_1d_fp64(A, s1, s2, t1, t2)
+            return _back_sub_nonlinear_no_bias_1d_fp32(A, s1, s2, t1, t2)
+        return _back_sub_nonlinear_no_bias_1d_fp64(A, s1, s2, t1, t2)
 
     else:
         raise ValueError(

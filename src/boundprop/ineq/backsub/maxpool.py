@@ -1,12 +1,12 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["BS_maxpool2d"]
+__all__ = ["back_sub_maxpool2d"]
 
 import torch
 import torch.nn.functional as F
 from torch import Tensor
 
 
-def _BS_maxpool_naive(
+def _back_sub_maxpool_naive(
     A: Tensor, b: Tensor, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor]:
     d = (1, 2)
@@ -21,7 +21,7 @@ def _BS_maxpool_naive(
     return A, b
 
 
-def _BS_maxpool_no_bias_naive(
+def _back_sub_maxpool_no_bias_naive(
     A: Tensor, s1: Tensor, s2: Tensor, t1: Tensor, t2: Tensor
 ) -> tuple[Tensor, Tensor]:
     d = (1, 2)
@@ -101,19 +101,19 @@ _example_inputs2_no_bias_fp64 = (
     _t2_4d_fp64,
 )
 
-_BS_maxpool_naive_fp32 = torch.jit.trace(_BS_maxpool_naive, _example_inputs1_fp32)
-_BS_maxpool_no_bias_naive_fp32 = torch.jit.trace(
-    _BS_maxpool_no_bias_naive, _example_inputs1_no_bias_fp32
+_back_sub_maxpool_naive_fp32 = torch.jit.trace(_back_sub_maxpool_naive, _example_inputs1_fp32)
+_back_sub_maxpool_no_bias_naive_fp32 = torch.jit.trace(
+    _back_sub_maxpool_no_bias_naive, _example_inputs1_no_bias_fp32
 )
 
 
-_BS_maxpool_naive_fp64 = torch.jit.trace(_BS_maxpool_naive, _example_inputs1_fp64)
-_BS_maxpool_no_bias_naive_fp64 = torch.jit.trace(
-    _BS_maxpool_no_bias_naive, _example_inputs1_no_bias_fp64
+_back_sub_maxpool_naive_fp64 = torch.jit.trace(_back_sub_maxpool_naive, _example_inputs1_fp64)
+_back_sub_maxpool_no_bias_naive_fp64 = torch.jit.trace(
+    _back_sub_maxpool_no_bias_naive, _example_inputs1_no_bias_fp64
 )
 
 
-def BS_maxpool2d(
+def back_sub_maxpool2d(
     A: Tensor,
     b: Tensor,
     s1: Tensor,
@@ -158,15 +158,15 @@ def BS_maxpool2d(
 
         A, b = (
             (
-                _BS_maxpool_naive_fp32(A, b, s1, s2, t1, t2)
+                _back_sub_maxpool_naive_fp32(A, b, s1, s2, t1, t2)
                 if A.dtype == torch.float32
-                else _BS_maxpool_naive_fp64(A, b, s1, s2, t1, t2)
+                else _back_sub_maxpool_naive_fp64(A, b, s1, s2, t1, t2)
             )
             if b is not None
             else (
-                _BS_maxpool_no_bias_naive_fp32(A, s1, s2, t1, t2)
+                _back_sub_maxpool_no_bias_naive_fp32(A, s1, s2, t1, t2)
                 if A.dtype == torch.float32
-                else _BS_maxpool_no_bias_naive_fp64(A, s1, s2, t1, t2)
+                else _back_sub_maxpool_no_bias_naive_fp64(A, s1, s2, t1, t2)
             )
         )
 

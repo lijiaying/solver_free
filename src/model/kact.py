@@ -304,7 +304,7 @@ class KActLPBoundModel(LPBoundModel):
                 pool_input_ids=pool_input_ids,
             )
 
-            grouped_input_constrs = BS_grouped_constrs(
+            grouped_input_constrs = back_sub_grouped_constrs(
                 input_bound,
                 pre_module,
                 pre_bound.l.numel(),

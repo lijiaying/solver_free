@@ -23,8 +23,9 @@ from abc import ABC  # , abstractmethod
 import sys
 from typing import List
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-from utils import *
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+from src.utils import *
+# from src.colors import *
 
 import cdd
 import numpy as np

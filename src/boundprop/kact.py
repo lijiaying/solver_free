@@ -17,9 +17,9 @@ convex hulls of the grouped neurons.
 __docformat__ = "restructuredtext"
 __all__ = [
     "generate_groups_lp",
-    "BS_grouped_constrs",
+    "back_sub_grouped_constrs",
     "cal_grouped_acthull",
-    "BS_to_input_kact",
+    "back_sub_to_input_kact",
 ]
 
 import itertools
@@ -230,7 +230,7 @@ def _get_constrs_template(
     return template
 
 
-def BS_grouped_constrs(
+def back_sub_grouped_constrs(
     input_bound: ScalarBound,
     pre_module: Any,
     n_vars: int,
@@ -297,7 +297,7 @@ def BS_grouped_constrs(
         ineqs = ineqs.reshape((-1, n_vars))
         constr = LConstr(A=ineqs)
         __import__("ipdb").set_trace()
-        bound = BS_to_input_kact(
+        bound = back_sub_to_input_kact(
             pre_module, LConstrBound(L=constr, U=constr), input_bound
         )
         l, u = bound.l, bound.u
@@ -485,7 +485,7 @@ def _collect_trivial_pool_idxs(
     return grouped_constrs, trivial_pool_idxs
 
 
-def BS_to_input_kact(
+def back_sub_to_input_kact(
     self: "BasicIneqNode",  # noqa
     constr_bound: LConstrBound,
     input_bound: ScalarBound,
@@ -525,7 +525,7 @@ def BS_to_input_kact(
                 constr_bound_r,
                 residual_second_path,
                 new_bound,
-            ) = BS_residual_second_path(
+            ) = back_sub_residual_second_path(
                 self,
                 module,
                 constr_bound,
@@ -538,7 +538,7 @@ def BS_to_input_kact(
             if new_bound is not None:
                 bound = bound.intersect(new_bound)
 
-        constr_bound, new_bound = BS_once_with_update_bound(
+        constr_bound, new_bound = back_sub_once_with_update_bound(
             self, module, constr_bound, in_residual_block, store_updated_bounds=False
         )
 

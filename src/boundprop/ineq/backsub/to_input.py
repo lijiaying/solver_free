@@ -1,9 +1,9 @@
 __docformat__ = ["restructuredtext"]
 __all__ = [
-    "BS_to_input",
-    "BS_once_with_update_bound",
+    "back_sub_to_input",
+    "back_sub_once_with_update_bound",
     "collect_residual_second_path",
-    "BS_residual_second_path",
+    "back_sub_residual_second_path",
 ]
 
 import logging
@@ -13,7 +13,7 @@ from ...base import NonLinearNode
 from ....utils import LConstrBound, ScalarBound
 
 
-def BS_to_input(
+def back_sub_to_input(
     self: "BasicIneqNode",  # noqa
     constr_bound: LConstrBound,
 ) -> LConstrBound:
@@ -49,12 +49,12 @@ def BS_to_input(
                 constr_bound_r,
                 residual_second_path,
                 _,
-            ) = BS_residual_second_path(
+            ) = back_sub_residual_second_path(
                 self, module, constr_bound, constr_bound_r, residual_second_path
             )
             in_residual_block = False
 
-        constr_bound, _ = BS_once_with_update_bound(
+        constr_bound, _ = back_sub_once_with_update_bound(
             self, module, constr_bound, in_residual_block
         )
 
@@ -76,7 +76,7 @@ def BS_to_input(
     return constr_bound
 
 
-def BS_once_with_update_bound(
+def back_sub_once_with_update_bound(
     self: "BasicIneqNode",  # noqa
     module: "BasicIneqNode",  # noqa
     constr_bound: LConstrBound,
@@ -84,7 +84,7 @@ def BS_once_with_update_bound(
     store_updated_bounds: bool = True,
 ) -> LConstrBound | tuple[LConstrBound, ScalarBound | None]:
     logger = logging.getLogger("stm")
-    constr_bound = module.BS_once(constr_bound)
+    constr_bound = module.back_sub_once(constr_bound)
     pre_module = module.pre_nodes[0] if module.pre_nodes else None
     bound = None
     if (
@@ -127,7 +127,7 @@ def collect_residual_second_path(
     return constr_bound_r, residual_second_path
 
 
-def BS_residual_second_path(
+def back_sub_residual_second_path(
     self: "BasicIneqNode",  # noqa
     module: "BasicIneqNode",  # noqa
     constr_bound: LConstrBound,
@@ -141,7 +141,7 @@ def BS_residual_second_path(
     logger = logging.getLogger("stm")
     residual_second_path: list["BasicIneqNode"]  # noqa
     for module_r in residual_second_path:
-        constr_bound_r = module_r.BS_once(constr_bound_r)
+        constr_bound_r = module_r.back_sub_once(constr_bound_r)
     constr_bound_r.L.A = constr_bound_r.L.A.reshape(constr_bound.L.A.shape)
     if constr_bound_r.U is not None:
         constr_bound_r.U.A = constr_bound_r.U.A.reshape(constr_bound.U.A.shape)
