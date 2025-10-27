@@ -1,5 +1,5 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["back_sub_gemm"]
+__all__ = ["gemm_back_sub"]
 
 import torch
 from torch import Tensor
@@ -62,7 +62,7 @@ _back_sub_gemm_no_bias3_fp64 = torch.jit.trace(_back_sub_gemm_no_bias3, _example
 _back_sub_gemm_fp64 = torch.jit.trace(_back_sub_gemm, _example_inputs4_fp64)
 
 
-def back_sub_gemm(
+def gemm_back_sub(
     A: Tensor, b: Tensor | None, weight: Tensor, bias: Tensor | None
 ) -> tuple[Tensor, Tensor | None]:
     """

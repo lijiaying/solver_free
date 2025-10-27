@@ -1,11 +1,11 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["back_sub_conv2d"]
+__all__ = ["conv2d_back_sub"]
 
 import torch.nn.functional as F
 from torch import Tensor
 
 
-def back_sub_conv2d(
+def conv2d_back_sub(
     A: Tensor,
     b: Tensor | None,
     weight: Tensor,

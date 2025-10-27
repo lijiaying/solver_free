@@ -394,7 +394,7 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
 
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_sub_gemm(
+                *gemm_back_sub(
                     constr_bound.L.A.reshape(-1, *self.output_size),
                     constr_bound.L.b,
                     *args,
@@ -405,7 +405,7 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
             return result_constr_bound
 
         result_constr_bound.U = LConstr(
-            *back_sub_gemm(
+            *gemm_back_sub(
                 constr_bound.U.A.reshape(-1, *self.output_size), constr_bound.U.b, *args
             )
         )
@@ -486,7 +486,7 @@ class Conv2DIneqNode(LinearIneqNode, Conv2DNode):
 
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_sub_conv2d(
+                *conv2d_back_sub(
                     constr_bound.L.A.reshape(-1, *self.output_size),
                     constr_bound.L.b,
                     *args,
@@ -497,7 +497,7 @@ class Conv2DIneqNode(LinearIneqNode, Conv2DNode):
             return result_constr_bound
 
         result_constr_bound.U = LConstr(
-            *back_sub_conv2d(
+            *conv2d_back_sub(
                 constr_bound.U.A.reshape(-1, *self.output_size), constr_bound.U.b, *args
             )
         )
@@ -601,7 +601,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
 
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_sub_nonlinear(
+                *nonlinear_back_sub(
                     constr_bound.L.A.reshape(-1, math.prod(self.output_size)),
                     constr_bound.L.b,
                     relaxation.L.A,
@@ -616,7 +616,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
             return result_constr_bound
 
         result_constr_bound.U = LConstr(
-            *back_sub_nonlinear(
+            *nonlinear_back_sub(
                 constr_bound.U.A.reshape(-1, math.prod(self.output_size)),
                 constr_bound.U.b,
                 relaxation.U.A,
@@ -699,7 +699,7 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
         relaxation = self.all_relaxations[self.name]
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_sub_relu(
+                *relu_back_sub(
                     constr_bound.L.A.reshape(-1, math.prod(self.output_size)),
                     constr_bound.L.b,
                     relaxation.L.A,
@@ -714,7 +714,7 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
         # NOTE: Here, it is different from other functions. Pay attension to the order
         # of the arguments.
         result_constr_bound.U = LConstr(
-            *back_sub_relu(
+            *relu_back_sub(
                 constr_bound.U.A.reshape(-1, math.prod(self.output_size)),
                 constr_bound.U.b,
                 relaxation.L.A,
@@ -859,7 +859,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
 
         result_constr_bound = LConstrBound(
             L=LConstr(
-                *back_sub_maxpool2d(
+                *maxpool2d_back_sub(
                     constr_bound.L.A.reshape((-1, self._co * self._nk)),
                     constr_bound.L.b,
                     relaxation.L.A,
@@ -875,7 +875,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
             return result_constr_bound
 
         result_constr_bound.U = LConstr(
-            *back_sub_maxpool2d(
+            *maxpool2d_back_sub(
                 constr_bound.U.A.reshape((-1, self._co * self._nk)),
                 constr_bound.U.b,
                 relaxation.U.A,

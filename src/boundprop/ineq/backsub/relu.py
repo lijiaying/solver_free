@@ -4,7 +4,7 @@ the ReLU activation function.
 """
 
 __docformat__ = ["restructuredtext"]
-__all__ = ["back_sub_relu"]
+__all__ = ["relu_back_sub"]
 
 import torch
 from torch import Tensor
@@ -30,7 +30,7 @@ def _back_sub_relu_1d_upper(
     return A, b
 
 
-def back_sub_relu(
+def relu_back_sub(
     A: Tensor,
     b: Tensor | None,
     sl: Tensor,
