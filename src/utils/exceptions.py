@@ -33,7 +33,8 @@ class NotConverged(Exception):
 
     def __init__(
         self,
-        message="The calculation is not converged after the maximum number of " "iterations.",
+        message="The calculation is not converged after the maximum number of "
+        "iterations.",
     ):
         super().__init__(message)
 

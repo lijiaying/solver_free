@@ -114,13 +114,13 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The scalar bound (lower and upper bound) of the input sample.
         """
-    
+
         print(f"[DEBUG] Get input bound from the input sample.")
 
-        print('**** input_sample:', input_sample)
+        print("**** input_sample:", input_sample)
         l, u = self.perturb_args.normalize(input_sample)
-        print('**** normalized l:', l)
-        print('**** normalized u:', u)
+        print("**** normalized l:", l)
+        print("**** normalized u:", u)
 
         return ScalarBound(l, u).to(**self.data_settings)
 
@@ -143,7 +143,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :return: The output weight matrix. For classification tasks, the output bias is
             None.
         """
-    
+
         print(
             f"Get output weight matrix from target label {target_label} of "
             f"total {num_labels} labels."
@@ -165,7 +165,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :param output_weight: The output weight matrix.
         :param output_bias: The output bias.
         """
-    
+
         print(f"[DEBUG] Start building bound module from {self.net_fpath}.")
 
         time_total = time.perf_counter()
@@ -188,7 +188,8 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         nodes_iterator = iter(model.graph.node)
 
         print(
-            "Parse means and stds in onnx model if exists. " "If not, use the pre-settings."
+            "Parse means and stds in onnx model if exists. "
+            "If not, use the pre-settings."
         )
         node = self._parse_onnx_mean_std(nodes_iterator)
         print(
@@ -301,7 +302,9 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         self._update_pre_next_nodes()
         self._check_output_size()
-        if self._set_and_add_output_layer(output_weight, output_bias, input_size, pre_module):
+        if self._set_and_add_output_layer(
+            output_weight, output_bias, input_size, pre_module
+        ):
             num_layers += 1
             num_linear_layers += 1
 
@@ -309,7 +312,9 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             f"Total {num_linear_layers} linear layers, "
             f"{num_layers - num_linear_layers} non-linear layers."
         )
-        print(f"[DEBUG] Finish building bound module in {time.perf_counter() - time_total:.4f}s.")
+        print(
+            f"[DEBUG] Finish building bound module in {time.perf_counter() - time_total:.4f}s."
+        )
 
     def _update_last_submodule_name(self, onnx_node: onnx.NodeProto):
         """
@@ -318,12 +323,12 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param onnx_node: The current ONNX node.
         """
-    
 
         pre_module = next(reversed(self.submodules.values()))
         new_name = _reformat(onnx_node.output[0])
         print(
-            f"Update the name of the last submodule " f"from {pre_module.name} to {new_name}."
+            f"Update the name of the last submodule "
+            f"from {pre_module.name} to {new_name}."
         )
         self.submodules.pop(pre_module.name)  # noqa
         pre_module._name = new_name
@@ -339,7 +344,9 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         """
         input_node = onnx_model.graph.input[0]
         self._input_name = _reformat(input_node.name)
-        self._input_shape = tuple(d.dim_value for d in input_node.type.tensor_type.shape.dim)
+        self._input_shape = tuple(
+            d.dim_value for d in input_node.type.tensor_type.shape.dim
+        )
 
         if len(self._input_shape) not in {2, 4}:
             raise RuntimeError(f"Unsupported input shape: {self._input_shape}.")
@@ -355,7 +362,9 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         """
         output_node = onnx_model.graph.output[0]
         self._output_name = _reformat(output_node.name)
-        self._output_shape = tuple(d.dim_value for d in output_node.type.tensor_type.shape.dim)
+        self._output_shape = tuple(
+            d.dim_value for d in output_node.type.tensor_type.shape.dim
+        )
 
         if len(self._output_shape) != 2:
             raise RuntimeError(f"Unsupported output shaspe: {self._output_shape}.")
@@ -369,7 +378,9 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :param onnx_model: The ONNX model.
         """
         return {
-            initializer.name: torch.tensor(numpy_helper.to_array(initializer), **self.data_settings)
+            initializer.name: torch.tensor(
+                numpy_helper.to_array(initializer), **self.data_settings
+            )
             for initializer in onnx_model.graph.initializer
         }
 
@@ -379,12 +390,14 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param onnx_nodes: The iterator of the ONNX nodes.
         """
-    
 
         constants = {}
         while True:
             onnx_node = next(onnx_nodes)
-            print(f"[DEBUG] Try to parse node {onnx_node.op_type} " f"{onnx_node.output[0]}.")
+            print(
+                f"[DEBUG] Try to parse node {onnx_node.op_type} "
+                f"{onnx_node.output[0]}."
+            )
 
             if onnx_node.op_type == "Constant":
                 constants[onnx_node.output[0]] = torch.tensor(
@@ -499,7 +512,6 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The convolutional arguments.
         """
-    
 
         groups = 1
         dilation = (1, 1)
@@ -544,7 +556,6 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The pooling arguments
         """
-    
 
         ceil_mode = False
         dilation = (1, 1)
@@ -587,7 +598,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         return kwargs
 
     def _update_pre_next_nodes(self):
-    
+
         print(f"[DEBUG] Set the pre and next nodes for each module.")
 
         # Set the pre and next nodes for each module.
@@ -621,7 +632,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         Check the output size of each module in the bound module by comparing with the
         inferred shape from the ONNX model.
         """
-    
+
         print(f"[DEBUG] Check output size of each module.")
 
         # Check the shape is correct.
@@ -663,7 +674,6 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         """
 
-    
         print(f"[DEBUG] Update output constraints for the last layer.")
 
         last_module = self.submodules[self.output_name]
@@ -689,8 +699,6 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         Restore the original weight and bias of the last layer, i.e., remove the
         output weight matrix and bias from the merged layer.
         """
-
-    
 
         last_module = self.submodules[self.output_name]
         if not isinstance(last_module, GemmNode):
@@ -793,7 +801,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The activation node.
         """
-    
+
         input_names, name = self._parse_names(node)
         op_type = node.op_type
 
@@ -855,15 +863,19 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param node: The residual Add node.
         """
-    
+
         input_names = _reformat(list(node.input))  # We need all input names.
 
         if len(input_names) != 2:
-            raise RuntimeError(f"Unsupported residual block with {len(input_names)} inputs.")
+            raise RuntimeError(
+                f"Unsupported residual block with {len(input_names)} inputs."
+            )
 
         for name_ in input_names:
             if name_ not in self.submodules.keys():
-                raise RuntimeError(f"Unsupported residual block with input {name_} not found.")
+                raise RuntimeError(
+                    f"Unsupported residual block with input {name_} not found."
+                )
 
         name = _reformat(node.output[0])
 
@@ -896,10 +908,13 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
             for module in modules_to_update:
                 if len(module.input_names) != 1:  # type: ignore
-                    raise RuntimeError(f"Unsupported residual block with multiple inputs {module}.")
+                    raise RuntimeError(
+                        f"Unsupported residual block with multiple inputs {module}."
+                    )
                 input_size_ = self.submodules[module.input_names[0]].output_size  # noqa
                 print(
-                    f"Update input size of {module} " f"from {module.input_size} to {input_size_}."
+                    f"Update input size of {module} "
+                    f"from {module.input_size} to {input_size_}."
                 )
                 module.input_size = input_size_
 
@@ -926,12 +941,14 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :return: True if the output layer is added, False if the output constraints
             are merged in the last layer.
         """
-    
+
         if weight is None:
             weight = torch.eye(self.output_shape[0], **self.data_settings)
 
         if isinstance(pre_module, GemmNode):
-            print(f"[DEBUG] Fuse output constraints with the last linear layer {pre_module}.")
+            print(
+                f"[DEBUG] Fuse output constraints with the last linear layer {pre_module}."
+            )
             self._ori_last_weight = pre_module.weight.clone()
             self._ori_last_bias = pre_module.bias.clone()
 
@@ -973,7 +990,9 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The scalar bound of the output.
         """
-        raise NotImplementedError("The forward method should be implemented in the subclass.")
+        raise NotImplementedError(
+            "The forward method should be implemented in the subclass."
+        )
 
     @abstractmethod
     def _handle_input(

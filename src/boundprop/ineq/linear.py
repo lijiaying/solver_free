@@ -145,8 +145,7 @@ class BasicIneqNode(BasicNode, ABC):
 
     @staticmethod
     def cal_bounds(
-        constr_bound: LConstrBound,
-        scalar_bound: ScalarBound
+        constr_bound: LConstrBound, scalar_bound: ScalarBound
     ) -> tuple[ScalarBound, Tensor | None]:
         """
         Calculate the scalar bounds of the given linear inequalities by the given
@@ -158,7 +157,9 @@ class BasicIneqNode(BasicNode, ABC):
         :return: The scalar bounds.
         """
         bound = ScalarBound(
-            l=cal_scalar_bound(constr_bound.L.A, constr_bound.L.b, scalar_bound.l, scalar_bound.u)
+            l=cal_scalar_bound(
+                constr_bound.L.A, constr_bound.L.b, scalar_bound.l, scalar_bound.u
+            )
         )
 
         if constr_bound.U is None:
@@ -570,7 +571,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
             # of the neurons in the current layer.
             bound = self.cal_bounds(
                 self.back_sub_to_input(self.init_constr_bound(only_lower_bound)),
-                input_bound
+                input_bound,
             )
 
             # ----- Tighten the bounds with activation function -----
@@ -647,7 +648,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
         :return: The linear relaxation of the lower and upper bounds of the
             current non-linear layer.
         """
-    
+
         print(f"[DEBUG] Calculate single-neuron relaxation.")
         pre_bound = shared_data.all_bounds[self.input_names[0]]
 
@@ -819,8 +820,10 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
         NonLinearIneqNode.__init__(self, *args)
         MaxPool2DNode.__init__(self, *args, **kwargs)
 
-    def cal_relaxation(self, input_bound: ScalarBound, shared_data: BPSharedData) -> LConstrBound:
-    
+    def cal_relaxation(
+        self, input_bound: ScalarBound, shared_data: BPSharedData
+    ) -> LConstrBound:
+
         print(f"[DEBUG] Calculate single-neuron relaxation.")
 
         pre_bound = self.shared_data.all_bounds[self.input_names[0]]
@@ -828,7 +831,9 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
         l, u = self.get_unfolded_pre_bound(pre_bound)
         l_max, l_argmax = self._get_l_argmax(pre_bound)
         mask = self.get_nontrivial_neuron_mask(pre_bound)
-        sl, su, tl, tu = self._cal_relaxation(l, u, self.act_relax_args.mode, l_max, l_argmax, mask)
+        sl, su, tl, tu = self._cal_relaxation(
+            l, u, self.act_relax_args.mode, l_max, l_argmax, mask
+        )
 
         return LConstrBound(L=LConstr(A=sl, b=tl), U=LConstr(A=su, b=tu))  # noqa
 

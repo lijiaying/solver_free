@@ -51,7 +51,7 @@ ITALIC = "\033[3m"
 # Foreground Colors
 END = "\033[0m"
 RESET = "\033[0m"
-GRAY = '\033[90m'
+GRAY = "\033[90m"
 BLACK_BD = "\033[1;30m"  # BLACK BOLD
 
 # Regular Colors

@@ -117,7 +117,6 @@ class BasicLPNode(ABC):
 
         :return: A list of gurobi variables.
         """
-    
 
         if bound is not None:
             lower_bounds = bound.l.flatten().tolist()
@@ -279,7 +278,9 @@ class InputLPNode(BasicLPNode):
         shared_data: LPSharedData,
         lp_args: LPArgs,
     ):
-        BasicLPNode.__init__(self, name, input_names, input_size, output_size, shared_data, lp_args)
+        BasicLPNode.__init__(
+            self, name, input_names, input_size, output_size, shared_data, lp_args
+        )
 
     def add_constrs(
         self,
@@ -408,8 +409,6 @@ class GemmLPNode(LinearLPNode):
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
 
-    
-
         constrs = []
         for i in range(len(gvars)):
             wxb = gurobipy.LinExpr(self.weight[i], pre_gvars)
@@ -524,8 +523,6 @@ class Conv2DLPNode(LinearLPNode):
         """
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
-
-    
 
         n_in = int(math.prod(self.input_size))
         stride = self.stride
@@ -661,15 +658,15 @@ class NonLinearLPNode(BasicLPNode, ABC):
         if pre_bound is None:
             raise ValueError("pre_bounds are not provided.")
 
-    
-
         pre_lower_bounds = pre_bound.l.flatten().tolist()
         pre_upper_bounds = pre_bound.u.flatten().tolist()
         constrs = []
         for i, (l, u) in enumerate(zip(pre_lower_bounds, pre_upper_bounds)):
             x, y = pre_gvars[i], gvars[i]
             constrs.extend(
-                self.cal_single_neuron_relaxation(model, x, y, l, u, name=self._create_var_name(i))
+                self.cal_single_neuron_relaxation(
+                    model, x, y, l, u, name=self._create_var_name(i)
+                )
             )
 
         print(f"[DEBUG] Add {len(constrs)} constraints to the model.")
@@ -724,7 +721,6 @@ class NonLinearLPNode(BasicLPNode, ABC):
         :return: A list of Guorbi constraints.
         """
 
-    
         k = len(grouped_input_ids[0])
         gconstrs = []
 
@@ -755,7 +751,8 @@ class NonLinearLPNode(BasicLPNode, ABC):
         print(f"[INFO] {num_none} groups are none due to tiny input polytope.")
         model.update()
         print(
-            f"Add {len(gconstrs)} k-activation constraints of " f"layer {self.name} to the model."
+            f"Add {len(gconstrs)} k-activation constraints of "
+            f"layer {self.name} to the model."
         )
 
         return gconstrs
@@ -973,7 +970,9 @@ class SShapeLPNode(NonLinearLPNode, ABC):
         # Triangle relaxation + one more line
         if ku >= klu:
             bu, ku, _ = (
-                self._get_second_tangent_line(xu, get_big=False) if xu > 0 else (bu, ku, None)
+                self._get_second_tangent_line(xu, get_big=False)
+                if xu > 0
+                else (bu, ku, None)
             )
             blu2, klu2, _ = self._get_parallel_tangent_line(klu, get_big=False)
             blu = yl - klu * xl
@@ -986,7 +985,9 @@ class SShapeLPNode(NonLinearLPNode, ABC):
 
         elif kl >= klu:
             btu, ktu, _ = (
-                self._get_second_tangent_line(xl, get_big=True) if xl < 0 else (bl, kl, None)
+                self._get_second_tangent_line(xl, get_big=True)
+                if xl < 0
+                else (bl, kl, None)
             )
             blu2, klu2, _ = self._get_parallel_tangent_line(klu, get_big=True)
             blu = yl - klu * xl
@@ -1022,7 +1023,9 @@ class SShapeLPNode(NonLinearLPNode, ABC):
 
     @staticmethod
     @abstractmethod
-    def _get_parallel_tangent_line(k: float, get_big: bool) -> tuple[float, float, float]:
+    def _get_parallel_tangent_line(
+        k: float, get_big: bool
+    ) -> tuple[float, float, float]:
         pass
 
 
@@ -1067,7 +1070,9 @@ class SigmoidLPNode(SShapeLPNode):
         return get_second_tangent_line(x, get_big, "sigmoid")
 
     @staticmethod
-    def _get_parallel_tangent_line(k: float, get_big: bool) -> tuple[float, float, float]:
+    def _get_parallel_tangent_line(
+        k: float, get_big: bool
+    ) -> tuple[float, float, float]:
         return get_parallel_tangent_line(k, get_big, "sigmoid")
 
 
@@ -1112,7 +1117,9 @@ class TanhLPNode(SShapeLPNode):
         return get_second_tangent_line(x, get_big, "tanh")
 
     @staticmethod
-    def _get_parallel_tangent_line(k: float, get_big: bool) -> tuple[float, float, float]:
+    def _get_parallel_tangent_line(
+        k: float, get_big: bool
+    ) -> tuple[float, float, float]:
         return get_parallel_tangent_line(k, get_big, "tanh")
 
 
@@ -1182,7 +1189,6 @@ class MaxPool2DLPNode(NonLinearLPNode):
         :exception ValueError: If the preceding variables are not provided.
         :exception ValueError: If the preceding bounds are not provided.
         """
-    
 
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
@@ -1288,7 +1294,6 @@ class MaxPool2DLPNode(NonLinearLPNode):
         :return: A list of Guorbi constraints.
         """
 
-    
         k = len(grouped_input_ids[0])
         gconstrs = []
 
@@ -1318,7 +1323,8 @@ class MaxPool2DLPNode(NonLinearLPNode):
         print(f"[INFO] {num_none} groups are none due to tiny input polytope.")
         model.update()
         print(
-            f"Add {len(gconstrs)} k-activation constraints of " f"{self.name} to the model."
+            f"Add {len(gconstrs)} k-activation constraints of "
+            f"{self.name} to the model."
         )
 
         return gconstrs
@@ -1378,7 +1384,9 @@ class ResidualAddLPNode(BasicLPNode):
         shared_data: LPSharedData,
         lp_args: LPArgs,
     ):
-        BasicLPNode.__init__(self, name, input_names, input_size, output_size, shared_data, lp_args)
+        BasicLPNode.__init__(
+            self, name, input_names, input_size, output_size, shared_data, lp_args
+        )
 
     def add_constrs(
         self,

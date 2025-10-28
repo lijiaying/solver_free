@@ -79,7 +79,6 @@ class IneqBoundModel(BasicBoundModel[T]):
         :return: The scalar bound of the output and the minimum input point if enabled.
         """
 
-    
         print(f"Start bound propagation.")
 
         time_start = time.perf_counter()
@@ -99,7 +98,6 @@ class IneqBoundModel(BasicBoundModel[T]):
         :param input_bound: The scalar bound of the input.
         :return: The scalar bound of the output.
         """
-    
 
         bound = None
         self.all_bounds[self.input_name] = input_bound
@@ -118,17 +116,25 @@ class IneqBoundModel(BasicBoundModel[T]):
             start = time.perf_counter()
 
             module.clear()
-            bound = module.forward(input_bound, only_lower_bound=module.next_nodes is None)
+            bound = module.forward(
+                input_bound, only_lower_bound=module.next_nodes is None
+            )
 
             print(f"    INPUT bound: {input_bound}")
             print(f"    O Lower bound: {bound.l.flatten()[:5]}")
-            print(f"    O Upper bound: {bound.u.flatten()[:5] if bound.u is not None else None}")
+            print(
+                f"    O Upper bound: {bound.u.flatten()[:5] if bound.u is not None else None}"
+            )
 
-            print(f"Finish processing {module} in " f"{time.perf_counter() - start:.4f}s")
-            print(f"{GREEN}<<< Finish processing {module} in " f"{time.perf_counter() - start:.4f}s{RESET}")
+            print(
+                f"Finish processing {module} in " f"{time.perf_counter() - start:.4f}s"
+            )
+            print(
+                f"{GREEN}<<< Finish processing {module} in "
+                f"{time.perf_counter() - start:.4f}s{RESET}"
+            )
             module = next(modules_iter, None)
         return bound
-
 
     def _handle_input(
         self,
@@ -249,13 +255,11 @@ class IneqBoundModel(BasicBoundModel[T]):
         args = (name, input_names, input_size, self.bp_shared_data)
         return ResidualAddIneqNode(*args)
 
-
     def clear(self):
         """
         Clear the cached data in the current sample to verify the next sample.
         """
         self.bp_shared_data.clear()
-
 
     @property
     def all_bounds(self) -> dict[str, ScalarBound]:
@@ -265,7 +269,6 @@ class IneqBoundModel(BasicBoundModel[T]):
         Refer to :class:`BPSharedData` for more details.
         """
         return self.bp_shared_data.all_bounds
-
 
     @property
     def all_relaxations(self) -> dict[str, LConstrBound]:

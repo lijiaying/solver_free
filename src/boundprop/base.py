@@ -595,7 +595,9 @@ class SigmoidNode(NonLinearNode, ABC):
         shared_data: BPSharedData,
         act_relax_args: ActRelaxArgs,
     ):
-        NonLinearNode.__init__(self, name, input_names, input_size, shared_data, act_relax_args)
+        NonLinearNode.__init__(
+            self, name, input_names, input_size, shared_data, act_relax_args
+        )
         self._output_size = self._cal_output_size()
         self._no = math.prod(self._output_size)
         self.act_type = ActType.SIGMOID
@@ -642,7 +644,9 @@ class TanhNode(NonLinearNode, ABC):
         shared_data: BPSharedData,
         act_relax_args: ActRelaxArgs,
     ):
-        NonLinearNode.__init__(self, name, input_names, input_size, shared_data, act_relax_args)
+        NonLinearNode.__init__(
+            self, name, input_names, input_size, shared_data, act_relax_args
+        )
         self._output_size = self._cal_output_size()
         self._no = math.prod(self._output_size)
         self.act_type = ActType.TANH
@@ -714,7 +718,9 @@ class MaxPool2DNode(NonLinearNode, ABC):
         dilation: tuple = (1, 1),
         ceil_mode: bool = False,
     ):
-        NonLinearNode.__init__(self, name, input_names, input_size, shared_data, act_relax_args)
+        NonLinearNode.__init__(
+            self, name, input_names, input_size, shared_data, act_relax_args
+        )
         self._kernel_size = kernel_size
         self._stride = stride
         self._padding = padding
@@ -769,7 +775,9 @@ class MaxPool2DNode(NonLinearNode, ABC):
 
         pre_l, pre_u = self.get_unfolded_pre_bound(pre_bound, re_calculate=recalculate)
         l_max, l_argmax = self._get_l_argmax(pre_bound, re_calculate=recalculate)
-        mask = self._get_nontrivial_neuron_mask(pre_l, pre_u, l_max, l_argmax, self.act_relax_args)
+        mask = self._get_nontrivial_neuron_mask(
+            pre_l, pre_u, l_max, l_argmax, self.act_relax_args
+        )
 
         if cached:
             self._cached_nontrivial_mask = mask
@@ -778,7 +786,9 @@ class MaxPool2DNode(NonLinearNode, ABC):
         if ignore_degenerate_pool:
             if cached:
                 mask = mask.clone()  # Do not change the cached mask.
-            mask = torch.where(((pre_u - pre_l) > 0).sum(dim=1) < self._nks, False, mask)
+            mask = torch.where(
+                ((pre_u - pre_l) > 0).sum(dim=1) < self._nks, False, mask
+            )
 
         return mask
 
@@ -790,7 +800,9 @@ class MaxPool2DNode(NonLinearNode, ABC):
         l_max_arg: Tensor,
         act_relax_args: ActRelaxArgs,
     ) -> Tensor:
-        return get_nontrivial_neuron_mask_maxpool2d(pre_l, pre_u, l_max, l_max_arg, act_relax_args)
+        return get_nontrivial_neuron_mask_maxpool2d(
+            pre_l, pre_u, l_max, l_max_arg, act_relax_args
+        )
 
     @staticmethod
     def clamp_bounds(bound: ScalarBound) -> ScalarBound:
@@ -799,7 +811,11 @@ class MaxPool2DNode(NonLinearNode, ABC):
     def get_unfolded_pre_bound(
         self, pre_bound: ScalarBound, re_calculate: bool = False
     ) -> tuple[Tensor, Tensor]:
-        if self._cached_l is not None and self._cached_u is not None and not re_calculate:
+        if (
+            self._cached_l is not None
+            and self._cached_u is not None
+            and not re_calculate
+        ):
             return self._cached_l, self._cached_u
 
         l, u = unfold_pre_bound_maxpool2d(
@@ -830,7 +846,9 @@ class MaxPool2DNode(NonLinearNode, ABC):
 
         pre_l, pre_u = self.get_unfolded_pre_bound(pre_bound)
         l_max, l_argmax = cal_l_argmax_maxpool2d(pre_l, pre_u)
-        mask = self._get_nontrivial_neuron_mask(pre_l, pre_u, l_max, l_argmax, self.act_relax_args)
+        mask = self._get_nontrivial_neuron_mask(
+            pre_l, pre_u, l_max, l_argmax, self.act_relax_args
+        )
         # To avoid two neuron have the same max lower bound.
         # But it is the trivial case, the argmax should be the actual max.
         u_argmax = pre_u.argmax(dim=1)
@@ -917,7 +935,8 @@ class MaxPool2DNode(NonLinearNode, ABC):
             MaxPool does not support the derivative function.
         """
         raise RuntimeError(
-            "This is only a placeholder. MaxPool does not support the " "derivative function."
+            "This is only a placeholder. MaxPool does not support the "
+            "derivative function."
         )
 
     @property

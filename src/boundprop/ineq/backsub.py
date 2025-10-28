@@ -1,5 +1,16 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["conv2d_back_sub", "gemm_back_sub", "maxpool2d_back_sub", "nonlinear_back_sub", "relu_back_sub", "cal_scalar_bound", "back_sub_to_input", "back_sub_once_with_update_bound", "collect_residual_second_path", "back_sub_residual_second_path"]
+__all__ = [
+    "conv2d_back_sub",
+    "gemm_back_sub",
+    "maxpool2d_back_sub",
+    "nonlinear_back_sub",
+    "relu_back_sub",
+    "cal_scalar_bound",
+    "back_sub_to_input",
+    "back_sub_once_with_update_bound",
+    "collect_residual_second_path",
+    "back_sub_residual_second_path",
+]
 
 import logging
 import time
@@ -95,12 +106,16 @@ def conv2d_back_sub(
 #######################################################
 ## gemm back_sub
 #######################################################
-def _back_sub_gemm_no_bias1(A: Tensor, b: Tensor, weight: Tensor) -> tuple[Tensor, Tensor]:
+def _back_sub_gemm_no_bias1(
+    A: Tensor, b: Tensor, weight: Tensor
+) -> tuple[Tensor, Tensor]:
     A = A @ weight
     return A, b
 
 
-def _back_sub_gemm_no_bias2(A: Tensor, weight: Tensor, bias: Tensor) -> tuple[Tensor, Tensor]:
+def _back_sub_gemm_no_bias2(
+    A: Tensor, weight: Tensor, bias: Tensor
+) -> tuple[Tensor, Tensor]:
     b = (A * bias).sum(dim=1)
     A = _back_sub_gemm_no_bias1(A, b, weight)[0]
     return A, b
@@ -111,7 +126,9 @@ def _back_sub_gemm_no_bias3(A: Tensor, weight: Tensor) -> Tensor:
     return A
 
 
-def _back_sub_gemm(A: Tensor, b: Tensor, weight: Tensor, bias: Tensor) -> tuple[Tensor, Tensor]:
+def _back_sub_gemm(
+    A: Tensor, b: Tensor, weight: Tensor, bias: Tensor
+) -> tuple[Tensor, Tensor]:
     b = b + (A * bias).sum(dim=1)
     A = _back_sub_gemm_no_bias1(A, b, weight)[0]
     return A, b
@@ -139,15 +156,27 @@ _gemm_inputs3_fp64 = (_gemm_A_fp64, _gemm_weight_fp64)
 _gemm_inputs4_fp64 = (_gemm_A_fp64, _gemm_b_fp64, _gemm_weight_fp64, _gemm_bias_fp64)
 
 
-_back_sub_gemm_no_bias1_fp32 = torch.jit.trace(_back_sub_gemm_no_bias1, _gemm_inputs1_fp32)
-_back_sub_gemm_no_bias2_fp32 = torch.jit.trace(_back_sub_gemm_no_bias2, _gemm_inputs2_fp32)
-_back_sub_gemm_no_bias3_fp32 = torch.jit.trace(_back_sub_gemm_no_bias3, _gemm_inputs3_fp32)
+_back_sub_gemm_no_bias1_fp32 = torch.jit.trace(
+    _back_sub_gemm_no_bias1, _gemm_inputs1_fp32
+)
+_back_sub_gemm_no_bias2_fp32 = torch.jit.trace(
+    _back_sub_gemm_no_bias2, _gemm_inputs2_fp32
+)
+_back_sub_gemm_no_bias3_fp32 = torch.jit.trace(
+    _back_sub_gemm_no_bias3, _gemm_inputs3_fp32
+)
 _back_sub_gemm_fp32 = torch.jit.trace(_back_sub_gemm, _gemm_inputs4_fp32)
 
 
-_back_sub_gemm_no_bias1_fp64 = torch.jit.trace(_back_sub_gemm_no_bias1, _gemm_inputs1_fp64)
-_back_sub_gemm_no_bias2_fp64 = torch.jit.trace(_back_sub_gemm_no_bias2, _gemm_inputs2_fp64)
-_back_sub_gemm_no_bias3_fp64 = torch.jit.trace(_back_sub_gemm_no_bias3, _gemm_inputs3_fp64)
+_back_sub_gemm_no_bias1_fp64 = torch.jit.trace(
+    _back_sub_gemm_no_bias1, _gemm_inputs1_fp64
+)
+_back_sub_gemm_no_bias2_fp64 = torch.jit.trace(
+    _back_sub_gemm_no_bias2, _gemm_inputs2_fp64
+)
+_back_sub_gemm_no_bias3_fp64 = torch.jit.trace(
+    _back_sub_gemm_no_bias3, _gemm_inputs3_fp64
+)
 _back_sub_gemm_fp64 = torch.jit.trace(_back_sub_gemm, _gemm_inputs4_fp64)
 
 
@@ -194,9 +223,6 @@ def gemm_back_sub(
             return _back_sub_gemm_no_bias2_fp32(A, weight, bias)
         else:
             return _back_sub_gemm_no_bias2_fp64(A, weight, bias)
-
-
-
 
 
 #######################################################
@@ -261,8 +287,21 @@ _maxpool_t1_4d_fp64 = _fp64_2x4x5
 _maxpool_t2_4d_fp64 = _fp64_2x4x5
 
 
-_maxpool_inputs1_fp32 = (_maxpool_A_fp32, _maxpool_b_fp32, _maxpool_s1_fp32, _maxpool_s2_fp32, _maxpool_t1_fp32, _maxpool_t2_fp32)
-_maxpool_inputs1_no_bias_fp32 = (_maxpool_A_fp32, _maxpool_s1_fp32, _maxpool_s2_fp32, _maxpool_t1_fp32, _maxpool_t2_fp32)
+_maxpool_inputs1_fp32 = (
+    _maxpool_A_fp32,
+    _maxpool_b_fp32,
+    _maxpool_s1_fp32,
+    _maxpool_s2_fp32,
+    _maxpool_t1_fp32,
+    _maxpool_t2_fp32,
+)
+_maxpool_inputs1_no_bias_fp32 = (
+    _maxpool_A_fp32,
+    _maxpool_s1_fp32,
+    _maxpool_s2_fp32,
+    _maxpool_t1_fp32,
+    _maxpool_t2_fp32,
+)
 _maxpool_inputs2_fp32 = (
     _maxpool_A_4d_fp32,
     _maxpool_b_4d_fp32,
@@ -279,8 +318,21 @@ _maxpool_inputs2_no_bias_fp32 = (
     _maxpool_t2_4d_fp32,
 )
 
-_maxpool_inputs1_fp64 = (_maxpool_A_fp64, _maxpool_b_fp64, _maxpool_s1_fp64, _maxpool_s2_fp64, _maxpool_t1_fp64, _maxpool_t2_fp64)
-_maxpool_inputs1_no_bias_fp64 = (_maxpool_A_fp64, _maxpool_s1_fp64, _maxpool_s2_fp64, _maxpool_t1_fp64, _maxpool_t2_fp64)
+_maxpool_inputs1_fp64 = (
+    _maxpool_A_fp64,
+    _maxpool_b_fp64,
+    _maxpool_s1_fp64,
+    _maxpool_s2_fp64,
+    _maxpool_t1_fp64,
+    _maxpool_t2_fp64,
+)
+_maxpool_inputs1_no_bias_fp64 = (
+    _maxpool_A_fp64,
+    _maxpool_s1_fp64,
+    _maxpool_s2_fp64,
+    _maxpool_t1_fp64,
+    _maxpool_t2_fp64,
+)
 _maxpool_inputs2_fp64 = (
     _maxpool_A_4d_fp64,
     _maxpool_b_4d_fp64,
@@ -297,13 +349,17 @@ _maxpool_inputs2_no_bias_fp64 = (
     _maxpool_t2_4d_fp64,
 )
 
-_back_sub_maxpool_naive_fp32 = torch.jit.trace(_back_sub_maxpool_naive, _maxpool_inputs1_fp32)
+_back_sub_maxpool_naive_fp32 = torch.jit.trace(
+    _back_sub_maxpool_naive, _maxpool_inputs1_fp32
+)
 _back_sub_maxpool_no_bias_naive_fp32 = torch.jit.trace(
     _back_sub_maxpool_no_bias_naive, _maxpool_inputs1_no_bias_fp32
 )
 
 
-_back_sub_maxpool_naive_fp64 = torch.jit.trace(_back_sub_maxpool_naive, _maxpool_inputs1_fp64)
+_back_sub_maxpool_naive_fp64 = torch.jit.trace(
+    _back_sub_maxpool_naive, _maxpool_inputs1_fp64
+)
 _back_sub_maxpool_no_bias_naive_fp64 = torch.jit.trace(
     _back_sub_maxpool_no_bias_naive, _maxpool_inputs1_no_bias_fp64
 )
@@ -443,10 +499,36 @@ _nonlinear_t1_3d_fp64 = _fp64_2x4
 _nonlinear_t2_3d_fp64 = _fp64_2x4
 
 
-_nonlinear_inputs_1d_fp32 = (_nonlinear_A_fp32, _nonlinear_b_fp32, _nonlinear_s1_fp32, _nonlinear_s2_fp32, _nonlinear_t1_fp32, _nonlinear_t2_fp32)
-_nonlinear_inputs_no_bias_1d_fp32 = (_nonlinear_A_fp32, _nonlinear_s1_fp32, _nonlinear_s2_fp32, _nonlinear_t1_fp32, _nonlinear_t2_fp32)
-_nonlinear_inputs_2d_fp32 = (_nonlinear_A_fp32, _nonlinear_b_fp32, _nonlinear_s1_2d_fp32, _nonlinear_s2_2d_fp32, _nonlinear_t1_fp32, _nonlinear_t2_fp32)
-_nonlinear_inputs_no_bias_2d_fp32 = (_nonlinear_A_fp32, _nonlinear_s1_2d_fp32, _nonlinear_s2_2d_fp32, _nonlinear_t1_fp32, _nonlinear_t2_fp32)
+_nonlinear_inputs_1d_fp32 = (
+    _nonlinear_A_fp32,
+    _nonlinear_b_fp32,
+    _nonlinear_s1_fp32,
+    _nonlinear_s2_fp32,
+    _nonlinear_t1_fp32,
+    _nonlinear_t2_fp32,
+)
+_nonlinear_inputs_no_bias_1d_fp32 = (
+    _nonlinear_A_fp32,
+    _nonlinear_s1_fp32,
+    _nonlinear_s2_fp32,
+    _nonlinear_t1_fp32,
+    _nonlinear_t2_fp32,
+)
+_nonlinear_inputs_2d_fp32 = (
+    _nonlinear_A_fp32,
+    _nonlinear_b_fp32,
+    _nonlinear_s1_2d_fp32,
+    _nonlinear_s2_2d_fp32,
+    _nonlinear_t1_fp32,
+    _nonlinear_t2_fp32,
+)
+_nonlinear_inputs_no_bias_2d_fp32 = (
+    _nonlinear_A_fp32,
+    _nonlinear_s1_2d_fp32,
+    _nonlinear_s2_2d_fp32,
+    _nonlinear_t1_fp32,
+    _nonlinear_t2_fp32,
+)
 _nonlinear_inputs_3d_fp32 = (
     _nonlinear_A_3d_fp32,
     _nonlinear_b_3d_fp32,
@@ -463,10 +545,36 @@ _nonlinear_inputs_no_bias_3d_fp32 = (
     _nonlinear_t2_3d_fp32,
 )
 
-_nonlinear_inputs_1d_fp64 = (_nonlinear_A_fp64, _nonlinear_b_fp64, _nonlinear_s1_fp64, _nonlinear_s2_fp64, _nonlinear_t1_fp64, _nonlinear_t2_fp64)
-_nonlinear_inputs_no_bias_1d_fp64 = (_nonlinear_A_fp64, _nonlinear_s1_fp64, _nonlinear_s2_fp64, _nonlinear_t1_fp64, _nonlinear_t2_fp64)
-_nonlinear_inputs_2d_fp64 = (_nonlinear_A_fp64, _nonlinear_b_fp64, _nonlinear_s1_2d_fp64, _nonlinear_s2_2d_fp64, _nonlinear_t1_fp64, _nonlinear_t2_fp64)
-_nonlinear_inputs_no_bias_2d_fp64 = (_nonlinear_A_fp64, _nonlinear_s1_2d_fp64, _nonlinear_s2_2d_fp64, _nonlinear_t1_fp64, _nonlinear_t2_fp64)
+_nonlinear_inputs_1d_fp64 = (
+    _nonlinear_A_fp64,
+    _nonlinear_b_fp64,
+    _nonlinear_s1_fp64,
+    _nonlinear_s2_fp64,
+    _nonlinear_t1_fp64,
+    _nonlinear_t2_fp64,
+)
+_nonlinear_inputs_no_bias_1d_fp64 = (
+    _nonlinear_A_fp64,
+    _nonlinear_s1_fp64,
+    _nonlinear_s2_fp64,
+    _nonlinear_t1_fp64,
+    _nonlinear_t2_fp64,
+)
+_nonlinear_inputs_2d_fp64 = (
+    _nonlinear_A_fp64,
+    _nonlinear_b_fp64,
+    _nonlinear_s1_2d_fp64,
+    _nonlinear_s2_2d_fp64,
+    _nonlinear_t1_fp64,
+    _nonlinear_t2_fp64,
+)
+_nonlinear_inputs_no_bias_2d_fp64 = (
+    _nonlinear_A_fp64,
+    _nonlinear_s1_2d_fp64,
+    _nonlinear_s2_2d_fp64,
+    _nonlinear_t1_fp64,
+    _nonlinear_t2_fp64,
+)
 _nonlinear_inputs_3d_fp64 = (
     _nonlinear_A_3d_fp64,
     _nonlinear_b_3d_fp64,
@@ -484,12 +592,16 @@ _nonlinear_inputs_no_bias_3d_fp64 = (
 )
 
 
-_back_sub_nonlinear_1d_fp32 = torch.jit.trace(_back_sub_nonlinear_1d, _nonlinear_inputs_1d_fp32)
+_back_sub_nonlinear_1d_fp32 = torch.jit.trace(
+    _back_sub_nonlinear_1d, _nonlinear_inputs_1d_fp32
+)
 _back_sub_nonlinear_no_bias_1d_fp32 = torch.jit.trace(
     _back_sub_nonlinear_no_bias_1d, _nonlinear_inputs_no_bias_1d_fp32
 )
 
-_back_sub_nonlinear_1d_fp64 = torch.jit.trace(_back_sub_nonlinear_1d, _nonlinear_inputs_1d_fp64)
+_back_sub_nonlinear_1d_fp64 = torch.jit.trace(
+    _back_sub_nonlinear_1d, _nonlinear_inputs_1d_fp64
+)
 _back_sub_nonlinear_no_bias_1d_fp64 = torch.jit.trace(
     _back_sub_nonlinear_no_bias_1d, _nonlinear_inputs_no_bias_1d_fp64
 )
@@ -536,8 +648,6 @@ def nonlinear_back_sub(
         )
 
 
-
-
 #######################################################
 ## relu back_sub
 #######################################################
@@ -546,7 +656,6 @@ def nonlinear_back_sub(
 This module contains the implementation of the specialized ad-hoc back-substitution for
 the ReLU activation function.
 """
-
 
 
 def _back_sub_relu_1d_lower(
@@ -596,16 +705,17 @@ def relu_back_sub(
 
     :return: The matrix and bias of the linear relaxation.
     """
-    assert A.dtype in (torch.float32, torch.float64), f"The data type {A.dtype} is not supported."
-    assert sl.dim() == su.dim() == 1 and tu.dim() == 1, f"The dimensions are not supported. sl: {sl.shape}, su: {su.shape}, tu: {tu.shape}."
+    assert A.dtype in (
+        torch.float32,
+        torch.float64,
+    ), f"The data type {A.dtype} is not supported."
+    assert (
+        sl.dim() == su.dim() == 1 and tu.dim() == 1
+    ), f"The dimensions are not supported. sl: {sl.shape}, su: {su.shape}, tu: {tu.shape}."
     if is_lower:
         return _back_sub_relu_1d_lower(A, b, sl, su, tu)
 
     return _back_sub_relu_1d_upper(A, b, sl, su, tu)
-
-
-
-
 
 
 #######################################################
@@ -664,14 +774,42 @@ _scalar_s1_3d_fp64 = _fp64_3x4x5
 _scalar_s2_3d_fp64 = _fp64_3x4x5
 
 
-_scalar_inputs1_fp32 = (_scalar_A_fp32, _scalar_b_fp32, _scalar_s1_fp32, _scalar_s2_fp32)
+_scalar_inputs1_fp32 = (
+    _scalar_A_fp32,
+    _scalar_b_fp32,
+    _scalar_s1_fp32,
+    _scalar_s2_fp32,
+)
 _scalar_inputs1_no_bias_fp32 = (_scalar_A_fp32, _scalar_s1_fp32, _scalar_s2_fp32)
-_scalar_inputs2_fp32 = (_scalar_A_3d_fp32, _scalar_b_3d_fp32, _scalar_s1_3d_fp32, _scalar_s2_3d_fp32)
-_scalar_inputs2_no_bias_fp32 = (_scalar_A_3d_fp32, _scalar_s1_3d_fp32, _scalar_s2_3d_fp32)
-_scalar_inputs1_fp64 = (_scalar_A_fp64, _scalar_b_fp64, _scalar_s1_fp64, _scalar_s2_fp64)
+_scalar_inputs2_fp32 = (
+    _scalar_A_3d_fp32,
+    _scalar_b_3d_fp32,
+    _scalar_s1_3d_fp32,
+    _scalar_s2_3d_fp32,
+)
+_scalar_inputs2_no_bias_fp32 = (
+    _scalar_A_3d_fp32,
+    _scalar_s1_3d_fp32,
+    _scalar_s2_3d_fp32,
+)
+_scalar_inputs1_fp64 = (
+    _scalar_A_fp64,
+    _scalar_b_fp64,
+    _scalar_s1_fp64,
+    _scalar_s2_fp64,
+)
 _scalar_inputs1_no_bias_fp64 = (_scalar_A_fp64, _scalar_s1_fp64, _scalar_s2_fp64)
-_scalar_inputs2_fp64 = (_scalar_A_3d_fp64, _scalar_b_3d_fp64, _scalar_s1_3d_fp64, _scalar_s2_3d_fp64)
-_scalar_inputs2_no_bias_fp64 = (_scalar_A_3d_fp64, _scalar_s1_3d_fp64, _scalar_s2_3d_fp64)
+_scalar_inputs2_fp64 = (
+    _scalar_A_3d_fp64,
+    _scalar_b_3d_fp64,
+    _scalar_s1_3d_fp64,
+    _scalar_s2_3d_fp64,
+)
+_scalar_inputs2_no_bias_fp64 = (
+    _scalar_A_3d_fp64,
+    _scalar_s1_3d_fp64,
+    _scalar_s2_3d_fp64,
+)
 
 _cal_scalar_bound_1d_fp32 = torch.jit.trace(_cal_scalar_bound_1d, _scalar_inputs1_fp32)
 _cal_scalar_bound_no_bias_1d_fp32 = torch.jit.trace(
@@ -726,7 +864,8 @@ def cal_scalar_bound(A: Tensor, b: Tensor | None, s1: Tensor, s2: Tensor) -> Ten
                 return _cal_scalar_bound_no_bias_3d_fp32(A, s1, s2)
             else:
                 raise ValueError(
-                    f"Unsupported dimension: " f"A: {A.shape} l: {s1.shape}, u: {s2.shape}."
+                    f"Unsupported dimension: "
+                    f"A: {A.shape} l: {s1.shape}, u: {s2.shape}."
                 )
     elif dtype == torch.float64:
         if b is not None:
@@ -746,7 +885,8 @@ def cal_scalar_bound(A: Tensor, b: Tensor | None, s1: Tensor, s2: Tensor) -> Ten
                 return _cal_scalar_bound_no_bias_3d_fp64(A, s1, s2)
             else:
                 raise ValueError(
-                    f"Unsupported dimension: " f"A: {A.shape} l: {s1.shape}, u: {s2.shape}."
+                    f"Unsupported dimension: "
+                    f"A: {A.shape} l: {s1.shape}, u: {s2.shape}."
                 )
     else:
         raise ValueError(f"Unsupported dtype: {dtype}.")
@@ -833,7 +973,9 @@ def back_sub_to_input(
 
         module = module.pre_nodes[0]
 
-    print(f"[DEBUG] Finish back-substitution in {time.perf_counter() - start:.4f} seconds.")
+    print(
+        f"[DEBUG] Finish back-substitution in {time.perf_counter() - start:.4f} seconds."
+    )
 
     return constr_bound
 
@@ -914,9 +1056,14 @@ def back_sub_residual_second_path(
 
     bound = None
     # Handle the non-linear module in the beginning of the residual block.
-    if isinstance(module, NonLinearNode) and module.act_relax_args.update_scalar_bounds_per_layer:
+    if (
+        isinstance(module, NonLinearNode)
+        and module.act_relax_args.update_scalar_bounds_per_layer
+    ):
         print(f"[DEBUG] Update scalar bounds by {module}.")
-        pre_scalar_bound = module.all_bounds[module.name].reshape(*constr_bound.L.A.shape[1:])
+        pre_scalar_bound = module.all_bounds[module.name].reshape(
+            *constr_bound.L.A.shape[1:]
+        )
 
         bound, _ = self.cal_bounds(constr_bound, pre_scalar_bound)
         if store_updated_bounds:

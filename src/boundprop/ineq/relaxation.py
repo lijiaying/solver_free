@@ -1,5 +1,10 @@
 __docformat__ = ["restructuredtext"]
-__all__ = ["cal_relaxation_maxpool2d", "cal_relaxation_relu", "cal_relaxation_sigmoid", "cal_relaxation_tanh"]
+__all__ = [
+    "cal_relaxation_maxpool2d",
+    "cal_relaxation_relu",
+    "cal_relaxation_sigmoid",
+    "cal_relaxation_tanh",
+]
 
 from typing import Callable
 import torch
@@ -17,10 +22,10 @@ from src.utils import (
 )
 
 
-
 #######################################################
 ## maxpool relaxation
 #######################################################
+
 
 def _cal_relaxation_maxpool2d(
     l: Tensor, u: Tensor, l_max: Tensor, l_argmax: Tensor, mask: Tensor
@@ -86,10 +91,10 @@ def cal_relaxation_maxpool2d(
     return sl, su, tl, tu
 
 
-
 #######################################################
 ## relu relaxation
 #######################################################
+
 
 def _cal_relaxation_relu(l: Tensor, u: Tensor) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     # Upper bound

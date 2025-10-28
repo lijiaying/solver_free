@@ -36,7 +36,9 @@ class ModelFactory:
         self._ignored_samples = None
         print(f"[INFO] Arguments:\n{arguments}")
 
-        _init_calculation_settings(arguments.random_seed, arguments.device, arguments.dtype)
+        _init_calculation_settings(
+            arguments.random_seed, arguments.device, arguments.dtype
+        )
 
         self.dtype = torch.float64 if arguments.dtype == "float64" else torch.float32
         self.device = torch.device(arguments.device)
@@ -83,7 +85,9 @@ class ModelFactory:
         print(f"[INFO] Ignored samples: {self._ignored_samples}")
 
         print(f"[DEBUG] Load dataset {args.dataset}.")
-        self.data_loader = load_dataset(args.dataset, dir_path="../.temp/datasets", normalize=False)
+        self.data_loader = load_dataset(
+            args.dataset, dir_path="../.temp/datasets", normalize=False
+        )
 
     def build(self):
         """
@@ -134,8 +138,6 @@ class ModelFactory:
         Verify the model with the given dataset and arguments.
         """
 
-    
-
         args = self.arguments
         dtype = self.dtype
         device = self.device
@@ -169,11 +171,7 @@ class ModelFactory:
             input_bound = self.model.get_input_bound(sample)
 
             # ======================= Incomplete Verification =======================
-            bound = self.model(
-                target_label,
-                sample,
-                input_bound
-            )
+            bound = self.model(target_label, sample, input_bound)
             l = bound.l
             print(f"[INFO] Verified lower bound: {l}")
 
@@ -229,8 +227,6 @@ class ModelFactory:
 
 
 def _init_calculation_settings(random_seed: int, device: str, dtype: str):
-
-
 
     print(f"[DEBUG] Set print options.")
     torch.set_printoptions(precision=4, sci_mode=False, linewidth=200, profile="full")
@@ -294,9 +290,9 @@ def _get_ignored_samples(
         if num_samples <= 0:
             break
 
-        print(f'-> checking sample', i, flush=True)
-        print('    sample:', sample)
-        print('    label:', label)
+        print(f"-> checking sample", i, flush=True)
+        print("    sample:", sample)
+        print("    label:", label)
 
         output = sess.run(
             [output_name],
@@ -323,20 +319,22 @@ def _load_ignored_samples(
     check_ignored_samples: bool = True,
 ) -> set:
 
-
     if not fpath.endswith(".txt"):
         raise ValueError(f"File path must end with .txt, not {fpath}.")
 
     print(f"[DEBUG] Load ignored samples from {fpath}.")
 
     if check_ignored_samples:
-        ignored_samples = _get_ignored_samples(net_fpath, data_loader, num_samples, start_index)
+        ignored_samples = _get_ignored_samples(
+            net_fpath, data_loader, num_samples, start_index
+        )
         _record_ignored_samples(fpath, ignored_samples)
 
     else:
         if not os.path.exists(fpath):
             print(
-                f"Ignored samples file {fpath} does not exist. " f"There is no ignored samples."
+                f"Ignored samples file {fpath} does not exist. "
+                f"There is no ignored samples."
             )
             return set()
         print(f"[DEBUG] Read existing ignored samples file {fpath}.")

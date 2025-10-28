@@ -101,7 +101,6 @@ class KActLPBoundModel(LPBoundModel):
         self._has_built_kact_constrs = False
 
     def verify_lp(self, label: int, adv_labels: list[int] = None) -> list[bool]:
-    
 
         num_labels = len(self.output_vars)
         if adv_labels is None:
@@ -177,7 +176,7 @@ class KActLPBoundModel(LPBoundModel):
               objective value and the solution will be None.
             - If return_solution is False, the solution will be None.
         """
-    
+
         print(f"[INFO] Start solving LP model.")
         start = time.perf_counter()
 
@@ -214,7 +213,7 @@ class KActLPBoundModel(LPBoundModel):
         """
         Build the multi-neuron constraints for the linear program.
         """
-    
+
         print(f"[INFO] Start building KAct constraints.")
         time_start = time.perf_counter()
 
@@ -376,7 +375,6 @@ class KActLPBoundModel(LPBoundModel):
         :return:
         """
 
-    
         print(f"[INFO] Start Separating KAct constraints.")
         time_start = time.perf_counter()
 
@@ -416,7 +414,7 @@ class KActLPBoundModel(LPBoundModel):
         )
 
     def _add_violated_kact_constrs(self, solution: np.ndarray):
-    
+
         if self._kact_constrs_A.shape[0] == 0:
             print(f"[INFO] No KAct constraints to add.")
             return
@@ -476,7 +474,6 @@ class KActLPBoundModel(LPBoundModel):
         """
         super().clear()
 
-    
         print(f"[DEBUG] Clear cache of kact constraints.")
 
         self._kact_constrs_A = None

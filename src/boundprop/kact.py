@@ -467,8 +467,6 @@ def _collect_trivial_pool_idxs(
     Collect the trivial pool detected by the function hull algorithm.
     """
 
-
-
     # Find the next non-None element to get the shape of the constraints.
     pool_mask_idxs = torch.arange(len(mask_mn), device=mask_mn.device)[mask_mn]
     trivial_pool_idxs = []
@@ -561,8 +559,6 @@ def back_sub_to_input_kact(
     new_bound, _ = self.cal_bounds(constr_bound, input_bound)
     bound = bound.intersect(new_bound)
 
-    print(
-        f"Finish back-substitution in {time.perf_counter() - start:.4f} seconds."
-    )
+    print(f"Finish back-substitution in {time.perf_counter() - start:.4f} seconds.")
 
     return bound

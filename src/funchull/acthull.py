@@ -25,6 +25,7 @@ from typing import List
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.utils import *
+
 # from src.colors import *
 
 import cdd
@@ -553,7 +554,9 @@ def compute_M_with_one_y_dlp(
     mask_vl, mask_vr = (vc < aux_point), (vc > aux_point)
 
     if not np.any(mask_vl) or not np.any(mask_vr):
-        raise RuntimeError("The vertices should not all greater/smaller than the auxiliary point.")
+        raise RuntimeError(
+            "The vertices should not all greater/smaller than the auxiliary point."
+        )
 
     ll, lr = aux_lines[[[0], [1]]] if is_convex else aux_lines[[[1], [0]]]
 
@@ -649,7 +652,9 @@ class ReLULikeHull(ActHull, ABC):
         dlp_point: float,
         is_convex: bool,
     ) -> tuple[ndarray, ndarray]:
-        return compute_M_with_one_y_dlp(idx, c, v, dlp_lines, dlp_point, is_convex=is_convex)
+        return compute_M_with_one_y_dlp(
+            idx, c, v, dlp_lines, dlp_point, is_convex=is_convex
+        )
 
     def _construct_dlp(self, *args, **kwargs):
         pass
@@ -948,7 +953,9 @@ class SShapeHull(ActHull, ABC):
         #     v[:,0] -= 1e-6  # To avoid numerical issue
         # else:
         #     v[:,0] += 1e-6  # To avoid numerical issue
-        return compute_M_with_one_y_dlp(idx, c, v, dlp_lines, dlp_point, is_convex=is_convex)
+        return compute_M_with_one_y_dlp(
+            idx, c, v, dlp_lines, dlp_point, is_convex=is_convex
+        )
 
     def _construct_dlp(
         self,
@@ -963,7 +970,9 @@ class SShapeHull(ActHull, ABC):
         klui: float,
         c: ndarray,
         add_s: bool,
-    ) -> tuple[ndarray | None, ndarray | None, float | None, float | None, ndarray | None]:
+    ) -> tuple[
+        ndarray | None, ndarray | None, float | None, float | None, ndarray | None
+    ]:
         """
         Calculate the auxiliary lines, auxiliary point, and S.
         There are three cases:
@@ -1676,7 +1685,9 @@ class MaxPoolHull(MaxPoolHullDLP):
 
 
 def __str_list(floatlist: List[float], precision=3, sep=", ") -> str:
-    strlist = [f"{f:n}" if float(f).is_integer() else f"{f:0{precision}f}" for f in floatlist]
+    strlist = [
+        f"{f:n}" if float(f).is_integer() else f"{f:0{precision}f}" for f in floatlist
+    ]
     return "[" + sep.join(strlist) + "]"
 
 

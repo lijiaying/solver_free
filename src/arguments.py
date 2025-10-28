@@ -15,6 +15,7 @@ from src.utils import *
 
 repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 @dataclass
 class Arguments:
     net_fpath: str
@@ -92,14 +93,20 @@ class Arguments:
         #     raise ValueError(f"Dataset {self.dataset} is not supported.")
 
         if self.epsilon < 0:
-            raise ValueError(f"Perturbation radius {self.epsilon} should be " f"non-negative.")
+            raise ValueError(
+                f"Perturbation radius {self.epsilon} should be " f"non-negative."
+            )
 
         if self.num_labels is not None:
             if self.num_labels < 2:
-                raise ValueError(f"Number of labels {self.num_labels} should be at least 2.")
+                raise ValueError(
+                    f"Number of labels {self.num_labels} should be at least 2."
+                )
 
         if self.num_samples < 1:
-            raise ValueError(f"Number of samples {self.num_samples} should be at least 1.")
+            raise ValueError(
+                f"Number of samples {self.num_samples} should be at least 1."
+            )
 
         if self.first_sample_index < 0:
             raise ValueError(
@@ -107,19 +114,23 @@ class Arguments:
             )
 
         if self.input_limited_range[0] > self.input_limited_range[1]:
-            raise ValueError(f"Input limited range {self.input_limited_range} is invalid.")
+            raise ValueError(
+                f"Input limited range {self.input_limited_range} is invalid."
+            )
 
         # if self.dataset in {"mnist", "cifar10"}:
         #     self.num_labels = 10
         net_lower = self.net_fpath.lower()
-        if self.dataset == 'deeppoly':
+        if self.dataset == "deeppoly":
             self.num_labels = 2
-        elif self.dataset == 'mnist':
+        elif self.dataset == "mnist":
             self.num_labels = 10
-        elif self.dataset == 'cifar10':
+        elif self.dataset == "cifar10":
             self.num_labels = 10
         else:
-            assert False, f'net_fpath {self.net_fpath} not recognized for dataset setting.'
+            assert (
+                False
+            ), f"net_fpath {self.net_fpath} not recognized for dataset setting."
 
         if self.net_dir_path is None:
             self.net_dir_path = os.path.dirname(self.net_fpath)
@@ -129,12 +140,16 @@ class Arguments:
 
         # If the log file is not None, check the dir path.
         if self.log_file is None:
-            self.log_file = os.path.join(repo_dir, "logs", f"{self.net_fname}_{self.epsilon}_{self.bound_propagation_method}_{self.act_relax_mode}.log")
-        print('log file:', self.log_file)
-        
+            self.log_file = os.path.join(
+                repo_dir,
+                "logs",
+                f"{self.net_fname}_{self.epsilon}_{self.bound_propagation_method}_{self.act_relax_mode}.log",
+            )
+        print("log file:", self.log_file)
+
         log_dir_path = os.path.dirname(self.log_file)
         if not os.path.exists(log_dir_path):
-            os.makedirs(log_dir_path)    
+            os.makedirs(log_dir_path)
 
         self._set_means_stds()
         self._set_args()
@@ -162,7 +177,9 @@ class Arguments:
         print(f"[DEBUG] Set perturbation arguments: {self.perturb_args}.")
         # -------- Set activation relaxation arguments --------
         self.act_relax_args = ActRelaxArgs(mode=self.act_relax_mode)
-        self.act_relax_args.update_scalar_bounds_per_layer = self.act_relax_mode != CROWN
+        self.act_relax_args.update_scalar_bounds_per_layer = (
+            self.act_relax_mode != CROWN
+        )
         print(f"[DEBUG] Set activation relaxation arguments: {self.act_relax_args}.")
 
         # -------- Set LP arguments --------
@@ -176,7 +193,9 @@ class Arguments:
 
     def __str__(self) -> str:
         return (
-            f"Arguments(\n" + ",\n".join(f"\t{k:<25}: {v}" for k, v in self.__dict__.items()) + "\n"
+            f"Arguments(\n"
+            + ",\n".join(f"\t{k:<25}: {v}" for k, v in self.__dict__.items())
+            + "\n"
             f")"
         )
 
@@ -200,4 +219,3 @@ class Arguments:
                 raise ValueError(f"Dataset {self.dataset} is not supported.")
 
         self.normalize = True
-

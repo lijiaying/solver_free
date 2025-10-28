@@ -19,8 +19,8 @@ from torchvision.datasets import CIFAR10, MNIST
 class MyDataset(torch.utils.data.Dataset):
     def __init__(self, root, train=True, transform=None, download=False):
         # mimic torchvision.datasets.MNIST interface
-        data = np.load(root + ('/train_data.npy' if train else '/test_data.npy'))
-        labels = np.load(root + ('/train_labels.npy' if train else '/test_labels.npy'))
+        data = np.load(root + ("/train_data.npy" if train else "/test_data.npy"))
+        labels = np.load(root + ("/train_labels.npy" if train else "/test_labels.npy"))
         self.images = data
         self.labels = labels
         self.transform = transform
@@ -36,18 +36,16 @@ class MyDataset(torch.utils.data.Dataset):
         return img, label
 
 
-
 def _load_eran_dataset(
     dataset: str, dir_path: str = None, max_samples_num: int = 1000
 ) -> list[tuple[torch.Tensor, torch.Tensor]]:
-
 
     dir_path = "../../datasets" if dir_path is None else dir_path
     print(
         f"Load ERAN dataset {dataset} in {dir_path} "
         f"(It has a different index order for image data)."
     )
-    print('**** dir_path:', dir_path)
+    print("**** dir_path:", dir_path)
 
     if dataset == "mnist":
         fpath = dir_path + "/mnist_test_full.csv"
@@ -94,7 +92,6 @@ def load_dataset(
 
     # __import__('ipdb').set_trace()
 
-
     # Create the directory if it does not exist.
     os.makedirs(dir_path, exist_ok=True)
 
@@ -124,9 +121,14 @@ def load_dataset(
         test_set = MNIST(root=dir_path, **kwargs)
     elif dataset == "cifar10":
         test_set = CIFAR10(root=dir_path + "/CIFAR10", **kwargs)
-    elif dataset == 'deeppoly':
+    elif dataset == "deeppoly":
         # __import__('ipdb').set_trace()
-        test_set = MyDataset(root=dir_path + "/DeepPoly", train=False, transform=transform, download=False)
+        test_set = MyDataset(
+            root=dir_path + "/DeepPoly",
+            train=False,
+            transform=transform,
+            download=False,
+        )
     else:
         raise NotImplementedError(f"Dataset {dataset} is not supported.")
 

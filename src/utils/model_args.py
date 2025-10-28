@@ -201,13 +201,18 @@ class ActRelaxArgs:
         if self.min_range < 0:
             raise ValueError(f"min_range should be nono-negative, got {self.min_range}")
         if self.min_half_range < 0:
-            raise ValueError(f"min_half_range should be non-negative, got {self.min_half_range}")
+            raise ValueError(
+                f"min_half_range should be non-negative, got {self.min_half_range}"
+            )
         if self.sigmoid_limit_bound <= 0:
             raise ValueError(
-                f"sigmoid_limit_bound should be positive, got " f"{self.sigmoid_limit_bound}"
+                f"sigmoid_limit_bound should be positive, got "
+                f"{self.sigmoid_limit_bound}"
             )
         if self.tanh_limit_bound <= 0:
-            raise ValueError(f"tanh_limit_bound should be positive, got {self.tanh_limit_bound}")
+            raise ValueError(
+                f"tanh_limit_bound should be positive, got {self.tanh_limit_bound}"
+            )
 
     def __str__(self):
         return (
@@ -396,7 +401,9 @@ class KActLPArgs:
 
     def __post_init__(self):
         if self.partition_size <= 0:
-            raise ValueError(f"partition_size should be positive, got {self.partition_size}")
+            raise ValueError(
+                f"partition_size should be positive, got {self.partition_size}"
+            )
         if self.group_size <= 0:
             raise ValueError(f"group_size should be positive, got {self.group_size}")
         if self.max_overlap_size < 0:
@@ -405,7 +412,8 @@ class KActLPArgs:
             )
         if self.max_parallel_groups <= 0:
             raise ValueError(
-                f"max_parallel_groups should be positive, got " f"{self.max_parallel_groups}"
+                f"max_parallel_groups should be positive, got "
+                f"{self.max_parallel_groups}"
             )
         if self.max_groups < -1:
             raise ValueError(f"max_groups should be >= -1 got {self.max_groups}")
