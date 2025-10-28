@@ -417,7 +417,7 @@ class GemmLPNode(LinearLPNode):
             y = gvars[i]
 
             constrs.append(
-                model.addLConstr(
+                model.addLinearConstr(
                     lhs=wxb,
                     sense=gurobipy.GRB.EQUAL,
                     rhs=y,
@@ -552,7 +552,7 @@ class Conv2DLPNode(LinearLPNode):
 
             wxb += self.bias[yc]
             constrs.append(
-                model.addLConstr(
+                model.addLinearConstr(
                     lhs=wxb,
                     sense=gurobipy.GRB.EQUAL,
                     rhs=y,
@@ -740,7 +740,7 @@ class NonLinearLPNode(BasicLPNode, ABC):
                 x, y = [pre_gvars[i] for i in ids], [gvars[i] for i in ids]
                 wx, wy = gurobipy.LinExpr(c_x, x), gurobipy.LinExpr(c_y, y)
                 gconstrs.append(
-                    model.addLConstr(
+                    model.addLinearConstr(
                         lhs=b + wx + wy,
                         sense=gurobipy.GRB.GREATER_EQUAL,
                         rhs=0.0,
@@ -831,16 +831,16 @@ class ReLULPNode(NonLinearLPNode):
     ) -> list[gurobipy.Constr]:
 
         if l >= 0:
-            constr = model.addLConstr(lhs=x, sense=gurobipy.GRB.EQUAL, rhs=y, name=name)
+            constr = model.addLinearConstr(lhs=x, sense=gurobipy.GRB.EQUAL, rhs=y, name=name)
             return [constr]
 
         elif l < 0 < u:
             min_half_range = self.act_relax_args.min_half_range
             if u > min_half_range and l < -min_half_range:
-                constr1 = model.addLConstr(
+                constr1 = model.addLinearConstr(
                     lhs=y, sense=gurobipy.GRB.GREATER_EQUAL, rhs=x, name=name + "_l_act"
                 )
-                constr2 = model.addLConstr(
+                constr2 = model.addLinearConstr(
                     lhs=u * (x - l),
                     sense=gurobipy.GRB.GREATER_EQUAL,
                     rhs=(u - l) * y,
@@ -848,10 +848,10 @@ class ReLULPNode(NonLinearLPNode):
                 )
 
             else:
-                constr1 = model.addLConstr(
+                constr1 = model.addLinearConstr(
                     lhs=y, sense=gurobipy.GRB.GREATER_EQUAL, rhs=x, name=name + "_l_act"
                 )
-                constr2 = model.addLConstr(
+                constr2 = model.addLinearConstr(
                     lhs=x - l,
                     sense=gurobipy.GRB.GREATER_EQUAL,
                     rhs=y,
@@ -914,7 +914,7 @@ class SShapeLPNode(NonLinearLPNode, ABC):
         if np.allclose(l, u):
             f, df = self.f, self.df
             return [
-                model.addLConstr(
+                model.addLinearConstr(
                     lhs=y,
                     sense=gurobipy.GRB.EQUAL,
                     rhs=f(l) + df(l) * (x - l),
@@ -930,13 +930,13 @@ class SShapeLPNode(NonLinearLPNode, ABC):
             if u - l < self.act_relax_args.min_range or u < -limit or l > limit:
                 f, df = self.f, self.df
                 s = min(df(l), df(u))
-                constr1 = model.addLConstr(
+                constr1 = model.addLinearConstr(
                     lhs=y,
                     sense=gurobipy.GRB.GREATER_EQUAL,
                     rhs=f(l) + s * (x - l),
                     name=name + "_l_act",
                 )
-                constr2 = model.addLConstr(
+                constr2 = model.addLinearConstr(
                     lhs=f(u) + s * (x - u),
                     sense=gurobipy.GRB.GREATER_EQUAL,
                     rhs=y,
@@ -949,7 +949,7 @@ class SShapeLPNode(NonLinearLPNode, ABC):
         for i, c in enumerate(cs):
             name = name
             b, kx, ky = c
-            constr = model.addLConstr(
+            constr = model.addLinearConstr(
                 lhs=b + kx * x + ky * y,
                 sense=gurobipy.GRB.GREATER_EQUAL,
                 rhs=0,
@@ -1230,7 +1230,7 @@ class MaxPool2DLPNode(NonLinearLPNode):
 
                 name = self._create_constr_name(y_idx) + f"_l_{x_idx}"
                 constrs.append(
-                    model.addLConstr(
+                    model.addLinearConstr(
                         lhs=y,
                         sense=gurobipy.GRB.GREATER_EQUAL,
                         rhs=pre_gvars[x_idx],
@@ -1246,7 +1246,7 @@ class MaxPool2DLPNode(NonLinearLPNode):
 
             name = self._create_constr_name(y_idx) + "_u"
             constrs.append(
-                model.addLConstr(
+                model.addLinearConstr(
                     lhs=x_sum - l_sum + l_max,
                     # lhs=u_max,
                     sense=gurobipy.GRB.GREATER_EQUAL,
@@ -1313,7 +1313,7 @@ class MaxPool2DLPNode(NonLinearLPNode):
                 x, y = [pre_gvars[i] for i in input_ids], gvars[output_id]  # noqa
                 wx, wy = gurobipy.LinExpr(c_x, x), gurobipy.LinExpr(c_y, y)
                 gconstrs.append(
-                    model.addLConstr(
+                    model.addLinearConstr(
                         lhs=b + wx + wy,
                         sense=gurobipy.GRB.GREATER_EQUAL,
                         rhs=0.0,
@@ -1422,7 +1422,7 @@ class ResidualAddLPNode(BasicLPNode):
             raise ValueError("pre_bounds2 are not provided.")
 
         constrs = [
-            model.addLConstr(
+            model.addLinearConstr(
                 lhs=pre_gvars1[i] + pre_gvars2[i],
                 sense=gurobipy.GRB.EQUAL,
                 rhs=gvars[i],

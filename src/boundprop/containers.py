@@ -51,7 +51,7 @@ class BPSharedData:
         layer.
         """
 
-        self.all_relaxations: dict[str, LConstrBound] = OrderedDict()
+        self.all_relaxations: dict[str, LinearConstrBound] = OrderedDict()
         """
         A dictionary that stores the linear relaxations of each non-linear layer.
         The key is the name of the layer, and the value is the linear relaxation of the

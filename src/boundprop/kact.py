@@ -295,10 +295,10 @@ def back_sub_grouped_constrs(
 
         # Calculate the biases of constrs by backward inequality propagation.
         ineqs = ineqs.reshape((-1, n_vars))
-        constr = LConstr(A=ineqs)
+        constr = LinearConstr(A=ineqs)
         __import__("ipdb").set_trace()
         bound = back_sub_to_input_kact(
-            pre_module, LConstrBound(L=constr, U=constr), input_bound
+            pre_module, LinearConstrBound(L=constr, U=constr), input_bound
         )
         l, u = bound.l, bound.u
         # if l.max() < -1e6 or u.max() > 1e6:
@@ -485,7 +485,7 @@ def _collect_trivial_pool_idxs(
 
 def back_sub_to_input_kact(
     self: "BasicIneqNode",  # noqa
-    constr_bound: LConstrBound,
+    constr_bound: LinearConstrBound,
     input_bound: ScalarBound,
 ) -> ScalarBound:
     """
@@ -509,7 +509,7 @@ def back_sub_to_input_kact(
     )
 
     in_residual_block = False
-    constr_bound_r: LConstrBound | None = None
+    constr_bound_r: LinearConstrBound | None = None
     residual_second_path: list["BasicIneqNode"] = []  # noqa
     module: "BasicIneqNode" = self  # noqa
     while True:

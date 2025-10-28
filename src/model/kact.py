@@ -429,7 +429,7 @@ class KActLPBoundModel(LPBoundModel):
                 mx = gurobipy.LinExpr(
                     [m[0, c] for c in m.indices], [vars_[c] for c in m.indices]
                 )
-                self.model.addLConstr(
+                self.model.addLinearConstr(
                     lhs=mx,
                     sense=GRB.GREATER_EQUAL,
                     rhs=b,

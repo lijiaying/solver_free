@@ -16,7 +16,8 @@ import logging
 import time
 
 from src.boundprop.base import NonLinearNode
-from src.utils import LConstrBound, ScalarBound
+from src.utils import LinearConstrBound, ScalarBound
+from src.utils.colors import *
 
 import torch
 import torch.nn.functional as F
@@ -194,35 +195,38 @@ def gemm_back_sub(
     :return: The matrix and bias of the linear relaxation after back-substitution.
     """
     dtype = A.dtype
+    print(f'{BLUE}->> gemm_back_sub: {RESET}')
+    print(f'    A: {A}')
+    print(f'    b: {b}')
+    print(f'    weight: {weight}')
+    print(f'    bias: {bias}')
 
     if dtype not in (torch.float32, torch.float64):
         raise ValueError(f"The data type {dtype} is not supported.")
 
     if b is not None and bias is not None:
-        # return _back_sub_gemm(A, b, weight, bias)
         if dtype == torch.float32:
-            return _back_sub_gemm_fp32(A, b, weight, bias)
+            ret = _back_sub_gemm_fp32(A, b, weight, bias)
         else:
-            return _back_sub_gemm_fp64(A, b, weight, bias)
+            ret = _back_sub_gemm_fp64(A, b, weight, bias)
     elif b is None and bias is None:
-        # return _back_sub_gemm_no_bias3(A, weight), None
         if dtype == torch.float32:
             A = _back_sub_gemm_no_bias3_fp32(A, weight)
         else:
             A = _back_sub_gemm_no_bias3_fp64(A, weight)
-        return A, None
+        ret = A, None
     elif b is not None:
-        # return _back_sub_gemm_no_bias1(A, b, weight)
         if dtype == torch.float32:
-            return _back_sub_gemm_no_bias1_fp32(A, b, weight)
+            ret = _back_sub_gemm_no_bias1_fp32(A, b, weight)
         else:
-            return _back_sub_gemm_no_bias1_fp64(A, b, weight)
+            ret = _back_sub_gemm_no_bias1_fp64(A, b, weight)
     else:
-        # return _back_sub_gemm_no_bias2(A, weight, bias)
         if dtype == torch.float32:
-            return _back_sub_gemm_no_bias2_fp32(A, weight, bias)
+            ret = _back_sub_gemm_no_bias2_fp32(A, weight, bias)
         else:
-            return _back_sub_gemm_no_bias2_fp64(A, weight, bias)
+            ret = _back_sub_gemm_no_bias2_fp64(A, weight, bias)
+    print(f'{GREEN}<<- gemm_back_sub with ret: \n{ret}{RESET}')
+    return ret
 
 
 #######################################################
@@ -712,10 +716,19 @@ def relu_back_sub(
     assert (
         sl.dim() == su.dim() == 1 and tu.dim() == 1
     ), f"The dimensions are not supported. sl: {sl.shape}, su: {su.shape}, tu: {tu.shape}."
-    if is_lower:
-        return _back_sub_relu_1d_lower(A, b, sl, su, tu)
 
-    return _back_sub_relu_1d_upper(A, b, sl, su, tu)
+    print(f'{CYAN}->> relu_back_sub: is_lower={is_lower}{RESET}')
+    print(f'    A: {A}')
+    print(f'    b: {b}')
+    print(f'    sl: {sl}')
+    print(f'    su: {su}')
+    print(f'    tu: {tu}')
+    if is_lower:
+        ret = _back_sub_relu_1d_lower(A, b, sl, su, tu)
+    else:
+        ret = _back_sub_relu_1d_upper(A, b, sl, su, tu)
+    print(f'{GREEN}<<- relu_back_sub with ret: \n{ret}{RESET}')
+    return ret
 
 
 #######################################################
@@ -917,8 +930,8 @@ _nonlinear_t2_3d_fp64 = _fp64_2x4
 #######################################################
 def back_sub_to_input(
     self: "BasicIneqNode",  # noqa
-    constr_bound: LConstrBound,
-) -> LConstrBound:
+    constr_bound: LinearConstrBound,
+) -> LinearConstrBound:
     """
     Back-substitute the linear relaxation to the preceding layer until the input layer.
 
@@ -932,7 +945,7 @@ def back_sub_to_input(
     start = time.perf_counter()
 
     # The constraint bound for the output of the residual block.
-    constr_bound_r: LConstrBound | None = None
+    constr_bound_r: LinearConstrBound | None = None
     # The queue to store the modules in the second path of the residual block.
     residual_second_path: list["BasicIneqNode"] = []  # noqa
     # If self is after a residual block and the current module is in the residual block,
@@ -983,10 +996,10 @@ def back_sub_to_input(
 def back_sub_once_with_update_bound(
     self: "BasicIneqNode",  # noqa
     module: "BasicIneqNode",  # noqa
-    constr_bound: LConstrBound,
+    constr_bound: LinearConstrBound,
     in_residual_block: bool,
     store_updated_bounds: bool = True,
-) -> tuple[LConstrBound, ScalarBound | None]:
+) -> tuple[LinearConstrBound, ScalarBound | None]:
 
     constr_bound = module.back_sub_once(constr_bound)
     pre_module = module.pre_nodes[0] if module.pre_nodes else None
@@ -1011,9 +1024,9 @@ def back_sub_once_with_update_bound(
 
 def collect_residual_second_path(
     module: "BasicIneqNode",  # noqa
-    constr_bound: LConstrBound,
+    constr_bound: LinearConstrBound,
     residual_second_path: list["BasicIneqNode"],  # noqa
-) -> tuple[LConstrBound, list["BasicIneqNode"]]:  # noqa
+) -> tuple[LinearConstrBound, list["BasicIneqNode"]]:  # noqa
     # For residual block, there will be two paths to the input.
     # We collect the modules in the second path and process them later.
     # The input biases will be calculated in the second path, so we do not
@@ -1034,13 +1047,13 @@ def collect_residual_second_path(
 def back_sub_residual_second_path(
     self: "BasicIneqNode",  # noqa
     module: "BasicIneqNode",  # noqa
-    constr_bound: LConstrBound,
-    constr_bound_r: LConstrBound,
+    constr_bound: LinearConstrBound,
+    constr_bound_r: LinearConstrBound,
     residual_second_path: list["BasicIneqNode"],  # noqa
     store_updated_bounds: bool = True,
 ) -> (
-    tuple[LConstrBound, None, list["BasicIneqNode"]]
-    | tuple[LConstrBound, None, list["BasicIneqNode"], ScalarBound | None]
+    tuple[LinearConstrBound, None, list["BasicIneqNode"]]
+    | tuple[LinearConstrBound, None, list["BasicIneqNode"], ScalarBound | None]
 ):  # noqa  # noqa
 
     residual_second_path: list["BasicIneqNode"]  # noqa

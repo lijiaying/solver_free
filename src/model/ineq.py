@@ -43,14 +43,11 @@ class IneqBoundModel(BasicBoundModel[T]):
         *args,
         **kwargs,
     ):
-        super(IneqBoundModel, self).__init__(
-            net_fpath, perturb_args, dtype, device, *args, **kwargs
-        )
-
+        super(IneqBoundModel, self).__init__(net_fpath, perturb_args, dtype, device, *args, **kwargs)
         self.act_relax_args: ActRelaxArgs = act_relax_args
-
         # The following will be shared with the submodules when building them.
         self.bp_shared_data = BPSharedData(dtype, device)
+
 
     def forward(
         self,
@@ -63,12 +60,10 @@ class IneqBoundModel(BasicBoundModel[T]):
         """
         This is the main method to calculate the bound of the output of the network.
 
-        - One hidden layer is divided by one linear operation and one non-linear
-          operation (activation function).
+        - The hidden layer is splitted as 1 linear op and 1 non-linear op (i.e. activation).
         - In this method, the bounds of neurons in each layer are calculated until
           the last layer. The scalar bound of the output is returned.
-        - For each layer, a backward inequality propagation or back-substitution is
-          used to calculate the bounds of the neurons in the layer.
+        - For each layer, back-substitution is used to calculate the bounds of the neurons in the layer.
 
         Here it utilized the mechanism of pytorch module for the forward method.
 
@@ -79,15 +74,12 @@ class IneqBoundModel(BasicBoundModel[T]):
         :return: The scalar bound of the output and the minimum input point if enabled.
         """
 
-        print(f"Start bound propagation.")
-
         time_start = time.perf_counter()
-
+        print(f">>>>>>>>>>>>>>> Start bound propagation.")
         bound = self.bound_propagate(input_bound)
-
-        print(f"Finish bound propagation in {time.perf_counter() - time_start:.4f}s")
-
+        print(f"<<<<<<<<<<<<<<< Finish bound propagation in {time.perf_counter() - time_start:.4f}s")
         return bound
+
 
     def bound_propagate(
         self,
@@ -104,37 +96,25 @@ class IneqBoundModel(BasicBoundModel[T]):
 
         modules_iter: Iterator[BasicIneqNode] = iter(self.submodules.values())
         module = next(modules_iter)  # Input layer
-        print(f"Process {module}".center(100, "~"))
+        print(f"{BLUE}>>> Process {module}{RESET}")
 
         print(f"Lower bound: {input_bound.l.flatten()[:5]}")
         print(f"Upper bound: {input_bound.u.flatten()[:5]}")
 
         module = next(modules_iter)
         while module is not None:
-            print(f"{BLUE}>>> Process {module}{RESET}")
-            print(f"Process {module}".center(100, "~"))
             start = time.perf_counter()
+            print(f"{BLUE}>>> Process {module}{RESET}")
 
             module.clear()
-            bound = module.forward(
-                input_bound, only_lower_bound=module.next_nodes is None
-            )
+            bound = module.forward(input_bound, only_lower_bound=module.next_nodes is None)
 
-            print(f"    INPUT bound: {input_bound}")
-            print(f"    O Lower bound: {bound.l.flatten()[:5]}")
-            print(
-                f"    O Upper bound: {bound.u.flatten()[:5] if bound.u is not None else None}"
-            )
-
-            print(
-                f"Finish processing {module} in " f"{time.perf_counter() - start:.4f}s"
-            )
-            print(
-                f"{GREEN}<<< Finish processing {module} in "
-                f"{time.perf_counter() - start:.4f}s{RESET}"
-            )
+            print(f"    INPUT  bound: {input_bound}")
+            print(f"    OUTPUT bound: lower: {bound.l.flatten()[:5]}, upper: {bound.u.flatten()[:5] if bound.u is not None else None}")
+            print(f"{GREEN}<<< Finish processing {module} in {time.perf_counter() - start:.4f}s{RESET}")
             module = next(modules_iter, None)
         return bound
+
 
     def _handle_input(
         self,
@@ -143,8 +123,8 @@ class IneqBoundModel(BasicBoundModel[T]):
         input_size: tuple[int] | tuple[int, int, int],
     ) -> InputNode:
         args = (name, input_names, input_size, self.bp_shared_data)
-
         return InputIneqNode(*args)
+
 
     def _handle_gemm(
         self,
@@ -155,8 +135,8 @@ class IneqBoundModel(BasicBoundModel[T]):
         bias: Tensor | None = None,
     ) -> GemmNode:
         args = (name, input_names, input_size, self.bp_shared_data, weight, bias)
-
         return GemmIneqNode(*args)
+
 
     def _handle_conv2d(
         self,
@@ -184,8 +164,8 @@ class IneqBoundModel(BasicBoundModel[T]):
             groups,
             ceil_mode,
         )
-
         return Conv2DIneqNode(*args)
+
 
     def _handle_relu(
         self,
@@ -194,8 +174,8 @@ class IneqBoundModel(BasicBoundModel[T]):
         input_size: tuple[int] | tuple[int, int, int],
     ) -> ReLUNode:
         args = (name, input_names, input_size, self.bp_shared_data, self.act_relax_args)
-
         return ReLUIneqNode(*args)
+
 
     def _handle_sigmoid(
         self,
@@ -204,8 +184,8 @@ class IneqBoundModel(BasicBoundModel[T]):
         input_size: tuple[int] | tuple[int, int, int],
     ) -> SigmoidNode:
         args = (name, input_names, input_size, self.bp_shared_data, self.act_relax_args)
-
         return SigmoidIneqNode(*args)
+
 
     def _handle_tanh(
         self,
@@ -214,8 +194,8 @@ class IneqBoundModel(BasicBoundModel[T]):
         input_size: tuple[int] | tuple[int, int, int],
     ) -> TanhNode:
         args = (name, input_names, input_size, self.bp_shared_data, self.act_relax_args)
-
         return TanhIneqNode(*args)
+
 
     def _handle_maxpool2d(
         self,
@@ -243,8 +223,8 @@ class IneqBoundModel(BasicBoundModel[T]):
             "dilation": dilation,
             "ceil_mode": ceil_mode,
         }
-
         return MaxPool2DIneqNode(*args, **kwargs)
+
 
     def _handle_residual_add(
         self,
@@ -255,11 +235,13 @@ class IneqBoundModel(BasicBoundModel[T]):
         args = (name, input_names, input_size, self.bp_shared_data)
         return ResidualAddIneqNode(*args)
 
+
     def clear(self):
         """
         Clear the cached data in the current sample to verify the next sample.
         """
         self.bp_shared_data.clear()
+
 
     @property
     def all_bounds(self) -> dict[str, ScalarBound]:
@@ -270,8 +252,9 @@ class IneqBoundModel(BasicBoundModel[T]):
         """
         return self.bp_shared_data.all_bounds
 
+
     @property
-    def all_relaxations(self) -> dict[str, LConstrBound]:
+    def all_relaxations(self) -> dict[str, LinearConstrBound]:
         """
         All linear constraints of the neurons in the network.
 

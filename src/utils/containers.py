@@ -7,8 +7,8 @@ the readability of the code.
 __docformat__ = "restructuredtext"
 __all__ = [
     "ScalarBound",
-    "LConstr",
-    "LConstrBound",
+    "LinearConstr",
+    "LinearConstrBound",
 ]
 
 from dataclasses import dataclass
@@ -131,7 +131,7 @@ class ScalarBound:
 
 
 @dataclass
-class LConstr:
+class LinearConstr:
     """
     A class of two tensors representing linear constraints.
 
@@ -156,7 +156,7 @@ class LConstr:
             if self.A.shape[0] != self.b.shape[0]:
                 raise ValueError("The first dimension of A and b must be the same.")
 
-    def to(self, *args, **kwargs) -> "LConstr":
+    def to(self, *args, **kwargs) -> "LinearConstr":
         """This is a similar function to the `torch.Tensor.to()` function."""
 
         self.A.to(*args, **kwargs)
@@ -164,17 +164,17 @@ class LConstr:
             self.b.to(*args, **kwargs)
         return self
 
-    def clone(self) -> "LConstr":
+    def clone(self) -> "LinearConstr":
         """This is a similar function to the `torch.Tensor.clone()` function."""
 
-        return LConstr(A=self.A.clone(), b=None if self.b is None else self.b.clone())
+        return LinearConstr(A=self.A.clone(), b=None if self.b is None else self.b.clone())
 
-    def detach(self) -> "LConstr":
+    def detach(self) -> "LinearConstr":
         """This is a similar function to the `torch.Tensor.detach()` function."""
 
-        return LConstr(A=self.A.detach(), b=None if self.b is None else self.b.detach())
+        return LinearConstr(A=self.A.detach(), b=None if self.b is None else self.b.detach())
 
-    def detach_(self) -> "LConstr":
+    def detach_(self) -> "LinearConstr":
         """This is a similar function to the `torch.Tensor.detach_()` function."""
 
         self.A.detach_()
@@ -186,7 +186,7 @@ class LConstr:
         """This is a similar function to the `torch.Tensor.requires_grad()` function."""
         return self.A.requires_grad or (self.b is not None and self.b.requires_grad)
 
-    def requires_grad_(self, requires_grad: bool) -> "LConstr":
+    def requires_grad_(self, requires_grad: bool) -> "LinearConstr":
         """
         This is a similar function to the `torch.Tensor.requires_grad_()` function.
         """
@@ -195,7 +195,7 @@ class LConstr:
             self.b.requires_grad_(requires_grad)
         return self
 
-    def __add__(self, other: "LConstr") -> "LConstr":
+    def __add__(self, other: "LinearConstr") -> "LinearConstr":
         A = self.A + other.A
         b = None
         if self.b is not None and other.b is not None:
@@ -204,9 +204,9 @@ class LConstr:
             b = self.b
         elif other.b is not None:
             b = other.b
-        return LConstr(A=A, b=b)
+        return LinearConstr(A=A, b=b)
 
-    def __sub__(self, other: "LConstr") -> "LConstr":
+    def __sub__(self, other: "LinearConstr") -> "LinearConstr":
         A = self.A - other.A
         b = None
         if self.b is not None and other.b is not None:
@@ -215,11 +215,11 @@ class LConstr:
             b = self.b
         elif other.b is not None:
             b = other.b
-        return LConstr(A=A, b=b)
+        return LinearConstr(A=A, b=b)
 
     def __str__(self):
         return (
-            f"LConstr(A={self.A.tolist()}, b"
+            f"LinearConstr(A={self.A.tolist()}, b"
             f"={self.b.tolist() if self.b is not None else None})"
         )
 
@@ -228,20 +228,19 @@ class LConstr:
 
 
 @dataclass
-class LConstrBound:
+class LinearConstrBound:
     """
     A class of two constraints representing lower and upper bounds. The lower constraint
-    bound must not be none. But the upper constraint bound can be none, which serves
-    to most verification for the last output variables.
+    bound should not be None, while the upper constraint bound can be, when it encodes the output node.
 
     :exception ValueError: If the shapes of A are not the same.
     :exception ValueError: If the shapes of b are not the same.
     """
 
-    L: LConstr
+    L: LinearConstr
     """The lower constraint bound."""
 
-    U: LConstr | None = None
+    U: LinearConstr | None = None
     """The upper constraint bound."""
 
     def __post_init__(self):
@@ -253,7 +252,7 @@ class LConstrBound:
                 if self.L.b.shape != self.U.b.shape:
                     raise ValueError("The shapes of b must be the same.")
 
-    def to(self, *args, **kwargs) -> "LConstrBound":
+    def to(self, *args, **kwargs) -> "LinearConstrBound":
         """This is a similar function to the `torch.Tensor.to()` function."""
 
         self.L.to(*args, **kwargs)
@@ -261,23 +260,23 @@ class LConstrBound:
             self.U.to(*args, **kwargs)
         return self
 
-    def clone(self) -> "LConstrBound":
+    def clone(self) -> "LinearConstrBound":
         """This is a similar function to the `torch.Tensor.clone()` function."""
 
-        new_constr_bound = LConstrBound(L=self.L.clone())
+        new_constr_bound = LinearConstrBound(L=self.L.clone())
         if self.U is not None:
             new_constr_bound.U = self.U.clone()
         return new_constr_bound
 
-    def detach(self) -> "LConstrBound":
+    def detach(self) -> "LinearConstrBound":
         """This is a similar function to the `torch.Tensor.detach()` function."""
 
-        new_constr_bound = LConstrBound(L=self.L.detach())
+        new_constr_bound = LinearConstrBound(L=self.L.detach())
         if self.U is not None:
             new_constr_bound.U = self.U.detach()
         return new_constr_bound
 
-    def detach_(self) -> "LConstrBound":
+    def detach_(self) -> "LinearConstrBound":
         """This is a similar function to the `torch.Tensor.detach_()` function."""
 
         self.L.detach_()
@@ -289,7 +288,7 @@ class LConstrBound:
         """This is a similar function to the `torch.Tensor.requires_grad()` function."""
         return self.L.requires_grad or (self.U is not None and self.U.requires_grad)
 
-    def requires_grad_(self, requires_grad: bool) -> "LConstrBound":
+    def requires_grad_(self, requires_grad: bool) -> "LinearConstrBound":
         """
         This is a similar function to the `torch.Tensor.requires_grad_()` function.
         """
@@ -299,7 +298,7 @@ class LConstrBound:
             self.U.requires_grad_(requires_grad)
         return self
 
-    def __add__(self, other: "LConstrBound") -> "LConstrBound":
+    def __add__(self, other: "LinearConstrBound") -> "LinearConstrBound":
         L = self.L + other.L
         U = None
         if self.U is not None and other.U is not None:
@@ -308,9 +307,9 @@ class LConstrBound:
             U = self.U
         elif other.U is not None:
             U = other.U
-        return LConstrBound(L=L, U=U)
+        return LinearConstrBound(L=L, U=U)
 
-    def __sub__(self, other: "LConstrBound") -> "LConstrBound":
+    def __sub__(self, other: "LinearConstrBound") -> "LinearConstrBound":
         L = self.L - other.L
         U = None
         if self.U is not None and other.U is not None:
@@ -319,4 +318,4 @@ class LConstrBound:
             U = self.U
         elif other.U is not None:
             U = other.U
-        return LConstrBound(L=L, U=U)
+        return LinearConstrBound(L=L, U=U)

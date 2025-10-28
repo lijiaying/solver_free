@@ -220,7 +220,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
                 lp_module.pre_nodes = None
 
             print(
-                f"Set pre nodes of {module.__class__.__name__}({module.name}) "
+                f"Set prev nodes of {module.__class__.__name__}({module.name}) "
                 f"being {lp_module.pre_nodes}."
             )
 

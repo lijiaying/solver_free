@@ -55,14 +55,13 @@ class BasicIneqNode(BasicNode, ABC):
         # used to calculate the bounds of neurons in the layer.
         # This is to reduce the computation when calculate the bounds of neurons of
         # the layer.
-        self._cached_init_constr: LConstr | None = None
+        self._cached_init_constr: LinearConstr | None = None
 
     @abstractmethod
     def forward(
         self,
         input_bound: ScalarBound,
         only_lower_bound: bool = False,
-        debug: bool = False,
     ) -> tuple[ScalarBound | None, Tensor | None]:
         """
         Calculate the scalar bounds of the neurons in the layer by the linear relaxation
@@ -74,23 +73,17 @@ class BasicIneqNode(BasicNode, ABC):
         If the current layer is a non-linear layer, the linear relaxation of the layer
         is constructed.
 
-        :param input_bound: The scalar bounds of the input.
-        :param only_lower_bound: When enabled, return only the lower bound, which is
-            commonly used for the output layer.
-        :param debug: When enabled, activate the debug mode.
-
         :return: The scalar bounds of the neurons in the layer.
         """
         pass
 
-    def init_constr_bound(self, only_lower_bound: bool = False) -> LConstrBound:
+    def init_constr_bound(self, only_lower_bound: bool = False) -> LinearConstrBound:
         """
         Generate the linear inequalities for back-substitution.
 
-        The linear inequalities are represented by a matrix and a bias.
-        To easy understanding, the return is an identity matrix and a zero bias to
-        represent the equality constraints (coefficients and constants) of the current
-        layer.
+        The linear inequalities are in form of a matrix and a bias.
+        By default, it returns an identity matrix and a zero bias, representing the equality constraints 
+        (coefficients and constants) of the current layer.
         This represents the variables is represented by themselves.
 
         .. tip::
@@ -103,10 +96,10 @@ class BasicIneqNode(BasicNode, ABC):
         """
         if self._cached_init_constr is not None:
             if only_lower_bound:
-                return LConstrBound(L=self._cached_init_constr)
-            return LConstrBound(L=self._cached_init_constr, U=self._cached_init_constr)
+                return LinearConstrBound(L=self._cached_init_constr)
+            return LinearConstrBound(L=self._cached_init_constr, U=self._cached_init_constr)
 
-        constr = LConstr(
+        constr = LinearConstr(
             A=torch.eye(
                 math.prod(self.output_size),
                 dtype=self.shared_data.dtype,
@@ -117,10 +110,10 @@ class BasicIneqNode(BasicNode, ABC):
         self._cached_init_constr = constr.detach().clone()
 
         if only_lower_bound:
-            return LConstrBound(L=constr)
-        return LConstrBound(L=constr, U=constr)
+            return LinearConstrBound(L=constr)
+        return LinearConstrBound(L=constr, U=constr)
 
-    def back_sub_to_input(self, constr_bound: LConstrBound) -> LConstrBound:
+    def back_sub_to_input(self, constr_bound: LinearConstrBound) -> LinearConstrBound:
         """
         Back-substitute the linear relaxation of the layer to the input layer and
         obtain a linear relaxation represented by input variables.
@@ -132,7 +125,7 @@ class BasicIneqNode(BasicNode, ABC):
         return back_sub_to_input(self, constr_bound)
 
     @abstractmethod
-    def back_sub_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def back_sub_once(self, constr_bound: LinearConstrBound) -> LinearConstrBound:
         """
         Back-substitute the linear relaxations to the previous layers.
 
@@ -145,7 +138,7 @@ class BasicIneqNode(BasicNode, ABC):
 
     @staticmethod
     def cal_bounds(
-        constr_bound: LConstrBound, scalar_bound: ScalarBound
+        constr_bound: LinearConstrBound, scalar_bound: ScalarBound
     ) -> tuple[ScalarBound, Tensor | None]:
         """
         Calculate the scalar bounds of the given linear inequalities by the given
@@ -195,7 +188,7 @@ class BasicIneqNode(BasicNode, ABC):
 
     @staticmethod
     def store_relaxations(
-        all_relaxations: dict[str, LConstrBound], name: str, relaxation: LConstrBound
+        all_relaxations: dict[str, LinearConstrBound], name: str, relaxation: LinearConstrBound
     ):
         """
         Store or update the new linear relaxation of the neurons in the layer into the
@@ -220,7 +213,7 @@ class BasicIneqNode(BasicNode, ABC):
         return self.shared_data.all_bounds
 
     @property
-    def all_relaxations(self) -> dict[str, LConstrBound]:
+    def all_relaxations(self) -> dict[str, LinearConstrBound]:
         """
         The linear relaxations of the neurons in all layers. This a property for the
         shared data.
@@ -256,7 +249,6 @@ class InputIneqNode(BasicIneqNode, InputNode):
         self,
         input_bound: ScalarBound,
         only_lower_bound: bool = False,
-        debug: bool = False,
     ) -> tuple[ScalarBound | None, Tensor | None]:
         """
         .. attention::
@@ -267,7 +259,7 @@ class InputIneqNode(BasicIneqNode, InputNode):
             f"Because the input do not need a forward pass."
         )
 
-    def back_sub_to_input(self, constr_bound: LConstrBound) -> LConstrBound:
+    def back_sub_to_input(self, constr_bound: LinearConstrBound) -> LinearConstrBound:
         """
         .. attention::
             This method is a placeholder. The input node does not need back
@@ -278,7 +270,7 @@ class InputIneqNode(BasicIneqNode, InputNode):
             f"Because the input do not need back substitution."
         )
 
-    def back_sub_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def back_sub_once(self, constr_bound: LinearConstrBound) -> LinearConstrBound:
         """
         Back-substitute the linear relaxations to the previous layers.
 
@@ -328,21 +320,19 @@ class LinearIneqNode(BasicIneqNode, LinearNode, ABC):
         self,
         input_bound: ScalarBound,
         only_lower_bound: bool = False,
-        debug: bool = False,
     ) -> tuple[ScalarBound | None, Tensor | None]:
         """
-        Calculate the scalar bounds of the neurons in the layer by the linear relaxation
-        of the layer. The scalar bounds are calculated by propagating the linear
-        relaxation from the layer to the input layer.
+        Calculate the scalar bounds of the neurons in the layer by the linear relaxation of the layer.
+        The scalar bounds are calculated by propagating the linear relaxation from the layer to the input layer.
 
         :param input_bound: The scalar bound of the input.
         :param only_lower_bound: Return only the lower bound.
-        :param debug: When enabled, activate the debug mode.
 
         :return: The scalar bounds of the neurons in the layer.
         """
+        approx_wrt_input = self.back_sub_to_input(self.init_constr_bound(only_lower_bound))
         bound = self.cal_bounds(
-            self.back_sub_to_input(self.init_constr_bound(only_lower_bound)),
+            approx_wrt_input,
             input_bound,
         )
 
@@ -379,7 +369,7 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
         LinearIneqNode.__init__(self, *args, weight, bias)  # noqa
         GemmNode.__init__(self, *args, weight, bias)  # noqa
 
-    def back_sub_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def back_sub_once(self, constr_bound: LinearConstrBound) -> LinearConstrBound:
         """
         Back-substitute the linear relaxations to the previous layers.
 
@@ -393,8 +383,8 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
         """
         args = (self.weight, self.bias)
 
-        result_constr_bound = LConstrBound(
-            L=LConstr(
+        result_constr_bound = LinearConstrBound(
+            L=LinearConstr(
                 *gemm_back_sub(
                     constr_bound.L.A.reshape(-1, *self.output_size),
                     constr_bound.L.b,
@@ -405,7 +395,7 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
         if constr_bound.U is None:
             return result_constr_bound
 
-        result_constr_bound.U = LConstr(
+        result_constr_bound.U = LinearConstr(
             *gemm_back_sub(
                 constr_bound.U.A.reshape(-1, *self.output_size), constr_bound.U.b, *args
             )
@@ -462,8 +452,8 @@ class Conv2DIneqNode(LinearIneqNode, Conv2DNode):
 
     def back_sub_once(
         self,
-        constr_bound: LConstrBound,
-    ) -> LConstrBound:
+        constr_bound: LinearConstrBound,
+    ) -> LinearConstrBound:
         """
         Back-substitute the linear relaxations to the previous layers.
 
@@ -485,8 +475,8 @@ class Conv2DIneqNode(LinearIneqNode, Conv2DNode):
             self.groups,
         )
 
-        result_constr_bound = LConstrBound(
-            L=LConstr(
+        result_constr_bound = LinearConstrBound(
+            L=LinearConstr(
                 *conv2d_back_sub(
                     constr_bound.L.A.reshape(-1, *self.output_size),
                     constr_bound.L.b,
@@ -497,7 +487,7 @@ class Conv2DIneqNode(LinearIneqNode, Conv2DNode):
         if constr_bound.U is None:
             return result_constr_bound
 
-        result_constr_bound.U = LConstr(
+        result_constr_bound.U = LinearConstr(
             *conv2d_back_sub(
                 constr_bound.U.A.reshape(-1, *self.output_size), constr_bound.U.b, *args
             )
@@ -519,7 +509,6 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
     :param shared_data: The shared data among all nodes.
     :param act_relax_args: The arguments for activation relaxation.
     """
-
     def __init__(
         self,
         name: str,
@@ -536,7 +525,6 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
         self,
         input_bound: ScalarBound,
         only_lower_bound: bool = False,
-        debug: bool = False,
     ) -> tuple[ScalarBound | None, Tensor | None]:
         """
         The non-linear layer needs the scalar bounds of the preceding layer to calculate
@@ -552,11 +540,6 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
             scalar bounds of the MaxPool layer.
             So the scalar bounds of the non-linear layer are calculated by
             back-substitution.
-
-
-        :param input_bound: The scalar bound of the input.
-        :param only_lower_bound: When enabled, return only the lower bound.
-        :param debug: When enabled, activate the debug mode.
 
         :return: The scalar bounds of the neurons in the layer.
         """
@@ -597,11 +580,11 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
 
         return old_bound
 
-    def back_sub_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def back_sub_once(self, constr_bound: LinearConstrBound) -> LinearConstrBound:
         relaxation = self.all_relaxations[self.name]
 
-        result_constr_bound = LConstrBound(
-            L=LConstr(
+        result_constr_bound = LinearConstrBound(
+            L=LinearConstr(
                 *nonlinear_back_sub(
                     constr_bound.L.A.reshape(-1, math.prod(self.output_size)),
                     constr_bound.L.b,
@@ -616,7 +599,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
         if constr_bound.U is None:
             return result_constr_bound
 
-        result_constr_bound.U = LConstr(
+        result_constr_bound.U = LinearConstr(
             *nonlinear_back_sub(
                 constr_bound.U.A.reshape(-1, math.prod(self.output_size)),
                 constr_bound.U.b,
@@ -633,7 +616,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
         self,
         input_bound: ScalarBound,
         shared_data: BPSharedData,
-    ) -> LConstrBound:
+    ) -> LinearConstrBound:
         """
         Calculate the relaxation based on single neuron constraints. The relaxation
         consists of two inequalities. One is for the lower bound and the other is for
@@ -658,7 +641,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
             self.act_relax_args.mode,
         )
 
-        return LConstrBound(L=LConstr(A=sl, b=tl), U=LConstr(A=su, b=tu))  # noqa
+        return LinearConstrBound(L=LinearConstr(A=sl, b=tl), U=LinearConstr(A=su, b=tu))  # noqa
 
     @staticmethod
     @abstractmethod
@@ -695,11 +678,11 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
     ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         return cal_relaxation_relu(l, u, mode)
 
-    def back_sub_once(self, constr_bound: LConstrBound) -> LConstrBound:
+    def back_sub_once(self, constr_bound: LinearConstrBound) -> LinearConstrBound:
         print("** ReLUIneqNode back_sub_once")
         relaxation = self.all_relaxations[self.name]
-        result_constr_bound = LConstrBound(
-            L=LConstr(
+        result_constr_bound = LinearConstrBound(
+            L=LinearConstr(
                 *relu_back_sub(
                     constr_bound.L.A.reshape(-1, math.prod(self.output_size)),
                     constr_bound.L.b,
@@ -714,7 +697,7 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
             return result_constr_bound
         # NOTE: Here, it is different from other functions. Pay attension to the order
         # of the arguments.
-        result_constr_bound.U = LConstr(
+        result_constr_bound.U = LinearConstr(
             *relu_back_sub(
                 constr_bound.U.A.reshape(-1, math.prod(self.output_size)),
                 constr_bound.U.b,
@@ -822,7 +805,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
 
     def cal_relaxation(
         self, input_bound: ScalarBound, shared_data: BPSharedData
-    ) -> LConstrBound:
+    ) -> LinearConstrBound:
 
         print(f"[DEBUG] Calculate single-neuron relaxation.")
 
@@ -835,7 +818,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
             l, u, self.act_relax_args.mode, l_max, l_argmax, mask
         )
 
-        return LConstrBound(L=LConstr(A=sl, b=tl), U=LConstr(A=su, b=tu))  # noqa
+        return LinearConstrBound(L=LinearConstr(A=sl, b=tl), U=LinearConstr(A=su, b=tu))  # noqa
 
     @staticmethod
     def _cal_relaxation(
@@ -850,8 +833,8 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
 
     def back_sub_once(
         self,
-        constr_bound: LConstrBound,
-    ) -> LConstrBound:
+        constr_bound: LinearConstrBound,
+    ) -> LinearConstrBound:
         relaxation = self.all_relaxations[self.name]
         args = (
             self.input_size,
@@ -862,8 +845,8 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
             self.stride,
         )
 
-        result_constr_bound = LConstrBound(
-            L=LConstr(
+        result_constr_bound = LinearConstrBound(
+            L=LinearConstr(
                 *maxpool2d_back_sub(
                     constr_bound.L.A.reshape((-1, self._co * self._nk)),
                     constr_bound.L.b,
@@ -879,7 +862,7 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
         if constr_bound.U is None:
             return result_constr_bound
 
-        result_constr_bound.U = LConstr(
+        result_constr_bound.U = LinearConstr(
             *maxpool2d_back_sub(
                 constr_bound.U.A.reshape((-1, self._co * self._nk)),
                 constr_bound.U.b,
@@ -939,6 +922,6 @@ class ResidualAddIneqNode(LinearIneqNode, ResidualAddNode):
 
     def back_sub_once(
         self,
-        constr_bound: LConstrBound,
-    ) -> LConstrBound:
+        constr_bound: LinearConstrBound,
+    ) -> LinearConstrBound:
         return constr_bound
