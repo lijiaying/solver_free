@@ -5,6 +5,5 @@ from .enums import *
 from .exceptions import *
 from .functions import *
 from .model_args import *
-from .model_logger import *
 from .tangent_line import *
 from .colors import *

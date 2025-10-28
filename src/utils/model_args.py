@@ -4,7 +4,6 @@ This module provides arguments for different approaches.
 
 __docformat__ = "restructuredtext"
 __all__ = [
-    "LoggerArgs",
     "PerturbArgs",
     "ActRelaxArgs",
     "LPArgs",
@@ -17,58 +16,6 @@ from dataclasses import dataclass
 from torch import Tensor
 
 from .enums import *
-
-
-@dataclass
-class LoggerArgs:
-    """
-    Arguments for the logger.
-    """
-
-    log_level: int = logging.INFO
-    """
-    Logging level. The default value is `logging.INFO`.
-    
-    ..seealso::
-        Refer to the `logging` for the details.
-    """
-
-    log_file: str | None = None
-    """
-    The file path to save the log. If it is None, the log will be printed to the 
-    console.
-    """
-
-    log_format: str = (
-        "%(asctime)s "
-        "[%(levelname)s] "
-        "%(message)-100s - "
-        "%(pathname)s, "
-        # "%(name)s - "
-        # "%(module)s - "
-        # "%(funcName)s - "
-        "Line: %(lineno)d"
-    )
-
-    """The format of the log."""
-
-    log_console: bool = False
-    """Whether to print the log to the console."""
-
-    def __post_init__(self):
-        if self.log_file:
-            # Create the dir
-            os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
-
-    def __str__(self):
-        return (
-            f"LoggerArgs("
-            f"log_level={self.log_level}, "
-            f"log_file={self.log_file}, "
-            f"log_format={self.log_format}, "
-            f"log_console={self.log_console}"
-            f")"
-        )
 
 
 @dataclass

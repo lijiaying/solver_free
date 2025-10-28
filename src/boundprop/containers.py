@@ -73,8 +73,8 @@ class BPSharedData:
             This is used to release the calculation resources of one input sample and
             prepare for the next input sample.
         """
-        logger = logging.getLogger("stm")
-        logger.debug(f"Clear cache of shared variables of bound propagation.")
+    
+        print(f"[DEBUG] Clear cache of shared variables of bound propagation.")
 
         self.all_bounds.clear()
         self.all_relaxations.clear()
@@ -88,8 +88,8 @@ class BPSharedData:
             This is usually used to clear the calculation resources about optimizable
             parameters.
         """
-        logger = logging.getLogger("stm")
-        logger.debug(f"Clear cache of optimized parameters of bound propagation.")
+    
+        print(f"[DEBUG] Clear cache of optimized parameters of bound propagation.")
 
         for name, bound in self.all_bounds.items():
             self.all_bounds[name] = bound.detach()

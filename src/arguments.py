@@ -136,7 +136,6 @@ class Arguments:
         if not os.path.exists(log_dir_path):
             os.makedirs(log_dir_path)    
 
-        _build_logger(self.log_file, self.log_level)
         self._set_means_stds()
         self._set_args()
 
@@ -145,8 +144,6 @@ class Arguments:
             setattr(self, k, v)
 
     def _set_args(self):
-
-        logger = logging.getLogger("stm")
         # -------- Set perturbation arguments --------
 
         dtype = torch.float64 if self.dtype == "float64" else torch.float32
@@ -162,20 +159,20 @@ class Arguments:
             upper_limit=self.input_limited_range[1],
         )
 
-        logger.debug(f"Set perturbation arguments: {self.perturb_args}.")
+        print(f"[DEBUG] Set perturbation arguments: {self.perturb_args}.")
         # -------- Set activation relaxation arguments --------
         self.act_relax_args = ActRelaxArgs(mode=self.act_relax_mode)
         self.act_relax_args.update_scalar_bounds_per_layer = self.act_relax_mode != CROWN
-        logger.debug(f"Set activation relaxation arguments: {self.act_relax_args}.")
+        print(f"[DEBUG] Set activation relaxation arguments: {self.act_relax_args}.")
 
         # -------- Set LP arguments --------
         if self.opt_method is not None:
             self.lp_args = LPArgs()
-            logger.debug(f"Set LP arguments: {self.lp_args}")
+            print(f"[DEBUG] Set LP arguments: {self.lp_args}")
 
             if self.opt_method == OptimizationMethod.MNLP:
                 self.kact_lp_args = KActLPArgs()
-                logger.debug(f"Set kact LP arguments: {self.kact_lp_args}")
+                print(f"[DEBUG] Set kact LP arguments: {self.kact_lp_args}")
 
     def __str__(self) -> str:
         return (
@@ -204,12 +201,3 @@ class Arguments:
 
         self.normalize = True
 
-
-def _build_logger(log_name: str | None, log_level=logging.INFO):
-
-    logger = build_logger(
-        LoggerArgs(log_level=log_level, log_file=log_name, log_console=True),
-        name="stm",
-    )
-
-    logger.debug("Setup logger.")

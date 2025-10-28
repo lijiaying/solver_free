@@ -92,17 +92,15 @@ class ScalarBound:
 
     def intersect(self, other: "ScalarBound") -> "ScalarBound":
         """This function computes the intersection of two scalar bounds as intervals."""
-        # logger = logging.getLogger("stm")
-
         l = torch.maximum(self.l, other.l)
-        # logger.debug(
+        # print(
         #     f"Lower bounds increase avg "
         #     f"{l.mean():.2f} - {self.l.mean():.2f} = {(l - self.l).mean():.2f}."
         # )
         u = None
         if self.u is not None and other.u is not None:
             u = torch.minimum(self.u, other.u)
-            # logger.debug(
+            # print(
             #     f"Upper bounds decrease avg "
             #     f"{u.mean():.2f} - {self.u.mean():.2f} = {(u - self.u).mean():.2f}."
             # )

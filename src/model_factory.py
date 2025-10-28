@@ -34,9 +34,7 @@ class ModelFactory:
         self.data_loader = None
 
         self._ignored_samples = None
-
-        logger = logging.getLogger("stm")
-        logger.info(f"Arguments:\n{arguments}")
+        print(f"[INFO] Arguments:\n{arguments}")
 
         _init_calculation_settings(arguments.random_seed, arguments.device, arguments.dtype)
 
@@ -63,12 +61,11 @@ class ModelFactory:
              `../.temp/ignored_samples`.
         """
 
-        logger = logging.getLogger("stm")
         args = self.arguments
 
-        logger.debug("Prepare dataset.")
+        print(f"[DEBUG] Prepare dataset.")
 
-        logger.debug(f"Find the ignored samples for the model {args.net_fpath}.")
+        print(f"[DEBUG] Find the ignored samples for the model {args.net_fpath}.")
         self._ignored_samples = _load_ignored_samples(
             "../.temp/ignored_samples/" + args.net_fname + ".txt",
             args.net_fpath,
@@ -83,9 +80,9 @@ class ModelFactory:
             args.first_sample_index,
             args.check_ignored_samples,
         )
-        logger.info(f"Ignored samples: {self._ignored_samples}")
+        print(f"[INFO] Ignored samples: {self._ignored_samples}")
 
-        logger.debug(f"Load dataset {args.dataset}.")
+        print(f"[DEBUG] Load dataset {args.dataset}.")
         self.data_loader = load_dataset(args.dataset, dir_path="../.temp/datasets", normalize=False)
 
     def build(self):
@@ -137,7 +134,7 @@ class ModelFactory:
         Verify the model with the given dataset and arguments.
         """
 
-        logger = logging.getLogger("stm")
+    
 
         args = self.arguments
         dtype = self.dtype
@@ -162,7 +159,7 @@ class ModelFactory:
             time_sample = time.perf_counter()
 
             target_label = int(target_label.item())
-            logger.info(f"Target label is {target_label}.")
+            print(f"[INFO] Target label is {target_label}.")
             self.model.update_output_constrs(
                 self.model.get_output_weight_bias(target_label, args.num_labels)[0]
             )
@@ -178,7 +175,7 @@ class ModelFactory:
                 input_bound
             )
             l = bound.l
-            logger.info(f"Verified lower bound: {l}")
+            print(f"[INFO] Verified lower bound: {l}")
 
             if torch.all(l >= 0):
                 global_status = VerificationStatus.SAT
@@ -187,7 +184,7 @@ class ModelFactory:
             else:
                 global_status = VerificationStatus.UNKNOWN
                 samples_stats["unknown"].add(i)
-            logger.info(f"Verification results: {global_status}")
+            print(f"[INFO] Verification results: {global_status}")
 
             if global_status != VerificationStatus.SAT:
                 if (
@@ -195,17 +192,17 @@ class ModelFactory:
                     and hasattr(self.model, "lp_args")
                     and self.model.lp_args is not None
                 ):
-                    logger.info(f"Start verification by LP.")
+                    print(f"[INFO] Start verification by LP.")
                     self.model.build_lp()
 
                     # Find the negative items in l and rearrange their indices
                     labels = torch.argsort(l)
 
                     adv_labels = labels[l[labels] < 0].tolist()
-                    logger.info(f"Adversarial labels: {adv_labels}")
+                    print(f"[INFO] Adversarial labels: {adv_labels}")
 
                     results = self.model.verify_lp(target_label, adv_labels)
-                    logger.debug(f"Verification results: {results}")
+                    print(f"[DEBUG] Verification results: {results}")
 
                     if all(results):
                         global_status = VerificationStatus.SAT
@@ -214,15 +211,15 @@ class ModelFactory:
                     else:
                         global_status = VerificationStatus.UNKNOWN
                         samples_stats["unknown"].add(i)
-                    logger.info(f"Verification results: {global_status}.")
+                    print(f"[INFO] Verification results: {global_status}.")
 
             self.model.clear()
 
             time_sample = time.perf_counter() - time_sample
-            logger.info(f"Finish sample {i}. Cost time: {time_sample:.4f}s")
+            print(f"[INFO] Finish sample {i}. Cost time: {time_sample:.4f}s")
             time_sample_list.append(time_sample)
-            logger.info(f"Current {len(samples_v)}/{len(time_sample_list)} verified.")
-            logger.debug(f"Verified: {samples_v}")
+            print(f"[INFO] Current {len(samples_v)}/{len(time_sample_list)} verified.")
+            print(f"[DEBUG] Verified: {samples_v}")
             num_samples -= 1
 
         print(f"Stats: {samples_stats}")
@@ -233,22 +230,18 @@ class ModelFactory:
 
 def _init_calculation_settings(random_seed: int, device: str, dtype: str):
 
-    logger = logging.getLogger("stm")
 
-    logger.debug(f"Set print options.")
+
+    print(f"[DEBUG] Set print options.")
     torch.set_printoptions(precision=4, sci_mode=False, linewidth=200, profile="full")
     np.set_printoptions(precision=4, suppress=True, linewidth=200)
 
-    logger.debug(f"Set random seed as {random_seed}.")
+    print(f"[DEBUG] Set random seed as {random_seed}.")
     torch.manual_seed(random_seed)
     random.seed(random_seed)
     np.random.seed(random_seed)
 
-    if logger.level == logging.DEBUG:
-        logger.debug("Set torch autograd detect anomaly as True.")
-        torch.autograd.set_detect_anomaly(True)
-
-    logger.debug(f"Set dtype as {dtype}.")
+    print(f"[DEBUG] Set dtype as {dtype}.")
     if dtype == "float64":
         torch.set_default_dtype(torch.float64)
     elif dtype == "float32":
@@ -256,20 +249,20 @@ def _init_calculation_settings(random_seed: int, device: str, dtype: str):
     else:
         raise ValueError(f"Invalid dtype: {dtype}.")
 
-    logger.debug(f"Set device as {device}")
+    print(f"[DEBUG] Set device as {device}")
     if device != "cpu":
         torch.cuda.manual_seed(random_seed)
         os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 
-        logger.debug("Set torch deterministic algorithms as True.")
+        print(f"[DEBUG] Set torch deterministic algorithms as True.")
         torch.use_deterministic_algorithms(True)
         torch.backends.cuda.matmul.allow_tf32 = dtype == "float32"
         torch.backends.cudnn.allow_tf32 = dtype == "float32"
 
 
 def _record_ignored_samples(fpath: str, ignored_samples: set):
-    logger = logging.getLogger("stm")
-    logger.debug(f"Write ignored samples in {fpath}.")
+
+    print(f"[DEBUG] Write ignored samples in {fpath}.")
 
     if not fpath.endswith(".txt"):
         raise ValueError(f"File path must end with .txt, not {fpath}.")
@@ -286,8 +279,8 @@ def _get_ignored_samples(
     num_samples: int,
     start_index: int,
 ) -> set:
-    logger = logging.getLogger("stm")
-    logger.debug("Get ignored samples by original model.")
+
+    print(f"[DEBUG] Get ignored samples by original model.")
 
     sess = ort.InferenceSession(net_fpath)
     # input_name = sess.get_inputs()[0]._idx
@@ -316,7 +309,7 @@ def _get_ignored_samples(
 
         num_samples -= 1
 
-    logger.debug(f"Get ignored samples: {ignored_samples}.")
+    print(f"[DEBUG] Get ignored samples: {ignored_samples}.")
 
     return ignored_samples
 
@@ -329,12 +322,12 @@ def _load_ignored_samples(
     start_index: int,
     check_ignored_samples: bool = True,
 ) -> set:
-    logger = logging.getLogger("stm")
+
 
     if not fpath.endswith(".txt"):
         raise ValueError(f"File path must end with .txt, not {fpath}.")
 
-    logger.debug(f"Load ignored samples from {fpath}.")
+    print(f"[DEBUG] Load ignored samples from {fpath}.")
 
     if check_ignored_samples:
         ignored_samples = _get_ignored_samples(net_fpath, data_loader, num_samples, start_index)
@@ -342,22 +335,22 @@ def _load_ignored_samples(
 
     else:
         if not os.path.exists(fpath):
-            logger.debug(
+            print(
                 f"Ignored samples file {fpath} does not exist. " f"There is no ignored samples."
             )
             return set()
-        logger.debug(f"Read existing ignored samples file {fpath}.")
+        print(f"[DEBUG] Read existing ignored samples file {fpath}.")
         with open(fpath, "r") as f:
             ignored_samples = eval(f.readline())
 
-        logger.debug(f"Get ignored samples: {ignored_samples}.")
+        print(f"[DEBUG] Get ignored samples: {ignored_samples}.")
 
     return ignored_samples
 
 
 def _skip_sample(i: int, ignored_samples: set, start_index: int):
-    logger = logging.getLogger("stm")
+
     skip = (i in ignored_samples) or (i < start_index)
     if skip:
-        logger.debug(f"Sample {i} is skipped.")
+        print(f"[DEBUG] Sample {i} is skipped.")
     return skip

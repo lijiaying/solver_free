@@ -647,8 +647,8 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
         :return: The linear relaxation of the lower and upper bounds of the
             current non-linear layer.
         """
-        logger = logging.getLogger("stm")
-        logger.debug(f"Calculate single-neuron relaxation.")
+    
+        print(f"[DEBUG] Calculate single-neuron relaxation.")
         pre_bound = shared_data.all_bounds[self.input_names[0]]
 
         sl, su, tl, tu = self._cal_relaxation(
@@ -820,8 +820,8 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
         MaxPool2DNode.__init__(self, *args, **kwargs)
 
     def cal_relaxation(self, input_bound: ScalarBound, shared_data: BPSharedData) -> LConstrBound:
-        logger = logging.getLogger("stm")
-        logger.debug(f"Calculate single-neuron relaxation.")
+    
+        print(f"[DEBUG] Calculate single-neuron relaxation.")
 
         pre_bound = self.shared_data.all_bounds[self.input_names[0]]
 

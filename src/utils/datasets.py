@@ -40,10 +40,10 @@ class MyDataset(torch.utils.data.Dataset):
 def _load_eran_dataset(
     dataset: str, dir_path: str = None, max_samples_num: int = 1000
 ) -> list[tuple[torch.Tensor, torch.Tensor]]:
-    logger = logging.getLogger("stm")
+
 
     dir_path = "../../datasets" if dir_path is None else dir_path
-    logger.debug(
+    print(
         f"Load ERAN dataset {dataset} in {dir_path} "
         f"(It has a different index order for image data)."
     )
@@ -61,7 +61,7 @@ def _load_eran_dataset(
     else:
         raise NotImplementedError(f"Dataset {dataset} is not supported.")
 
-    logger.debug(f"Load only first {max_samples_num} samples.")
+    print(f"[DEBUG] Load only first {max_samples_num} samples.")
     data_loader = []
     with open(fpath, "r") as f:
         for _ in range(max_samples_num):
@@ -93,7 +93,7 @@ def load_dataset(
     """
 
     # __import__('ipdb').set_trace()
-    logger = logging.getLogger("stm")
+
 
     # Create the directory if it does not exist.
     os.makedirs(dir_path, exist_ok=True)
@@ -103,7 +103,7 @@ def load_dataset(
     transform = transforms.Compose([transforms.ToTensor()])
 
     if normalize:
-        logger.debug(f"Set normalization transformer.")
+        print(f"[DEBUG] Set normalization transformer.")
         if means is not None and stds is not None:
             means = tuple(means.tolist())
             stds = tuple(stds.tolist())
@@ -116,7 +116,7 @@ def load_dataset(
 
         transform.transforms.append(transforms.Normalize(means, stds))
 
-    logger.debug(f"Set dataset loader {dataset}.")
+    print(f"[DEBUG] Set dataset loader {dataset}.")
 
     kwargs = {"train": False, "download": True, "transform": transform}
 

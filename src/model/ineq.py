@@ -29,7 +29,6 @@ class IneqBoundModel(BasicBoundModel[T]):
     :param perturb_args: The perturbation arguments.
     :param act_relax_args: The activation relaxation arguments.
     :param ada_act_relax_args: The adaptive constraint arguments.
-    :param log_args: The logger arguments.
     :param dtype: The data type used in torch.
     :param device: The device used in torch.
     """
@@ -80,14 +79,14 @@ class IneqBoundModel(BasicBoundModel[T]):
         :return: The scalar bound of the output and the minimum input point if enabled.
         """
 
-        logger = logging.getLogger("stm")
-        logger.debug(f"Start bound propagation.")
+    
+        print(f"Start bound propagation.")
 
         time_start = time.perf_counter()
 
         bound = self.bound_propagate(input_bound)
 
-        logger.debug(f"Finish bound propagation in {time.perf_counter() - time_start:.4f}s")
+        print(f"Finish bound propagation in {time.perf_counter() - time_start:.4f}s")
 
         return bound
 
@@ -96,57 +95,40 @@ class IneqBoundModel(BasicBoundModel[T]):
         input_bound: ScalarBound,
     ) -> tuple[ScalarBound, Tensor | None]:
         """
-        This is the specific method to implement bound propagation in the
-        :func:`forward`.
-
+        This is the specific method to implement bound propagation in the :func:`forward`.
         :param input_bound: The scalar bound of the input.
-
         :return: The scalar bound of the output.
         """
-
-        logger = logging.getLogger("stm")
+    
 
         bound = None
-
         self.all_bounds[self.input_name] = input_bound
 
         modules_iter: Iterator[BasicIneqNode] = iter(self.submodules.values())
         module = next(modules_iter)  # Input layer
-        logger.debug(f"Process {module}".center(100, "~"))
+        print(f"Process {module}".center(100, "~"))
 
-        if logger.level <= logging.DEBUG:
-            logger.debug(f"Lower bound: {input_bound.l.flatten()[:5]}")
-            logger.debug(f"Upper bound: {input_bound.u.flatten()[:5]}")
+        print(f"Lower bound: {input_bound.l.flatten()[:5]}")
+        print(f"Upper bound: {input_bound.u.flatten()[:5]}")
 
         module = next(modules_iter)
         while module is not None:
             print(f"{BLUE}>>> Process {module}{RESET}")
-            logger.debug(f"Process {module}".center(100, "~"))
+            print(f"Process {module}".center(100, "~"))
             start = time.perf_counter()
 
             module.clear()
-
-            bound = module.forward(
-                input_bound,
-                only_lower_bound=module.next_nodes is None,
-            )
+            bound = module.forward(input_bound, only_lower_bound=module.next_nodes is None)
 
             print(f"    INPUT bound: {input_bound}")
             print(f"    O Lower bound: {bound.l.flatten()[:5]}")
             print(f"    O Upper bound: {bound.u.flatten()[:5] if bound.u is not None else None}")
 
-
-            if logger.level <= logging.DEBUG and bound is not None:
-                logger.debug(f"Lower bound: {bound.l.flatten()[:5]}")
-                logger.debug(
-                    f"Upper bound: " f"{bound.u.flatten()[:5] if bound.u is not None else None}"
-                )
-
-            logger.debug(f"Finish processing {module} in " f"{time.perf_counter() - start:.4f}s")
+            print(f"Finish processing {module} in " f"{time.perf_counter() - start:.4f}s")
             print(f"{GREEN}<<< Finish processing {module} in " f"{time.perf_counter() - start:.4f}s{RESET}")
             module = next(modules_iter, None)
-
         return bound
+
 
     def _handle_input(
         self,
@@ -265,18 +247,15 @@ class IneqBoundModel(BasicBoundModel[T]):
         input_size: tuple[int] | tuple[int, int, int],
     ) -> ResidualAddNode:
         args = (name, input_names, input_size, self.bp_shared_data)
-
         return ResidualAddIneqNode(*args)
+
 
     def clear(self):
         """
         Clear the cached data in the current sample to verify the next sample.
         """
-
-        logger = logging.getLogger("stm")
-        logger.debug("Clear cache of bound propagation.")
-
         self.bp_shared_data.clear()
+
 
     @property
     def all_bounds(self) -> dict[str, ScalarBound]:
@@ -286,6 +265,7 @@ class IneqBoundModel(BasicBoundModel[T]):
         Refer to :class:`BPSharedData` for more details.
         """
         return self.bp_shared_data.all_bounds
+
 
     @property
     def all_relaxations(self) -> dict[str, LConstrBound]:

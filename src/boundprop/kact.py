@@ -73,8 +73,8 @@ def generate_groups_lp(
 
     :return: The grouped indices of the neurons.
     """
-    logger = logging.getLogger("stm")
-    logger.debug(f"Start generating groups for {act_type}.")
+
+    print(f"[DEBUG] Start generating groups for {act_type}.")
     time_start = time.perf_counter()
 
     # Filter out unnecessary neurons
@@ -87,7 +87,7 @@ def generate_groups_lp(
         ids = torch.arange(mask_mn.numel(), device=mask_mn.device)[mask_mn]
 
         r = (pre_u - pre_l)[mask_mn]
-        logger.debug(
+        print(
             f"Max range {torch.max(r).item():.2f}, Min range {torch.min(r).item():.2f}"
         )
         ids = ids[r.argsort(descending=True)]
@@ -106,7 +106,7 @@ def generate_groups_lp(
 
     grouped_ids = grouped_ids[: kact_args.max_groups].to(pre_l.device)
 
-    logger.debug(
+    print(
         f"Finish generating {grouped_ids.size(0)} groups for {act_type}. "
         f"Cost time: {time.perf_counter() - time_start:.4f}s"
     )
@@ -258,8 +258,8 @@ def back_sub_grouped_constrs(
 
     :return: The input constraints of the grouped neurons.
     """
-    logger = logging.getLogger("stm")
-    logger.debug("Start calculating input constraints of convex hulls.")
+
+    print(f"[DEBUG] Start calculating input constraints of convex hulls.")
     time_start = time.time()
 
     # Calculate the input constrs from template by backward inequality propagation.
@@ -318,7 +318,7 @@ def back_sub_grouped_constrs(
         new_constrs = torch.cat((const, coeffs), dim=2)
         constrs = torch.cat((constrs, new_constrs), dim=0)
 
-    logger.debug(
+    print(
         f"Finish calculating input constraints of convex hulls in "
         f"{time.time() - time_start:.4f}s."
     )
@@ -361,8 +361,8 @@ def cal_grouped_acthull(
 
     :return: The function hulls of the grouped neurons.
     """
-    logger = logging.getLogger("stm")
-    logger.debug("Start calculating convex hulls.")
+
+    print(f"[DEBUG] Start calculating convex hulls.")
     time_start = time.perf_counter()
 
     fun_hull = _get_func_hull(act_type)
@@ -373,7 +373,7 @@ def cal_grouped_acthull(
         fun_hull, grouped_input_constrs, grouped_l, grouped_u, use_multi_threads
     )
 
-    logger.debug(
+    print(
         f"Finish calculating convex hulls in "
         f"{time.perf_counter() - time_start:.4f}s."
     )
@@ -467,7 +467,7 @@ def _collect_trivial_pool_idxs(
     Collect the trivial pool detected by the function hull algorithm.
     """
 
-    logger = logging.getLogger("stm")
+
 
     # Find the next non-None element to get the shape of the constraints.
     pool_mask_idxs = torch.arange(len(mask_mn), device=mask_mn.device)[mask_mn]
@@ -480,7 +480,7 @@ def _collect_trivial_pool_idxs(
         if np.all(num_nz == 2):  # The trivial pool of y = const or y = x_i.
             trivial_pool_idxs.append(pool_idxs.item())
 
-    logger.debug(f"Find {len(trivial_pool_idxs)} trivial pools.")
+    print(f"[DEBUG] Find {len(trivial_pool_idxs)} trivial pools.")
 
     return grouped_constrs, trivial_pool_idxs
 
@@ -499,8 +499,8 @@ def back_sub_to_input_kact(
 
     :return: The linear relaxation represented by input variables.
     """
-    logger = logging.getLogger("stm")
-    logger.debug(f"Back-substitute to input for {self}.")
+
+    print(f"[DEBUG] Back-substitute to input for {self}.")
     start = time.perf_counter()
 
     n = constr_bound.L.A.shape[0]
@@ -561,7 +561,7 @@ def back_sub_to_input_kact(
     new_bound, _ = self.cal_bounds(constr_bound, input_bound)
     bound = bound.intersect(new_bound)
 
-    logger.debug(
+    print(
         f"Finish back-substitution in {time.perf_counter() - start:.4f} seconds."
     )
 

@@ -114,8 +114,8 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The scalar bound (lower and upper bound) of the input sample.
         """
-        logger = logging.getLogger("stm")
-        logger.debug("Get input bound from the input sample.")
+    
+        print(f"[DEBUG] Get input bound from the input sample.")
 
         print('**** input_sample:', input_sample)
         l, u = self.perturb_args.normalize(input_sample)
@@ -143,8 +143,8 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :return: The output weight matrix. For classification tasks, the output bias is
             None.
         """
-        logger = logging.getLogger("stm")
-        logger.debug(
+    
+        print(
             f"Get output weight matrix from target label {target_label} of "
             f"total {num_labels} labels."
         )
@@ -165,42 +165,42 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :param output_weight: The output weight matrix.
         :param output_bias: The output bias.
         """
-        logger = logging.getLogger("stm")
-        logger.debug(f"Start building bound module from {self.net_fpath}.")
+    
+        print(f"[DEBUG] Start building bound module from {self.net_fpath}.")
 
         time_total = time.perf_counter()
 
-        logger.debug(f"Load onnx model from {self.net_fpath}.")
+        print(f"[DEBUG] Load onnx model from {self.net_fpath}.")
         model = onnx.load(self.net_fpath)
 
-        logger.debug("Parse inputs.")
+        print(f"[DEBUG] Parse inputs.")
         self._parse_onnx_input(model)
-        logger.debug(f"Get input {self.input_name}, shape={self.input_shape}")
+        print(f"[DEBUG] Get input {self.input_name}, shape={self.input_shape}")
 
-        logger.debug("Parse output.")
+        print(f"[DEBUG] Parse output.")
         self._parse_onnx_output(model)
-        logger.debug(f"Get output {self.output_name}, shape={self.output_shape}")
+        print(f"[DEBUG] Get output {self.output_name}, shape={self.output_shape}")
 
-        logger.debug("Parse initializer (parameters and constants).")
+        print(f"[DEBUG] Parse initializer (parameters and constants).")
         initializers = self._parse_onnx_initializer(model)
-        logger.debug(f"Get {len(initializers)} initializers.")
+        print(f"[DEBUG] Get {len(initializers)} initializers.")
 
         nodes_iterator = iter(model.graph.node)
 
-        logger.debug(
+        print(
             "Parse means and stds in onnx model if exists. " "If not, use the pre-settings."
         )
         node = self._parse_onnx_mean_std(nodes_iterator)
-        logger.debug(
+        print(
             f"Get mean={self.perturb_args.means.tolist()} and "
             f"std={self.perturb_args.stds.tolist()}"
         )
 
-        logger.debug("Parse node Input.")
+        print(f"[DEBUG] Parse node Input.")
         input_names, output_name, input_size = ([], self._input_name, self.input_shape)
         module = self._handle_input(output_name, input_names, input_size)
         self.submodules[output_name] = module
-        logger.debug(
+        print(
             f"Get input={input_names} (shape={input_size}) => "
             f"output={output_name} (shape={module.output_size})."
         )
@@ -218,7 +218,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         #     node = next(nodes_iterator, None)
         # node = first_node
         while node:
-            logger.debug(f"Process node {node.op_type}.")
+            print(f"[DEBUG] Process node {node.op_type}.")
             op_type = node.op_type
 
             if op_type == "Gemm":
@@ -263,7 +263,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             elif op_type == "MatMul":
                 node1 = node
                 node2 = next(nodes_iterator)
-                logger.debug(f"Process node {node2.op_type} together.")
+                print(f"[DEBUG] Process node {node2.op_type} together.")
 
                 module = self._parse_matmul_add(node1, node2, input_size, initializers)
 
@@ -282,13 +282,13 @@ class BasicBoundModel(Module, ABC, Generic[T]):
                 raise NotImplementedError(f"Unsupported op type {node.op_type}")
 
             if module is not None:
-                logger.debug(
+                print(
                     f"Get "
                     f"input name=[{module.input_names}] (shape={module.input_size}) "
                     f"=> "
                     f"output name={module.name} (shape={module.output_size})."
                 )
-                logger.debug(f"Build module {module.__class__.__name__} {module.name}")
+                print(f"[DEBUG] Build module {module.__class__.__name__} {module.name}")
                 num_layers += 1
                 if isinstance(module, LinearNode):
                     num_linear_layers += 1
@@ -305,11 +305,11 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             num_layers += 1
             num_linear_layers += 1
 
-        logger.debug(
+        print(
             f"Total {num_linear_layers} linear layers, "
             f"{num_layers - num_linear_layers} non-linear layers."
         )
-        logger.debug(f"Finish building bound module in {time.perf_counter() - time_total:.4f}s.")
+        print(f"[DEBUG] Finish building bound module in {time.perf_counter() - time_total:.4f}s.")
 
     def _update_last_submodule_name(self, onnx_node: onnx.NodeProto):
         """
@@ -318,11 +318,11 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param onnx_node: The current ONNX node.
         """
-        logger = logging.getLogger("stm")
+    
 
         pre_module = next(reversed(self.submodules.values()))
         new_name = _reformat(onnx_node.output[0])
-        logger.debug(
+        print(
             f"Update the name of the last submodule " f"from {pre_module.name} to {new_name}."
         )
         self.submodules.pop(pre_module.name)  # noqa
@@ -379,12 +379,12 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param onnx_nodes: The iterator of the ONNX nodes.
         """
-        logger = logging.getLogger("stm")
+    
 
         constants = {}
         while True:
             onnx_node = next(onnx_nodes)
-            logger.debug(f"Try to parse node {onnx_node.op_type} " f"{onnx_node.output[0]}.")
+            print(f"[DEBUG] Try to parse node {onnx_node.op_type} " f"{onnx_node.output[0]}.")
 
             if onnx_node.op_type == "Constant":
                 constants[onnx_node.output[0]] = torch.tensor(
@@ -499,7 +499,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The convolutional arguments.
         """
-        logger = logging.getLogger("stm")
+    
 
         groups = 1
         dilation = (1, 1)
@@ -507,7 +507,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         padding = (0, 0)
         stride = (1, 1)
         if onnx_node.op_type in {"Conv", "ConvTranspose"}:
-            logger.debug("Parse conv arguments.")
+            print(f"[DEBUG] Parse conv arguments.")
             for attr in onnx_node.attribute:
                 if attr.name == "dilations":
                     dilation = BasicBoundModel._parse_dilation(attr.ints)
@@ -529,7 +529,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             "groups": groups,
         }
 
-        logger.debug(f"Get conv kwargs {kwargs}")
+        print(f"[DEBUG] Get conv kwargs {kwargs}")
 
         return kwargs
 
@@ -544,7 +544,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The pooling arguments
         """
-        logger = logging.getLogger("stm")
+    
 
         ceil_mode = False
         dilation = (1, 1)
@@ -553,7 +553,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         stride = (1, 1)
         count_include_pad = True  # For AveragePool # noqa
         if onnx_node.op_type in {"MaxPool", "AveragePool"}:
-            logger.debug("Parse pool arguments.")
+            print(f"[DEBUG] Parse pool arguments.")
             for attr in onnx_node.attribute:
                 if attr.name == "ceil_mode":
                     ceil_mode = BasicBoundModel._parse_ceil_mode(attr.i)
@@ -582,13 +582,13 @@ class BasicBoundModel(Module, ABC, Generic[T]):
             "ceil_mode": ceil_mode,
         }
 
-        logger.debug(f"Get pool kwargs {kwargs}")
+        print(f"[DEBUG] Get pool kwargs {kwargs}")
 
         return kwargs
 
     def _update_pre_next_nodes(self):
-        logger = logging.getLogger("stm")
-        logger.debug("Set the pre and next nodes for each module.")
+    
+        print(f"[DEBUG] Set the pre and next nodes for each module.")
 
         # Set the pre and next nodes for each module.
         modules_iter = iter(self.submodules.values())
@@ -614,15 +614,15 @@ class BasicBoundModel(Module, ABC, Generic[T]):
                 module.pre_nodes.append(pre_module)
                 pre_module.next_nodes.append(module)  # type: ignore
 
-        logger.debug("Finish setting the pre and next nodes for each module.")
+        print(f"[DEBUG] Finish setting the pre and next nodes for each module.")
 
     def _check_output_size(self):
         """
         Check the output size of each module in the bound module by comparing with the
         inferred shape from the ONNX model.
         """
-        logger = logging.getLogger("stm")
-        logger.debug("Check output size of each module.")
+    
+        print(f"[DEBUG] Check output size of each module.")
 
         # Check the shape is correct.
         model = onnx.load(self.net_fpath)
@@ -646,7 +646,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
                     f"module {name} is not equal to {output_size}."
                 )
 
-        logger.debug("Output size of each module is correct.")
+        print(f"[DEBUG] Output size of each module is correct.")
 
     def update_output_constrs(self, weight: Tensor, bias: Tensor | None = None):
         """
@@ -663,8 +663,8 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         """
 
-        logger = logging.getLogger("stm")
-        logger.debug("Update output constraints for the last layer.")
+    
+        print(f"[DEBUG] Update output constraints for the last layer.")
 
         last_module = self.submodules[self.output_name]
         if not isinstance(last_module, GemmNode):
@@ -690,7 +690,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         output weight matrix and bias from the merged layer.
         """
 
-        logger = logging.getLogger("stm")
+    
 
         last_module = self.submodules[self.output_name]
         if not isinstance(last_module, GemmNode):
@@ -699,9 +699,9 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         if self._ori_last_weight is not None and self._ori_last_bias is not None:
             last_module.weight = self._ori_last_weight
             last_module.bias = self._ori_last_bias
-            logger.debug("Restore output constraints for the last layer.")
+            print(f"[DEBUG] Restore output constraints for the last layer.")
         else:
-            logger.debug("No need to restore the output constraints.")
+            print(f"[DEBUG] No need to restore the output constraints.")
 
     @staticmethod
     def _parse_names(node: onnx.NodeProto):
@@ -793,7 +793,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :return: The activation node.
         """
-        logger = logging.getLogger("stm")
+    
         input_names, name = self._parse_names(node)
         op_type = node.op_type
 
@@ -802,7 +802,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         elif op_type == "Sigmoid":
             if next_node is not None:
-                logger.debug(f"Get a SiLU activation funciton.")
+                print(f"[DEBUG] Get a SiLU activation funciton.")
                 name = _reformat(next_node.output[0])
                 assert False, "Incomplete SiLU handling."
                 return self._handle_silu(name, input_names, input_size)
@@ -855,7 +855,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         :param node: The residual Add node.
         """
-        logger = logging.getLogger("stm")
+    
         input_names = _reformat(list(node.input))  # We need all input names.
 
         if len(input_names) != 2:
@@ -878,7 +878,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
                 names_set.add(input_name)
 
         residual_input_name = find_residual_block_input(input_names)
-        logger.debug(f"Find input {residual_input_name} of residual block.")
+        print(f"[DEBUG] Find input {residual_input_name} of residual block.")
 
         def update_residual_path_input_size():
             # We only need to consider the second path of the residual block.
@@ -898,14 +898,14 @@ class BasicBoundModel(Module, ABC, Generic[T]):
                 if len(module.input_names) != 1:  # type: ignore
                     raise RuntimeError(f"Unsupported residual block with multiple inputs {module}.")
                 input_size_ = self.submodules[module.input_names[0]].output_size  # noqa
-                logger.debug(
+                print(
                     f"Update input size of {module} " f"from {module.input_size} to {input_size_}."
                 )
                 module.input_size = input_size_
 
             return module.output_size
 
-        logger.debug("Update residual path input size.")
+        print(f"[DEBUG] Update residual path input size.")
         input_size = update_residual_path_input_size()
 
         return self._handle_residual_add(name, input_names, input_size)  # noqa
@@ -926,12 +926,12 @@ class BasicBoundModel(Module, ABC, Generic[T]):
         :return: True if the output layer is added, False if the output constraints
             are merged in the last layer.
         """
-        logger = logging.getLogger("stm")
+    
         if weight is None:
             weight = torch.eye(self.output_shape[0], **self.data_settings)
 
         if isinstance(pre_module, GemmNode):
-            logger.debug(f"Fuse output constraints with the last linear layer {pre_module}.")
+            print(f"[DEBUG] Fuse output constraints with the last linear layer {pre_module}.")
             self._ori_last_weight = pre_module.weight.clone()
             self._ori_last_bias = pre_module.bias.clone()
 
@@ -944,7 +944,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
             return False
         else:
-            logger.debug(f"Add a new Gemm layer for the output constraints.")
+            print(f"[DEBUG] Add a new Gemm layer for the output constraints.")
             name = _reformat("verified_output")
             input_names = [_reformat(self.output_name)]
             self._output_name = name

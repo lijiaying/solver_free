@@ -117,7 +117,7 @@ class BasicLPNode(ABC):
 
         :return: A list of gurobi variables.
         """
-        logger = logging.getLogger("stm")
+    
 
         if bound is not None:
             lower_bounds = bound.l.flatten().tolist()
@@ -147,7 +147,7 @@ class BasicLPNode(ABC):
                 for i in range(int(math.prod(self.output_size)))
             ]
 
-        logger.debug(f"Add {len(gvars)} variables to the model.")
+        print(f"[DEBUG] Add {len(gvars)} variables to the model.")
 
         return gvars
 
@@ -408,7 +408,7 @@ class GemmLPNode(LinearLPNode):
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
 
-        logger = logging.getLogger("stm")
+    
 
         constrs = []
         for i in range(len(gvars)):
@@ -426,7 +426,7 @@ class GemmLPNode(LinearLPNode):
                 )
             )
 
-        logger.debug(f"Add {len(constrs)} constraints to the model.")
+        print(f"[DEBUG] Add {len(constrs)} constraints to the model.")
 
         return constrs
 
@@ -525,7 +525,7 @@ class Conv2DLPNode(LinearLPNode):
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
 
-        logger = logging.getLogger("stm")
+    
 
         n_in = int(math.prod(self.input_size))
         stride = self.stride
@@ -563,7 +563,7 @@ class Conv2DLPNode(LinearLPNode):
                 )
             )
 
-        logger.debug(f"Add {len(constrs)} constraints to the model.")
+        print(f"[DEBUG] Add {len(constrs)} constraints to the model.")
 
         return constrs
 
@@ -661,7 +661,7 @@ class NonLinearLPNode(BasicLPNode, ABC):
         if pre_bound is None:
             raise ValueError("pre_bounds are not provided.")
 
-        logger = logging.getLogger("stm")
+    
 
         pre_lower_bounds = pre_bound.l.flatten().tolist()
         pre_upper_bounds = pre_bound.u.flatten().tolist()
@@ -672,7 +672,7 @@ class NonLinearLPNode(BasicLPNode, ABC):
                 self.cal_single_neuron_relaxation(model, x, y, l, u, name=self._create_var_name(i))
             )
 
-        logger.debug(f"Add {len(constrs)} constraints to the model.")
+        print(f"[DEBUG] Add {len(constrs)} constraints to the model.")
 
         return constrs
 
@@ -724,7 +724,7 @@ class NonLinearLPNode(BasicLPNode, ABC):
         :return: A list of Guorbi constraints.
         """
 
-        logger = logging.getLogger("stm")
+    
         k = len(grouped_input_ids[0])
         gconstrs = []
 
@@ -752,9 +752,9 @@ class NonLinearLPNode(BasicLPNode, ABC):
                     )
                 )
 
-        logger.info(f"{num_none} groups are none due to tiny input polytope.")
+        print(f"[INFO] {num_none} groups are none due to tiny input polytope.")
         model.update()
-        logger.info(
+        print(
             f"Add {len(gconstrs)} k-activation constraints of " f"layer {self.name} to the model."
         )
 
@@ -1182,7 +1182,7 @@ class MaxPool2DLPNode(NonLinearLPNode):
         :exception ValueError: If the preceding variables are not provided.
         :exception ValueError: If the preceding bounds are not provided.
         """
-        logger = logging.getLogger("stm")
+    
 
         if pre_gvars is None:
             raise ValueError("pre_gvars are not provided.")
@@ -1249,7 +1249,7 @@ class MaxPool2DLPNode(NonLinearLPNode):
                 )
             )
 
-        logger.debug(f"Add {len(constrs)} constraints to the model.")
+        print(f"[DEBUG] Add {len(constrs)} constraints to the model.")
 
         return constrs
 
@@ -1288,7 +1288,7 @@ class MaxPool2DLPNode(NonLinearLPNode):
         :return: A list of Guorbi constraints.
         """
 
-        logger = logging.getLogger("stm")
+    
         k = len(grouped_input_ids[0])
         gconstrs = []
 
@@ -1315,9 +1315,9 @@ class MaxPool2DLPNode(NonLinearLPNode):
                         name=name,
                     )
                 )
-        logger.info(f"{num_none} groups are none due to tiny input polytope.")
+        print(f"[INFO] {num_none} groups are none due to tiny input polytope.")
         model.update()
-        logger.info(
+        print(
             f"Add {len(gconstrs)} k-activation constraints of " f"{self.name} to the model."
         )
 

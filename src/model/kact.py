@@ -77,7 +77,6 @@ class KActLPBoundModel(LPBoundModel):
         :param ada_act_relax_args: The adaptive constraints arguments.
         :param lp_args: The linear programming arguments.
         :param kact_lp_args: The k-activation arguments.
-        :param log_args: The logger arguments.
         :param dtype: The data type of the linear program.
         :param device: The device of the linear program.
         """
@@ -102,7 +101,7 @@ class KActLPBoundModel(LPBoundModel):
         self._has_built_kact_constrs = False
 
     def verify_lp(self, label: int, adv_labels: list[int] = None) -> list[bool]:
-        logger = logging.getLogger("stm")
+    
 
         num_labels = len(self.output_vars)
         if adv_labels is None:
@@ -114,7 +113,7 @@ class KActLPBoundModel(LPBoundModel):
         ]
 
         for adv_label in adv_labels:
-            logger.info(f"Verify label {adv_label} vs. {label}.")
+            print(f"[INFO] Verify label {adv_label} vs. {label}.")
 
             obj = self.output_vars[label] - self.output_vars[adv_label]
             self.model.setObjective(obj)
@@ -178,8 +177,8 @@ class KActLPBoundModel(LPBoundModel):
               objective value and the solution will be None.
             - If return_solution is False, the solution will be None.
         """
-        logger = logging.getLogger("stm")
-        logger.info("Start solving LP model.")
+    
+        print(f"[INFO] Start solving LP model.")
         start = time.perf_counter()
 
         def slow_callback_lp(model: gurobipy.Model, where: GRB.Callback):
@@ -206,8 +205,8 @@ class KActLPBoundModel(LPBoundModel):
 
         result, obj_val, solution = self._process_model_status(return_solution)
 
-        logger.info(f"Finish solving LP model in {time.perf_counter() - start:.4f}s")
-        logger.info(f"Verification result: {'SUCCESS' if result else 'UNKNOWN'}.")
+        print(f"[INFO] Finish solving LP model in {time.perf_counter() - start:.4f}s")
+        print(f"[INFO] Verification result: {'SUCCESS' if result else 'UNKNOWN'}.")
 
         return result, obj_val, solution
 
@@ -215,8 +214,8 @@ class KActLPBoundModel(LPBoundModel):
         """
         Build the multi-neuron constraints for the linear program.
         """
-        logger = logging.getLogger("stm")
-        logger.info("Start building KAct constraints.")
+    
+        print(f"[INFO] Start building KAct constraints.")
         time_start = time.perf_counter()
 
         input_bound = self.all_bounds[self.input_name]
@@ -279,7 +278,7 @@ class KActLPBoundModel(LPBoundModel):
             else:
                 raise NotImplementedError(f"{module} is not supported.")
 
-            logger.info(f"Start building KAct constraints for {module}.")
+            print(f"[INFO] Start building KAct constraints for {module}.")
 
             if isinstance(module, MaxPool2DNode):
                 pre_bound = ScalarBound(*module.get_unfolded_pre_bound(pre_bound))
@@ -292,7 +291,7 @@ class KActLPBoundModel(LPBoundModel):
             )
             n_mn = mask_mn.sum().item()
             if n_mn < self.kact_lp_args.group_size:
-                logger.info(f"To few neurons {n_mn} to group for {module}.")
+                print(f"[INFO] To few neurons {n_mn} to group for {module}.")
                 continue
 
             grouped_input_ids = generate_groups_lp(
@@ -348,11 +347,11 @@ class KActLPBoundModel(LPBoundModel):
 
             self.model.update()
 
-        logger.info(
+        print(
             f"Finish building KAct constraints in "
             f"{time.perf_counter() - time_start:.4f}s"
         )
-        logger.info(
+        print(
             f"Current LP model has {self.model.NumVars} variables "
             f"and {self.model.NumConstrs} constraints"
         )
@@ -377,8 +376,8 @@ class KActLPBoundModel(LPBoundModel):
         :return:
         """
 
-        logger = logging.getLogger("stm")
-        logger.info("Start Separating KAct constraints.")
+    
+        print(f"[INFO] Start Separating KAct constraints.")
         time_start = time.perf_counter()
 
         # Get all kact constraints from the original model
@@ -394,7 +393,7 @@ class KActLPBoundModel(LPBoundModel):
             model_with_act_constrs.getAttr("RHS"), dtype=np.float64
         )
 
-        logger.debug(f"KAct constraints number: {self._kact_constrs_A.shape[0]}")
+        print(f"[DEBUG] KAct constraints number: {self._kact_constrs_A.shape[0]}")
 
         act_constrs_sense = model_with_act_constrs.getAttr("Sense")
         if any(sense != ">" for sense in act_constrs_sense):
@@ -411,18 +410,18 @@ class KActLPBoundModel(LPBoundModel):
         self._has_separate_kact_constrs = True
         self._kact_constr_counter = 0
 
-        logger.info(
+        print(
             f"Finish separating KAct constraints in "
             f"{time.perf_counter() - time_start:.4f}s"
         )
 
     def _add_violated_kact_constrs(self, solution: np.ndarray):
-        logger = logging.getLogger("stm")
+    
         if self._kact_constrs_A.shape[0] == 0:
-            logger.info("No KAct constraints to add.")
+            print(f"[INFO] No KAct constraints to add.")
             return
 
-        logger.info(f"Start adding violated KAct constraints.")
+        print(f"[INFO] Start adding violated KAct constraints.")
         time_start = time.perf_counter()
 
         def add_kact_constrs(constrs_A, constrs_RHS: np.ndarray):
@@ -443,7 +442,7 @@ class KActLPBoundModel(LPBoundModel):
 
         value = self._kact_constrs_A @ solution - self._kact_constrs_RHS
         violated_constrs_idxes = np.where(value < 0)[0]
-        logger.info(
+        print(
             f"Add {violated_constrs_idxes.shape[0]}/{self._kact_constrs_A.shape[0]} "
             f"violated KAct constraints."
         )
@@ -457,11 +456,11 @@ class KActLPBoundModel(LPBoundModel):
         self._kact_constrs_A = self._kact_constrs_A[remained_constrs_idxes]
         self._kact_constrs_RHS = self._kact_constrs_RHS[remained_constrs_idxes]
 
-        logger.info(
+        print(
             f"Finish adding violated KAct constraints in "
             f"{time.perf_counter() - time_start:.4f}s"
         )
-        logger.info(
+        print(
             f"Current LP model has {self.model.NumVars} variables "
             f"and {self.model.NumConstrs} constraints"
         )
@@ -477,8 +476,8 @@ class KActLPBoundModel(LPBoundModel):
         """
         super().clear()
 
-        logger = logging.getLogger("stm")
-        logger.debug("Clear cache of kact constraints.")
+    
+        print(f"[DEBUG] Clear cache of kact constraints.")
 
         self._kact_constrs_A = None
         self._kact_constrs_RHS = None

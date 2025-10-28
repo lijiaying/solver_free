@@ -17,7 +17,9 @@ from torch import Tensor
 #######################################################
 # FP32 meta variables
 _fp32_2x3 = torch.ones((2, 3), dtype=torch.float32)
+_fp32_2x4 = torch.ones((2, 4), dtype=torch.float32)
 _fp32_2 = torch.ones((2,), dtype=torch.float32)
+_fp32_3x3 = torch.ones((3, 3), dtype=torch.float32)
 _fp32_3x4 = torch.ones((3, 4), dtype=torch.float32)
 _fp32_3 = torch.ones((3,), dtype=torch.float32)
 _fp32_2x3x4 = torch.ones((2, 3, 4), dtype=torch.float32)
@@ -29,7 +31,9 @@ _fp32_2x4x4 = torch.ones((2, 4, 4), dtype=torch.float32)
 
 # FP64 meta variables
 _fp64_2x3 = torch.ones((2, 3), dtype=torch.float64)
+_fp64_2x4 = torch.ones((2, 4), dtype=torch.float64)
 _fp64_2 = torch.ones((2,), dtype=torch.float64)
+_fp64_3x3 = torch.ones((3, 3), dtype=torch.float64)
 _fp64_3x4 = torch.ones((3, 4), dtype=torch.float64)
 _fp64_3 = torch.ones((3,), dtype=torch.float64)
 _fp64_2x3x4 = torch.ones((2, 3, 4), dtype=torch.float64)
@@ -104,7 +108,6 @@ def _back_sub_gemm_no_bias2(A: Tensor, weight: Tensor, bias: Tensor) -> tuple[Te
 
 def _back_sub_gemm_no_bias3(A: Tensor, weight: Tensor) -> Tensor:
     A = A @ weight
-
     return A
 
 
@@ -784,8 +787,8 @@ def back_sub_to_input(
 
     :return: The linear relaxation represented by input variables.
     """
-    logger = logging.getLogger("stm")
-    logger.debug(f"Back-substitute to input for {self}.")
+
+    print(f"[DEBUG] Back-substitute to input for {self}.")
     start = time.perf_counter()
 
     # The constraint bound for the output of the residual block.
@@ -830,7 +833,7 @@ def back_sub_to_input(
 
         module = module.pre_nodes[0]
 
-    logger.debug(f"Finish back-substitution in {time.perf_counter() - start:.4f} seconds.")
+    print(f"[DEBUG] Finish back-substitution in {time.perf_counter() - start:.4f} seconds.")
 
     return constr_bound
 
@@ -842,7 +845,7 @@ def back_sub_once_with_update_bound(
     in_residual_block: bool,
     store_updated_bounds: bool = True,
 ) -> tuple[LConstrBound, ScalarBound | None]:
-    logger = logging.getLogger("stm")
+
     constr_bound = module.back_sub_once(constr_bound)
     pre_module = module.pre_nodes[0] if module.pre_nodes else None
     bound = None
@@ -852,7 +855,7 @@ def back_sub_once_with_update_bound(
         and isinstance(pre_module, NonLinearNode)
         and pre_module.act_relax_args.update_scalar_bounds_per_layer
     ):
-        logger.debug(f"Update scalar bounds by {pre_module}.")
+        print(f"[DEBUG] Update scalar bounds by {pre_module}.")
         pre_scalar_bound = pre_module.all_bounds[pre_module.name].reshape(
             *constr_bound.L.A.shape[1:]
         )
@@ -897,7 +900,7 @@ def back_sub_residual_second_path(
     tuple[LConstrBound, None, list["BasicIneqNode"]]
     | tuple[LConstrBound, None, list["BasicIneqNode"], ScalarBound | None]
 ):  # noqa  # noqa
-    logger = logging.getLogger("stm")
+
     residual_second_path: list["BasicIneqNode"]  # noqa
     for module_r in residual_second_path:
         constr_bound_r = module_r.back_sub_once(constr_bound_r)
@@ -912,7 +915,7 @@ def back_sub_residual_second_path(
     bound = None
     # Handle the non-linear module in the beginning of the residual block.
     if isinstance(module, NonLinearNode) and module.act_relax_args.update_scalar_bounds_per_layer:
-        logger.debug(f"Update scalar bounds by {module}.")
+        print(f"[DEBUG] Update scalar bounds by {module}.")
         pre_scalar_bound = module.all_bounds[module.name].reshape(*constr_bound.L.A.shape[1:])
 
         bound, _ = self.cal_bounds(constr_bound, pre_scalar_bound)

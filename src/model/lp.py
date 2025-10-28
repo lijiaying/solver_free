@@ -79,7 +79,6 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         :param multi_act_relax_args: The multi-neuron activation relaxation arguments.
         :param ada_act_relax_args: The adaptive constraints arguments.
         :param lp_args: The linear programming arguments.
-        :param log_args: The logger arguments.
         :param dtype: The data type of the linear program.
         :param device: The device of the linear program.
         """
@@ -126,14 +125,14 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         :param output_weight: The output weight matrix.
         :param output_bias: The output bias.
         """
-        logger = logging.getLogger("stm")
+    
 
         print('**** Building LP module ****')
         print('output_weight:', output_weight)
         print('output_bias:', output_bias)
         super().build(output_weight, output_bias)
 
-        logger.debug("Start building LP module.")
+        print(f"[DEBUG] Start building LP module.")
         time_start = time.perf_counter()
 
         def convert_to_lp_module(m: BasicNode) -> BasicLPNode:
@@ -201,12 +200,12 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
 
         # Convert all modules to LP modules
         for module in self.submodules.values():
-            logger.debug(f"Create LP module of {module.__class__.__name__}({module.name}).")
+            print(f"[DEBUG] Create LP module of {module.__class__.__name__}({module.name}).")
             lp_module = convert_to_lp_module(module)
             self.lp_submodules[lp_module.name] = lp_module
 
         # Set the pre and next nodes for each module
-        logger.debug("Set pre and next nodes for each LP module.")
+        print(f"[DEBUG] Set pre and next nodes for each LP module.")
         for module in self.submodules.values():
             lp_module = self.lp_submodules[module.name]
 
@@ -219,7 +218,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
                 # The input module has no pre nodes.
                 lp_module.pre_nodes = None
 
-            logger.debug(
+            print(
                 f"Set pre nodes of {module.__class__.__name__}({module.name}) "
                 f"being {lp_module.pre_nodes}."
             )
@@ -233,31 +232,31 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
                 # The output module has no next nodes.
                 lp_module.next_nodes = None
 
-            logger.debug(
+            print(
                 f"Set next nodes of {module.__class__.__name__}({module.name}) "
                 f"being {lp_module.next_nodes}."
             )
 
-        logger.info(f"Finish building LP module in {time.perf_counter() - time_start:.4f}s.")
+        print(f"[INFO] Finish building LP module in {time.perf_counter() - time_start:.4f}s.")
 
     def build_lp(self):
-        logger = logging.getLogger("stm")
+    
 
-        logger.debug("Start building LP model.")
+        print(f"[DEBUG] Start building LP model.")
         time_start = time.perf_counter()
 
-        logger.debug("Clear all parameters from bound propagation if any.")
+        print(f"[DEBUG] Clear all parameters from bound propagation if any.")
         self.bp_shared_data.clear_params()
 
-        logger.debug("Restore last weights and biases.")
+        print(f"[DEBUG] Restore last weights and biases.")
         self.restore_output_constraints()
 
-        logger.debug("Initialize Gurobi model.")
+        print(f"[DEBUG] Initialize Gurobi model.")
         self.model = self._init_gurobi_model()
 
         gvars = None
         for module, lp_module in zip(self.submodules.values(), self.lp_submodules.values()):
-            logger.debug(
+            print(
                 f"Add variables and constraints for {lp_module.__class__.__name__} "
                 f"({lp_module.name})."
             )
@@ -332,24 +331,24 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
 
         self.model.update()
         self.output_vars = gvars
-        logger.debug(f"Finish building LP model in {time.perf_counter() - time_start:.4f}s")
-        logger.info(
+        print(f"[DEBUG] Finish building LP model in {time.perf_counter() - time_start:.4f}s")
+        print(
             f"Current LP model has {self.model.NumVars} variables "
             f"and {self.model.NumConstrs} constraints"
         )
 
         # # The following code is to check if the mode is infeasible.
-        # logger.debug(f"Check if the model is infeasible.")
+        # print(f"[DEBUG] Check if the model is infeasible.")
         # self.model.optimize()
         # if self.model.Status == GRB.INFEASIBLE:
-        #     logger.error(f"The model is infeasible. Write the model to model.ilp")
+        #     print(f"[ERROR]The model is infeasible. Write the model to model.ilp")
         #     self.model.computeIIS()
         #     # Create a directory to store the model
         #     os.makedirs("ilp", exist_ok=True)
         #     self.model.write("ilp/model.ilp")
         #     raise RuntimeError(f"The model is infeasible.")
         # else:
-        #     logger.debug(
+        #     print(
         #         f"The model is feasible {self.model.Status}. "
         #         "The objective value is {self.model.ObjVal:.4f}"
         #     )
@@ -371,7 +370,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
             Currently, this method only supports local robustness verification.
         """
 
-        logger = logging.getLogger("stm")
+    
 
         last_module = self.submodules[self.output_name]
         if not isinstance(last_module, GemmNode):
@@ -380,13 +379,13 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         if self._ori_last_weight is not None and self._ori_last_bias is not None:
             last_module.weight = self._ori_last_weight
             last_module.bias = self._ori_last_bias
-            logger.debug("Restore output constraints for the last layer.")
+            print(f"[DEBUG] Restore output constraints for the last layer.")
         else:
             # Here the implementation is DIFFERENT from the superclass.
             n = last_module.weight.shape[0]
             last_module.weight = torch.eye(n, dtype=self.dtype, device=self.device)
             last_module.bias = None
-            logger.debug("No need to restore the output constraints.")
+            print(f"[DEBUG] No need to restore the output constraints.")
 
     def verify_lp(self, label: int, adv_labels: list[int] = None) -> list[bool]:
         """
@@ -403,7 +402,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
             means the property is verified, and False means the property is not
             verified.
         """
-        logger = logging.getLogger("stm")
+    
 
         num_labels = len(self.output_vars)
         if adv_labels is None:
@@ -413,7 +412,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         results = [False if label in adv_labels else True for label in range(num_labels)]
 
         for adv_label in adv_labels:
-            logger.info(f"Verify label {adv_label} vs. {label}.")
+            print(f"[INFO] Verify label {adv_label} vs. {label}.")
 
             obj = self.output_vars[label] - self.output_vars[adv_label]
             self.model.setObjective(obj)
@@ -458,8 +457,8 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
               objective value and the solution will be None.
             - If return_solution is False, the solution will be None.
         """
-        logger = logging.getLogger("stm")
-        logger.info("Start solving LP model.")
+    
+        print(f"[INFO] Start solving LP model.")
         start = time.perf_counter()
 
         def callback_lp(model: gurobipy.Model, where: GRB.Callback):
@@ -476,63 +475,62 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
 
         result, obj_val, solution = self._process_model_status(return_solution)
 
-        logger.info(f"Finish solving LP model in {time.perf_counter() - start:.4f}s")
-        logger.info(f"Verification result: {'SUCCESS' if result else 'UNKNOWN'}")
+        print(f"[INFO] Finish solving LP model in {time.perf_counter() - start:.4f}s")
+        print(f"[INFO] Verification result: {'SUCCESS' if result else 'UNKNOWN'}")
 
         return result, obj_val, solution
 
     def _process_model_status(
         self, return_solution: bool = False
     ) -> tuple[bool, float | None, np.ndarray | None]:
-        logger = logging.getLogger("stm")
+    
 
-        logger.info(
+        print(
             f"Result status: {self.model.Status}-" f"{GRB_STATUS_MAP.get(self.model.status)}."
         )
 
         # If the model is infeasible or unbounded, reoptimize to get definitive status.
         if self.model.Status == GRB.INF_OR_UNBD:
-            logger.warning(
-                "The model is infeasible or unbounded. " "Reoptimize to get definitive status."
+            print(
+                "[WARNING]The model is infeasible or unbounded. Reoptimize to get definitive status."
             )
             self.model.setParam(GRB.Param.DualReductions, 0)
             self.model.optimize()
-            logger.info(
+            print(
                 f"Result status: {self.model.Status}-" f"{GRB_STATUS_MAP.get(self.model.status)}."
             )
 
         # If the model is infeasible, output the infeasible constraints.
         if self.model.Status == GRB.INFEASIBLE:
             # Set the numeric focus to 3 to get higher precision.
-            logger.info("The model is infeasible. Set numeric focus to 3 and recompute.")
+            print(f"[INFO] The model is infeasible. Set numeric focus to 3 and recompute.")
             self.model.setParam(GRB.Param.NumericFocus, 3)
             self.model.optimize()
-            logger.info(
+            print(
                 f"Result status: {self.model.Status}-" f"{GRB_STATUS_MAP.get(self.model.status)}."
             )
 
             if self.model.Status == GRB.INF_OR_UNBD:
-                logger.warning(
-                    "The model is infeasible or unbounded. " "Reoptimize to get definitive status."
+                print(
+                    "[WARNING]The model is infeasible or unbounded. Reoptimize to get definitive status."
                 )
                 self.model.setParam(GRB.Param.DualReductions, 0)
                 self.model.optimize()
-                logger.info(
+                print(
                     f"Result status: {self.model.Status}-"
                     f"{GRB_STATUS_MAP.get(self.model.status)}."
                 )
 
             if self.model.Status == GRB.INFEASIBLE:
-                logger.info("The model is still infeasible.")
+                print(f"[INFO] The model is still infeasible.")
                 current_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
                 fname = f"infeasible_model_IIS_{current_time}.ilp"
                 try:
                     self.model.computeIIS()
                     self.model.write(fname)
-                    logger.error(f"The infeasible model IIS is written to {fname}.")
-                    # logger.error(f"The model is infeasible.")
+                    print(f"[ERROR]The infeasible model IIS is written to {fname}.")
                 except Exception as e:
-                    logger.error(f"Failed to write the infeasible model IIS: {e}")
+                    print(f"[ERROR]Failed to write the infeasible model IIS: {e}")
 
         # If the model is optimal, get the objective value and solution.
         result = self.if_lp_success()
@@ -540,7 +538,7 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         solution = None
         if self.model.Status == GRB.OPTIMAL:
             obj_val = self.model.ObjVal
-            logger.info(f"Objective value is {obj_val:.4f}.")
+            print(f"[INFO] Objective value is {obj_val:.4f}.")
             if return_solution:
                 solution = np.array(
                     [var.x for var in self.model.getVars()], dtype=np.float64
@@ -579,8 +577,8 @@ class LPBoundModel(IneqBoundModel, Generic[T]):
         """
         super().clear()
 
-        logger = logging.getLogger("stm")
-        logger.debug("Clear cache of linear programming model.")
+    
+        print(f"[DEBUG] Clear cache of linear programming model.")
 
         self.lp_shared_data.clear()
         if self.model is not None:
