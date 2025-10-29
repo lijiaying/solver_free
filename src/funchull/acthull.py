@@ -90,7 +90,7 @@ class ActHull(ABC):
         dtype_cdd: CDDNumberType = "float",
     ):
         assert S or M, "At least one of S and M should be True."
-        __import__("ipdb").set_trace()
+        # __import__("ipdb").set_trace()
         self._add_S = S
         self._add_M = M
         self._dtype_cdd = dtype_cdd
@@ -121,13 +121,13 @@ class ActHull(ABC):
         :param upper: The upper bounds of the input variables.
         :return: The constraints defining the convex hull.
         """
-        __import__("ipdb").set_trace()
+        # __import__("ipdb").set_trace()
         self._check_input_bounds(lower, upper)
         self._check_constrs(constrs)
         self._check_inputs(constrs, lower, upper)
 
         print("<> call cal_hull ", flush=True)
-        print("constrs=\n", constrs, flush=True)
+        # print("constrs=\n", constrs, flush=True)
         d = None
         l = u = None
         c_i = c_l = c_u = None

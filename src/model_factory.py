@@ -291,8 +291,8 @@ def _get_ignored_samples(
             break
 
         print(f"-> checking sample", i, flush=True)
-        print("    sample:", sample)
-        print("    label:", label)
+        # print("    sample:", sample)
+        # print("    label:", label)
 
         output = sess.run(
             [output_name],

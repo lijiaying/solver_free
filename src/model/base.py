@@ -117,7 +117,7 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         print(f"[DEBUG] Get input bound from the input sample.")
 
-        print("**** input_sample:", input_sample)
+        # print("**** input_sample:", input_sample)
         l, u = self.perturb_args.normalize(input_sample)
         # print("**** normalized l:", l)
         # print("**** normalized u:", u)

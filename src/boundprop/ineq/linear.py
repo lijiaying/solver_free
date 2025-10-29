@@ -642,7 +642,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
             self.act_relax_args.mode,
         )
 
-        print(f"{RED_BK}[DEBUG] [after relaxation] =>=> k_l: \n{k_l}, \nk_u: \n{k_u}, \nb_l: \n{b_l}, \nb_u: \n{b_u}{RESET}")
+        # print(f"{RED_BK}[DEBUG] [after relaxation] =>=> k_l: \n{k_l}, \nk_u: \n{k_u}, \nb_l: \n{b_l}, \nb_u: \n{b_u}{RESET}")
         return LinearConstrBound(L=LinearConstr(A=k_l, b=b_l), U=LinearConstr(A=k_u, b=b_u))  # noqa
 
     @staticmethod

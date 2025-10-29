@@ -296,7 +296,7 @@ def back_sub_grouped_constrs(
         # Calculate the biases of constrs by backward inequality propagation.
         ineqs = ineqs.reshape((-1, n_vars))
         constr = LinearConstr(A=ineqs)
-        __import__("ipdb").set_trace()
+        # __import__("ipdb").set_trace()
         bound = back_sub_to_input_kact(
             pre_module, LinearConstrBound(L=constr, U=constr), input_bound
         )
@@ -365,7 +365,7 @@ def cal_grouped_acthull(
     print(f"[DEBUG] Start calculating convex hulls.")
     time_start = time.perf_counter()
 
-    __import__("ipdb").set_trace()
+    # __import__("ipdb").set_trace()
     print(f'{BLUE_BK}call func hull{RESET} for {act_type}')
     fun_hull = _get_func_hull(act_type)
     grouped_l, grouped_u = _group_input_bounds(
@@ -558,7 +558,8 @@ def back_sub_to_input_kact(
 
         module = module.pre_nodes[0]
 
-    new_bound, _ = self.cal_bounds(constr_bound, input_bound)
+    # __import__("ipdb").set_trace()
+    new_bound = self.cal_bounds(constr_bound, input_bound)
     bound = bound.intersect(new_bound)
 
     print(f"Finish back-substitution in {time.perf_counter() - start:.4f} seconds.")

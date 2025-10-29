@@ -27,6 +27,21 @@
                 "--opt", "mnlp"
             ]
         },
+        {
+            "name": "MNIST sigmoid 3x500 Example",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/verify/",
+            "program": "exp.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--net_fpath", "../nets/mnist_sigmoid_3_500.onnx",
+                "--epsilon", "0.02",
+                "--bp", "stm",
+                "--opt", "mnlp"
+            ]
+        },
     ]
 }
 

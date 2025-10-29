@@ -13,7 +13,6 @@ from src import *
 
 
 def main(args):
-
     if args.bp == "deeppoly":
         bp_method = RelaxMode.DEEPPOLY
     elif args.bp == "crown":
@@ -50,7 +49,7 @@ def main(args):
         log_file=log_file,
         opt_method=opt_method,
         first_sample_index=0,
-        num_samples=100,
+        num_samples=args.num_samples,
         input_limited_range=input_limited_range,
         # device="cuda:0",  # noqa
         dtype="float64",
@@ -71,6 +70,7 @@ if __name__ == "__main__":
     parser.add_argument("--bp", type=str, default=None)
     parser.add_argument("--opt", type=str, default=None)
     parser.add_argument("--log_name", type=str, default=None)
+    parser.add_argument("--num_samples", type=int, default=None)
 
     args = parser.parse_args()
     if args.dataset is None:
@@ -81,6 +81,12 @@ if __name__ == "__main__":
             args.dataset = "mnist"
         elif 'cifar10' in net_lower:
             args.dataset = "cifar10"
+
+    if args.num_samples is not None:
+        assert args.num_samples > 0 and args.num_samples < 100, "num_samples should be positive."
+        print(f"Set num_samples to {args.num_samples}")
+    else:
+        args.num_samples = 10
         
     main(args)
 
