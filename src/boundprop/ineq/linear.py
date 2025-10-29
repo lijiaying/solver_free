@@ -636,14 +636,14 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
         pre_bound = shared_data.all_bounds[self.input_names[0]]
         # print(f"{RED_BK}[DEBUG] [before relaxation] =>=> pre_bound: {pre_bound}{RESET}")
 
-        sl, su, tl, tu = self._cal_relaxation(
+        k_l, k_u, b_l, b_u = self._cal_relaxation(
             pre_bound.l.flatten(),
             pre_bound.u.flatten(),
             self.act_relax_args.mode,
         )
 
-        print(f"{RED_BK}[DEBUG] [after relaxation] =>=> sl: \n{sl}, \nsu: \n{su}, \ntl: \n{tl}, \ntu: \n{tu}{RESET}")
-        return LinearConstrBound(L=LinearConstr(A=sl, b=tl), U=LinearConstr(A=su, b=tu))  # noqa
+        print(f"{RED_BK}[DEBUG] [after relaxation] =>=> k_l: \n{k_l}, \nk_u: \n{k_u}, \nb_l: \n{b_l}, \nb_u: \n{b_u}{RESET}")
+        return LinearConstrBound(L=LinearConstr(A=k_l, b=b_l), U=LinearConstr(A=k_u, b=b_u))  # noqa
 
     @staticmethod
     @abstractmethod
@@ -815,11 +815,11 @@ class MaxPool2DIneqNode(NonLinearIneqNode, MaxPool2DNode):
         l, u = self.get_unfolded_pre_bound(pre_bound)
         l_max, l_argmax = self._get_l_argmax(pre_bound)
         mask = self.get_nontrivial_neuron_mask(pre_bound)
-        sl, su, tl, tu = self._cal_relaxation(
+        k_l, k_u, b_l, b_u = self._cal_relaxation(
             l, u, self.act_relax_args.mode, l_max, l_argmax, mask
         )
 
-        return LinearConstrBound(L=LinearConstr(A=sl, b=tl), U=LinearConstr(A=su, b=tu))  # noqa
+        return LinearConstrBound(L=LinearConstr(A=k_l, b=b_l), U=LinearConstr(A=k_u, b=b_u))  # noqa
 
     @staticmethod
     def _cal_relaxation(

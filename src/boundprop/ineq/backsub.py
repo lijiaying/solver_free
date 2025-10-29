@@ -665,31 +665,31 @@ the ReLU activation function.
 
 
 def _back_sub_relu_1d_lower(
-    A: Tensor, b: Tensor | None, sl: Tensor, su: Tensor, tu: Tensor
+    A: Tensor, b: Tensor | None, k_l: Tensor, k_u: Tensor, b_u: Tensor
 ) -> tuple[Tensor, Tensor]:
     Ap, An = A.clamp(min=0), A.clamp(max=0)
-    bx = (An * tu).sum(dim=1)
+    bx = (An * b_u).sum(dim=1)
     b = bx + b if b is not None else bx
-    A = Ap * sl + An * su
+    A = Ap * k_l + An * k_u
     return A, b
 
 
 def _back_sub_relu_1d_upper(
-    A: Tensor, b: Tensor | None, sl: Tensor, su: Tensor, tu: Tensor
+    A: Tensor, b: Tensor | None, k_l: Tensor, k_u: Tensor, b_u: Tensor
 ) -> tuple[Tensor, Tensor]:
     Ap, An = A.clamp(min=0), A.clamp(max=0)
-    bx = (Ap * tu).sum(dim=1)
+    bx = (Ap * b_u).sum(dim=1)
     b = bx + b if b is not None else bx
-    A = Ap * su + An * sl
+    A = Ap * k_u + An * k_l
     return A, b
 
 
 def relu_back_sub(
     A: Tensor,
     b: Tensor | None,
-    sl: Tensor,
-    su: Tensor,
-    tu: Tensor,
+    k_l: Tensor,
+    k_u: Tensor,
+    b_u: Tensor,
     is_lower: bool = True,
 ) -> tuple[Tensor, Tensor | None]:
     """
@@ -702,9 +702,9 @@ def relu_back_sub(
 
     :param A: The matrix of the linear relaxation.
     :param b: The bias of the linear relaxation.
-    :param sl: The slopes of the lower linear relaxation of the non-linear operation.
-    :param su: The slopes of the upper linear relaxation of the non-linear operation.
-    :param tu: The intercepts of the upper linear relaxation of the non-linear
+    :param k_l: The slopes of the lower linear relaxation of the non-linear operation.
+    :param k_u: The slopes of the upper linear relaxation of the non-linear operation.
+    :param b_u: The intercepts of the upper linear relaxation of the non-linear
         operation.
     :param is_lower: If True, calculate the lower relaxation; otherwise, calculate the
         upper relaxation.
@@ -716,19 +716,19 @@ def relu_back_sub(
         torch.float64,
     ), f"The data type {A.dtype} is not supported."
     assert (
-        sl.dim() == su.dim() == 1 and tu.dim() == 1
-    ), f"The dimensions are not supported. sl: {sl.shape}, su: {su.shape}, tu: {tu.shape}."
+        k_l.dim() == k_u.dim() == 1 and b_u.dim() == 1
+    ), f"The dimensions are not supported. k_l: {k_l.shape}, k_u: {k_u.shape}, b_u: {b_u.shape}."
 
     # print(f'{CYAN}->> relu_back_sub: is_lower={is_lower}{RESET}')
     # print(f'    A: {A}')
     # print(f'    b: {b}')
-    # print(f'    sl: {sl}')
-    # print(f'    su: {su}')
-    # print(f'    tu: {tu}')
+    # print(f'    k_l: {k_l}')
+    # print(f'    k_u: {k_u}')
+    # print(f'    b_u: {b_u}')
     if is_lower:
-        ret = _back_sub_relu_1d_lower(A, b, sl, su, tu)
+        ret = _back_sub_relu_1d_lower(A, b, k_l, k_u, b_u)
     else:
-        ret = _back_sub_relu_1d_upper(A, b, sl, su, tu)
+        ret = _back_sub_relu_1d_upper(A, b, k_l, k_u, b_u)
     # print(f'{GREEN}<<- relu_back_sub with ret: \n{ret}{RESET}')
     return ret
 

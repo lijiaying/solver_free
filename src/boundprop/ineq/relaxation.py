@@ -33,10 +33,10 @@ def _cal_relaxation_maxpool2d(
     dtype, device = l.dtype, l.device
     n, s = l.shape
 
-    sl = torch.zeros((n, s), dtype=dtype, device=device)
-    tl = torch.zeros((n,), dtype=dtype, device=device)
-    su = sl.clone()
-    tu = tl.clone()
+    k_l = torch.zeros((n, s), dtype=dtype, device=device)
+    b_l = torch.zeros((n,), dtype=dtype, device=device)
+    k_u = k_l.clone()
+    b_u = b_l.clone()
     idx = torch.arange(n, device=device)
 
     # Non-zero case. All the lower bounds and upper bounds are zero.
@@ -45,21 +45,21 @@ def _cal_relaxation_maxpool2d(
     # Lower relaxation
     # Lower bound is y > x_i, where x_i has the maximum lower bound.
     mask_l = ~mask_z
-    sl[idx[mask_l], l_argmax[mask_l]] = 1.0
+    k_l[idx[mask_l], l_argmax[mask_l]] = 1.0
 
     # Upper relaxation
     # (1) Trivial case. one lower bound is larger than the other upper bounds.
     # Set the maximum upper bound to negative infinite to exclude it from the
     # max operation.
     mask_t = ~(mask | mask_z)
-    su[idx[mask_t], l_argmax[mask_t]] = 1.0
+    k_u[idx[mask_t], l_argmax[mask_t]] = 1.0
 
     # (2) Nontrivial cases.
     # Reference: CROWN and DeepPoly
     # y <= u_max
-    tu[mask] = u.max(dim=1)[0][mask]
+    b_u[mask] = u.max(dim=1)[0][mask]
 
-    return sl, su, tl, tu
+    return k_l, k_u, b_l, b_u
 
 
 def cal_relaxation_maxpool2d(
@@ -77,18 +77,18 @@ def cal_relaxation_maxpool2d(
 
     dtype = l.dtype
     if dtype == torch.float32:
-        sl, su, tl, tu = _cal_relaxation_maxpool2d(l, u, l_max, l_argmax, mask)
+        k_l, k_u, b_l, b_u = _cal_relaxation_maxpool2d(l, u, l_max, l_argmax, mask)
     elif dtype == torch.float64:
-        sl, su, tl, tu = _cal_relaxation_maxpool2d(l, u, l_max, l_argmax, mask)
+        k_l, k_u, b_l, b_u = _cal_relaxation_maxpool2d(l, u, l_max, l_argmax, mask)
     else:
         raise ValueError(f"Unsupported dtype: {dtype}")
 
-    sl = sl.reshape((n, s))
-    su = su.reshape((n, s))
-    tl = tl.flatten()
-    tu = tu.flatten()
+    k_l = k_l.reshape((n, s))
+    k_u = k_u.reshape((n, s))
+    b_l = b_l.flatten()
+    b_u = b_u.flatten()
 
-    return sl, su, tl, tu
+    return k_l, k_u, b_l, b_u
 
 
 #######################################################
@@ -99,20 +99,20 @@ def cal_relaxation_maxpool2d(
 def _cal_relaxation_relu(l: Tensor, u: Tensor) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     # Upper bound
     # y <= x
-    su = torch.where(l >= 0, 1.0, 0.0)
+    k_u = torch.where(l >= 0, 1.0, 0.0)
 
     # y <= u / (u - l) (x - l)
     mask_u = (l < 0) & (u > 0)
-    su = torch.where(mask_u, u / (u - l), su)
-    tu = torch.where(mask_u, -l * su, 0)
+    k_u = torch.where(mask_u, u / (u - l), k_u)
+    b_u = torch.where(mask_u, -l * k_u, 0)
 
     # Lower bound
     # y >= x (when u is large) 
     # or y >= 0 (when l is large)
-    sl = torch.where(u > -l, 1.0, 0.0)
-    tl = torch.zeros_like(l)
+    k_l = torch.where(u > -l, 1.0, 0.0)
+    b_l = torch.zeros_like(l)
 
-    return sl, su, tl, tu
+    return k_l, k_u, b_l, b_u
 
 
 def cal_relaxation_relu(
@@ -140,22 +140,22 @@ def _cal_relaxation_sshape_deeppoly(
     mask2: Tensor = (l >= 0) & ~mask0
     mask3: Tensor = ~(mask0 | mask1 | mask2)
 
-    sl = torch.where(mask0, kl, torch.zeros_like(kl))
-    su = sl.clone()
+    k_l = torch.where(mask0, kl, torch.zeros_like(kl))
+    k_u = k_l.clone()
 
-    sl = torch.where(mask1, kl, sl)
-    su = torch.where(mask1, klu, su)
+    k_l = torch.where(mask1, kl, k_l)
+    k_u = torch.where(mask1, klu, k_u)
 
-    sl = torch.where(mask2, klu, sl)
-    su = torch.where(mask2, ku, su)
+    k_l = torch.where(mask2, klu, k_l)
+    k_u = torch.where(mask2, ku, k_u)
 
-    sl = torch.where(mask3, torch.minimum(kl, ku), sl)
-    su = torch.where(mask3, sl, su)
+    k_l = torch.where(mask3, torch.minimum(kl, ku), k_l)
+    k_u = torch.where(mask3, k_l, k_u)
 
-    tl = -sl * l + yl
-    tu = -su * u + yu
+    b_l = -k_l * l + yl
+    b_u = -k_u * u + yu
 
-    return sl, su, tl, tu
+    return k_l, k_u, b_l, b_u
 
 
 def _cal_relaxation_sshape(
@@ -175,27 +175,27 @@ def _cal_relaxation_sshape(
     mask2: Tensor = (kl >= klu) & ~mask0
     mask3: Tensor = ~(mask0 | mask1 | mask2)
 
-    sl = torch.where(mask0, kl, 0.0)
-    su = sl.clone()
-    tl = torch.where(mask0, yl - sl * l, 0.0)
-    tu = tl.clone()
+    k_l = torch.where(mask0, kl, 0.0)
+    k_u = k_l.clone()
+    b_l = torch.where(mask0, yl - k_l * l, 0.0)
+    b_u = b_l.clone()
 
-    sl = torch.where(mask1, km, sl)
-    su = torch.where(mask1, klu, su)
-    tl = torch.where(mask1, ym - sl * m, tl)
-    tu = torch.where(mask1, yl - su * l, tu)
+    k_l = torch.where(mask1, km, k_l)
+    k_u = torch.where(mask1, klu, k_u)
+    b_l = torch.where(mask1, ym - k_l * m, b_l)
+    b_u = torch.where(mask1, yl - k_u * l, b_u)
 
-    sl = torch.where(mask2, klu, sl)
-    su = torch.where(mask2, km, su)
-    tl = torch.where(mask2, yu - sl * u, tl)
-    tu = torch.where(mask2, ym - su * m, tu)
+    k_l = torch.where(mask2, klu, k_l)
+    k_u = torch.where(mask2, km, k_u)
+    b_l = torch.where(mask2, yu - k_l * u, b_l)
+    b_u = torch.where(mask2, ym - k_u * m, b_u)
 
-    sl = torch.where(mask3, kl, sl)
-    su = torch.where(mask3, ku, su)
-    tl = torch.where(mask3, yl - sl * l, tl)
-    tu = torch.where(mask3, yu - su * u, tu)
+    k_l = torch.where(mask3, kl, k_l)
+    k_u = torch.where(mask3, ku, k_u)
+    b_l = torch.where(mask3, yl - k_l * l, b_l)
+    b_u = torch.where(mask3, yu - k_u * u, b_u)
 
-    return sl, su, tl, tu
+    return k_l, k_u, b_l, b_u
 
 
 def cal_relaxation_sshape(
