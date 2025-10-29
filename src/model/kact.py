@@ -1,44 +1,28 @@
 """
-This module is used to build a linear programming model to verify the neural network
-with k-activation constraints.
+This module is used to build a linear programming model to verify the neural network with k-activation constraints.
 
-k-activation constraints is originally proposed in the paper:
+k-activation constraints (multi-neuron approx.) is originally proposed in the paper:
 `Beyond the single neuron convex barrier for neural network certification
-<https://proceedings.neurips.cc/paper_files/paper/2019/file/0a9fdbb17feb6ccb7ec405cfb85222c4-Paper.pdf>`__
-:cite:`singh_beyond_2019`
 
-.. tip::
+We use *lazy constraints* to add M constraints adaptively; 
+without it, the linear program is built with all M constraints.
 
-    In our terminology, k-activation constraints are also called multi-neuron
-    constraints or k-act constraints.
+**Lazy constraints** is a technique to add constraints to the model when the
+solution violates the constraints.
 
-We will use a technique called *lazy constraints* to add the k-act constraints when
-enable this feature; otherwise, the k-act constraints will be added to the model
-before solving the linear program.
-
-.. tip::
-
-    **Lazy constraints** is a technique to add constraints to the model when the
-    solution violates the constraints.
-
-    - First, we separate the k-act constraints from the original model and store them
-      in a sparse matrix. Solving the linear program without the k-act constraints is
-      faster but with a worse optimal solution.
-    - When the optimal solution is not enough to verify the property, we will evaluate
-      if adding the k-act constraints to the model can help to verify the property.
-      That is, the original solution must close to what we want to verify.
-    - Then, we filter those k-act constraints that are violated by the solution and add
-      them to the model. This can improve the solution quality and help to verify the
-      property.
-
-
+- First, we separate M constraints from the original model and store them in a sparse matrix.
+  Solving the linear program without M constraints is faster but with a worse optimal solution.
+- When the optimal solution is not adequate to verify the property, we ?? will evaluate ??
+  if adding M constraints to the model can help to verify the property.
+  That is, the original solution must close to what we want to verify.
+- Then, we filter those M constraints that are violated by the solution and add them to the model. 
+  This can improve the solution quality and help to verify the property.
 """
 
 __docformat__ = "restructuredtext"
 __all__ = ["KActLPBoundModel"]
 
 import gurobipy
-import logging
 import math
 import numpy as np
 import time
@@ -100,16 +84,13 @@ class KActLPBoundModel(LPBoundModel):
 
         self._has_built_kact_constrs = False
 
-    def verify_lp(self, label: int, adv_labels: list[int] = None) -> list[bool]:
 
+    def verify_lp(self, label: int, adv_labels: list[int] = None) -> list[bool]:
         num_labels = len(self.output_vars)
         if adv_labels is None:
             adv_labels = list(range(num_labels))
             adv_labels.pop(label)
-
-        results = [
-            False if label in adv_labels else True for label in range(num_labels)
-        ]
+        results = [False if label in adv_labels else True for label in range(num_labels)]
 
         for adv_label in adv_labels:
             print(f"[INFO] Verify label {adv_label} vs. {label}.")
@@ -120,10 +101,7 @@ class KActLPBoundModel(LPBoundModel):
             success, obj_val, solution = self.solve_lp(
                 call_back=False, return_solution=True
             )
-            if (
-                obj_val is not None
-                and 0 > obj_val > self.kact_lp_args.gurobi_lazy_callback_objval
-            ):
+            if (obj_val is not None and 0 > obj_val > self.kact_lp_args.gurobi_lazy_callback_objval):
                 if not self._has_built_kact_constrs:
                     self.build_kact_lp()
                 if self.kact_lp_args.use_lazy_constraints:
@@ -136,8 +114,8 @@ class KActLPBoundModel(LPBoundModel):
 
             if not success and self.lp_args.terminate_if_fail:
                 break
-
         return results
+
 
     def solve_lp(
         self, call_back=False, return_solution: bool = False
@@ -154,11 +132,9 @@ class KActLPBoundModel(LPBoundModel):
             file for debug.
 
             The reasons for infeasibility may be:
-
             - There is a bug when calculating the bounds and relaxation of neurons.
             - There is a bug when constructing the linear program.
-            - The numerical precision of the solver is not enough for tiny bounds and
-              constraints.
+            - The numerical precision of the solver is not enough for tiny bounds and constraints.
 
         .. tip::
             When lazy constraints are used, the callback function use a negative value
@@ -166,11 +142,9 @@ class KActLPBoundModel(LPBoundModel):
             constraints. If the objective value is less than the negative value, the
             linear program will be terminated without adding lazy constraints.
 
-
         :return: A tuple of three elements, where the first element is a boolean value
             indicating if the linear program successfully verifies the property, the
-            second element is the objective value, and the third element is the
-            solution.
+            second element is the objective value, and the third element is the solution.
 
             - If the linear program has not got the optimal solution, the
               objective value and the solution will be None.
@@ -183,18 +157,13 @@ class KActLPBoundModel(LPBoundModel):
         def slow_callback_lp(model: gurobipy.Model, where: GRB.Callback):
             if where == GRB.Callback.SIMPLEX:
                 obj_best = model.cbGet(GRB.Callback.SPX_OBJVAL)
-                if (
-                    model.cbGet(GRB.Callback.SPX_PRIMINF) == 0
-                    and obj_best < self.kact_lp_args.gurobi_lazy_callback_objval
-                ):
-                    # and model.cbGet(GRB.Callback.SPX_DUALINF) == 0:
+                if (model.cbGet(GRB.Callback.SPX_PRIMINF) == 0 and obj_best < self.kact_lp_args.gurobi_lazy_callback_objval): # and model.cbGet(GRB.Callback.SPX_DUALINF) == 0:
                     model.terminate()
 
         def callback_lp(model: gurobipy.Model, where: GRB.Callback):
             if where == GRB.Callback.SIMPLEX:
                 obj_best = model.cbGet(GRB.Callback.SPX_OBJVAL)
-                if model.cbGet(GRB.Callback.SPX_PRIMINF) == 0 and obj_best < -0.001:
-                    # and model.cbGet(GRB.Callback.SPX_DUALINF) == 0:
+                if model.cbGet(GRB.Callback.SPX_PRIMINF) == 0 and obj_best < -0.001: # and model.cbGet(GRB.Callback.SPX_DUALINF) == 0:
                     model.terminate()
 
         if call_back:
@@ -209,12 +178,12 @@ class KActLPBoundModel(LPBoundModel):
 
         return result, obj_val, solution
 
+
     def build_kact_lp(self):
         """
         Build the multi-neuron constraints for the linear program.
         """
-
-        print(f"[INFO] Start building KAct constraints.")
+        print(f"[INFO] Start building M constraints.")
         time_start = time.perf_counter()
 
         input_bound = self.all_bounds[self.input_name]
@@ -277,7 +246,7 @@ class KActLPBoundModel(LPBoundModel):
             else:
                 raise NotImplementedError(f"{module} is not supported.")
 
-            print(f"[INFO] Start building KAct constraints for {module}.")
+            print(f"[INFO] Start building M constraints for {module}.")
 
             if isinstance(module, MaxPool2DNode):
                 pre_bound = ScalarBound(*module.get_unfolded_pre_bound(pre_bound))
@@ -346,39 +315,32 @@ class KActLPBoundModel(LPBoundModel):
 
             self.model.update()
 
-        print(
-            f"Finish building KAct constraints in "
-            f"{time.perf_counter() - time_start:.4f}s"
-        )
-        print(
-            f"Current LP model has {self.model.NumVars} variables "
-            f"and {self.model.NumConstrs} constraints"
-        )
+        print(f"Finish building M constraints in {time.perf_counter() - time_start:.4f}s")
+        print(f"Current LP model has {self.model.NumVars} variables and {self.model.NumConstrs} constraints")
 
         if self.kact_lp_args.use_lazy_constraints:
             self._separate_kact_constrs()
 
         self._has_built_kact_constrs = True
 
+
     def _separate_kact_constrs(self):
         """
-        Separate the KAct constraints from the original model.
+        Separate the M constraints from the original model.
 
         .. tip::
-            The k-act constraints are separated from the original model to reduce the
+            M constraints are separated from the original model to reduce the
             size of the model and so a faster solution can be obtained.
 
-            The k-act constraints will be added to the model when the solution
-            violates the constraints, where we also assess if there is a need to add
-            k-act constraints to the model. This is called *lazy constraints*.
+            M constraints will be added to the model when the solution violates the constraints, 
+            where we also assess if there is a need to add M constraints to the model.
 
         :return:
         """
-
-        print(f"[INFO] Start Separating KAct constraints.")
+        print(f"[INFO] Start Separating M constraints.")
         time_start = time.perf_counter()
 
-        # Get all kact constraints from the original model
+        # Get all M constraints from the original model
         model_with_act_constrs: gurobipy.Model = self.model.copy()
         for constr in model_with_act_constrs.getConstrs():
             if not constr.getAttr("ConstrName").endswith("kact"):
@@ -391,7 +353,7 @@ class KActLPBoundModel(LPBoundModel):
             model_with_act_constrs.getAttr("RHS"), dtype=np.float64
         )
 
-        print(f"[DEBUG] KAct constraints number: {self._kact_constrs_A.shape[0]}")
+        print(f"[DEBUG] M constraints number: {self._kact_constrs_A.shape[0]}")
 
         act_constrs_sense = model_with_act_constrs.getAttr("Sense")
         if any(sense != ">" for sense in act_constrs_sense):
@@ -399,7 +361,7 @@ class KActLPBoundModel(LPBoundModel):
 
         model_with_act_constrs.dispose()
 
-        # Remove all kact constraints from the original model
+        # Remove all M constraints from the original model
         for constr in self.model.getConstrs():
             if constr.getAttr("ConstrName").endswith("kact"):
                 self.model.remove(constr)
@@ -408,18 +370,15 @@ class KActLPBoundModel(LPBoundModel):
         self._has_separate_kact_constrs = True
         self._kact_constr_counter = 0
 
-        print(
-            f"Finish separating KAct constraints in "
-            f"{time.perf_counter() - time_start:.4f}s"
-        )
+        print(f"Finish separating M constraints in {time.perf_counter() - time_start:.4f}s")
+
 
     def _add_violated_kact_constrs(self, solution: np.ndarray):
-
         if self._kact_constrs_A.shape[0] == 0:
-            print(f"[INFO] No KAct constraints to add.")
+            print(f"[INFO] No M constraints to add.")
             return
 
-        print(f"[INFO] Start adding violated KAct constraints.")
+        print(f"[INFO] Start adding violated M constraints.")
         time_start = time.perf_counter()
 
         def add_kact_constrs(constrs_A, constrs_RHS: np.ndarray):
@@ -429,7 +388,7 @@ class KActLPBoundModel(LPBoundModel):
                 mx = gurobipy.LinExpr(
                     [m[0, c] for c in m.indices], [vars_[c] for c in m.indices]
                 )
-                self.model.addLinearConstr(
+                self.model.addLConstr(
                     lhs=mx,
                     sense=GRB.GREATER_EQUAL,
                     rhs=b,
@@ -440,10 +399,7 @@ class KActLPBoundModel(LPBoundModel):
 
         value = self._kact_constrs_A @ solution - self._kact_constrs_RHS
         violated_constrs_idxes = np.where(value < 0)[0]
-        print(
-            f"Add {violated_constrs_idxes.shape[0]}/{self._kact_constrs_A.shape[0]} "
-            f"violated KAct constraints."
-        )
+        print(f"Add {violated_constrs_idxes.shape[0]}/{self._kact_constrs_A.shape[0]} violated M constraints.")
         add_kact_constrs(
             self._kact_constrs_A[violated_constrs_idxes],
             self._kact_constrs_RHS[violated_constrs_idxes],
@@ -453,28 +409,21 @@ class KActLPBoundModel(LPBoundModel):
         remained_constrs_idxes[violated_constrs_idxes] = False
         self._kact_constrs_A = self._kact_constrs_A[remained_constrs_idxes]
         self._kact_constrs_RHS = self._kact_constrs_RHS[remained_constrs_idxes]
+    
+        print(f"Finish adding violated M constraints in {time.perf_counter() - time_start:.4f}s")
+        print(f"Current LP model has {self.model.NumVars} variables and {self.model.NumConstrs} constraints")
 
-        print(
-            f"Finish adding violated KAct constraints in "
-            f"{time.perf_counter() - time_start:.4f}s"
-        )
-        print(
-            f"Current LP model has {self.model.NumVars} variables "
-            f"and {self.model.NumConstrs} constraints"
-        )
 
     def clear(self):
         """
         Clear the linear programming model. Specifically,
-
         - clear the Gurobi model with model.close() and
         - clear the shared data including all Gurobi variables and constraints.
-        - clear the cached k-act constraints.
-
+        - clear the cached M constraints.
         """
         super().clear()
 
-        print(f"[DEBUG] Clear cache of kact constraints.")
+        print(f"[DEBUG] Clear cache of M constraints.")
 
         self._kact_constrs_A = None
         self._kact_constrs_RHS = None

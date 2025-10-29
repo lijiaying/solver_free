@@ -330,11 +330,15 @@ class LinearIneqNode(BasicIneqNode, LinearNode, ABC):
 
         :return: The scalar bounds of the neurons in the layer.
         """
-        approx_wrt_input = self.back_sub_to_input(self.init_constr_bound(only_lower_bound))
+        init_bound = self.init_constr_bound(only_lower_bound)
+        # print(f"{DARK_GRAY_BK}    Initial constraint bound: {init_bound}{RESET}")
+        approx_wrt_input = self.back_sub_to_input(init_bound)
+        # print(f"{DARK_GRAY_BK}    Approximated w.r.t input: {approx_wrt_input}{RESET}")
         bound = self.cal_bounds(
             approx_wrt_input,
             input_bound,
         )
+        # print(f"{DARK_GRAY_BK}    Calculated bound: {bound}{RESET}")
 
         bound = self.store_bounds(self.all_bounds, self.name, bound)
         return bound
@@ -383,23 +387,19 @@ class GemmIneqNode(GemmNode, LinearIneqNode):
         """
         args = (self.weight, self.bias)
 
+        # print("On the LOWER bound back-substitution:")
+        LA = constr_bound.L.A.reshape(-1, *self.output_size)
         result_constr_bound = LinearConstrBound(
             L=LinearConstr(
-                *gemm_back_sub(
-                    constr_bound.L.A.reshape(-1, *self.output_size),
-                    constr_bound.L.b,
-                    *args,
-                )
+                *gemm_back_sub(LA, constr_bound.L.b, *args)
             )
         )
-        if constr_bound.U is None:
-            return result_constr_bound
-
-        result_constr_bound.U = LinearConstr(
-            *gemm_back_sub(
-                constr_bound.U.A.reshape(-1, *self.output_size), constr_bound.U.b, *args
+        if constr_bound.U is not None:
+            # print("On the UPPER bound back-substitution:")
+            UA = constr_bound.U.A.reshape(-1, *self.output_size)
+            result_constr_bound.U = LinearConstr(
+                *gemm_back_sub(UA, constr_bound.U.b, *args)
             )
-        )
 
         return result_constr_bound
 
@@ -634,6 +634,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
 
         print(f"[DEBUG] Calculate single-neuron relaxation.")
         pre_bound = shared_data.all_bounds[self.input_names[0]]
+        # print(f"{RED_BK}[DEBUG] [before relaxation] =>=> pre_bound: {pre_bound}{RESET}")
 
         sl, su, tl, tu = self._cal_relaxation(
             pre_bound.l.flatten(),
@@ -641,6 +642,7 @@ class NonLinearIneqNode(BasicIneqNode, NonLinearNode, ABC):
             self.act_relax_args.mode,
         )
 
+        print(f"{RED_BK}[DEBUG] [after relaxation] =>=> sl: \n{sl}, \nsu: \n{su}, \ntl: \n{tl}, \ntu: \n{tu}{RESET}")
         return LinearConstrBound(L=LinearConstr(A=sl, b=tl), U=LinearConstr(A=su, b=tu))  # noqa
 
     @staticmethod
@@ -695,8 +697,7 @@ class ReLUIneqNode(NonLinearIneqNode, ReLUNode):
 
         if constr_bound.U is None:
             return result_constr_bound
-        # NOTE: Here, it is different from other functions. Pay attension to the order
-        # of the arguments.
+        # NOTE: Here, it is different from other functions. Pay attension to the order of the arguments.
         result_constr_bound.U = LinearConstr(
             *relu_back_sub(
                 constr_bound.U.A.reshape(-1, math.prod(self.output_size)),

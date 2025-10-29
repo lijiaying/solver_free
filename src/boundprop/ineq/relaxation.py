@@ -107,8 +107,9 @@ def _cal_relaxation_relu(l: Tensor, u: Tensor) -> tuple[Tensor, Tensor, Tensor, 
     tu = torch.where(mask_u, -l * su, 0)
 
     # Lower bound
-    # y >= 0 or y >= x
-    sl = torch.where(u >= -l, 1.0, 0.0)
+    # y >= x (when u is large) 
+    # or y >= 0 (when l is large)
+    sl = torch.where(u > -l, 1.0, 0.0)
     tl = torch.zeros_like(l)
 
     return sl, su, tl, tu

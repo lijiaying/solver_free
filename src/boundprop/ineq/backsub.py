@@ -195,11 +195,13 @@ def gemm_back_sub(
     :return: The matrix and bias of the linear relaxation after back-substitution.
     """
     dtype = A.dtype
-    print(f'{BLUE}->> gemm_back_sub: {RESET}')
-    print(f'    A: {A}')
-    print(f'    b: {b}')
-    print(f'    weight: {weight}')
-    print(f'    bias: {bias}')
+    # print(f'{BLUE}->> gemm_back_sub: {RESET}')
+    # print(f'    A: {A}')
+    # print(f'    b: {b}')
+    # print(f'    weight: {weight}')
+    # print(f'    bias: {bias}')
+    # print(f"    <> computation: b = b + (A * bias).sum(dim=1)")
+    # print(f"    <> computation: A = A @ weight")
 
     if dtype not in (torch.float32, torch.float64):
         raise ValueError(f"The data type {dtype} is not supported.")
@@ -225,7 +227,7 @@ def gemm_back_sub(
             ret = _back_sub_gemm_no_bias2_fp32(A, weight, bias)
         else:
             ret = _back_sub_gemm_no_bias2_fp64(A, weight, bias)
-    print(f'{GREEN}<<- gemm_back_sub with ret: \n{ret}{RESET}')
+    # print(f'{GREEN}<<- gemm_back_sub with ret: \n{ret}{RESET}')
     return ret
 
 
@@ -717,17 +719,17 @@ def relu_back_sub(
         sl.dim() == su.dim() == 1 and tu.dim() == 1
     ), f"The dimensions are not supported. sl: {sl.shape}, su: {su.shape}, tu: {tu.shape}."
 
-    print(f'{CYAN}->> relu_back_sub: is_lower={is_lower}{RESET}')
-    print(f'    A: {A}')
-    print(f'    b: {b}')
-    print(f'    sl: {sl}')
-    print(f'    su: {su}')
-    print(f'    tu: {tu}')
+    # print(f'{CYAN}->> relu_back_sub: is_lower={is_lower}{RESET}')
+    # print(f'    A: {A}')
+    # print(f'    b: {b}')
+    # print(f'    sl: {sl}')
+    # print(f'    su: {su}')
+    # print(f'    tu: {tu}')
     if is_lower:
         ret = _back_sub_relu_1d_lower(A, b, sl, su, tu)
     else:
         ret = _back_sub_relu_1d_upper(A, b, sl, su, tu)
-    print(f'{GREEN}<<- relu_back_sub with ret: \n{ret}{RESET}')
+    # print(f'{GREEN}<<- relu_back_sub with ret: \n{ret}{RESET}')
     return ret
 
 
@@ -941,7 +943,7 @@ def back_sub_to_input(
     :return: The linear relaxation represented by input variables.
     """
 
-    print(f"[DEBUG] Back-substitute to input for {self}.")
+    # print(f"[DEBUG] Back-substitute to input for {self}.")
     start = time.perf_counter()
 
     # The constraint bound for the output of the residual block.

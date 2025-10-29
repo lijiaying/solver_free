@@ -119,8 +119,8 @@ class BasicBoundModel(Module, ABC, Generic[T]):
 
         print("**** input_sample:", input_sample)
         l, u = self.perturb_args.normalize(input_sample)
-        print("**** normalized l:", l)
-        print("**** normalized u:", u)
+        # print("**** normalized l:", l)
+        # print("**** normalized u:", u)
 
         return ScalarBound(l, u).to(**self.data_settings)
 

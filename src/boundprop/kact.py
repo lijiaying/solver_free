@@ -365,6 +365,8 @@ def cal_grouped_acthull(
     print(f"[DEBUG] Start calculating convex hulls.")
     time_start = time.perf_counter()
 
+    __import__("ipdb").set_trace()
+    print(f'{BLUE_BK}call func hull{RESET} for {act_type}')
     fun_hull = _get_func_hull(act_type)
     grouped_l, grouped_u = _group_input_bounds(
         act_type, pre_l, pre_u, mask_mn, grouped_ids, pool_input_l, pool_input_u
@@ -498,7 +500,7 @@ def back_sub_to_input_kact(
     :return: The linear relaxation represented by input variables.
     """
 
-    print(f"[DEBUG] Back-substitute to input for {self}.")
+    # print(f"[DEBUG] Back-substitute to input for {self}.")
     start = time.perf_counter()
 
     n = constr_bound.L.A.shape[0]

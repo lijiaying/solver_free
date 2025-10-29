@@ -96,22 +96,21 @@ class IneqBoundModel(BasicBoundModel[T]):
 
         modules_iter: Iterator[BasicIneqNode] = iter(self.submodules.values())
         module = next(modules_iter)  # Input layer
-        print(f"{BLUE}>>> Process {module}{RESET}")
-
-        print(f"Lower bound: {input_bound.l.flatten()[:5]}")
-        print(f"Upper bound: {input_bound.u.flatten()[:5]}")
+        print(f"{LIGHT_BLUE_BK}>>> Process {module}{RESET}")
+        # print(f"Input Lower bound: {input_bound.l.flatten()[:5]}")
+        # print(f"Input Upper bound: {input_bound.u.flatten()[:5]}")
 
         module = next(modules_iter)
         while module is not None:
             start = time.perf_counter()
-            print(f"{BLUE}>>> Process {module}{RESET}")
+            print(f"{LIGHT_BLUE_BK}>>> Process {module}{RESET}")
 
             module.clear()
             bound = module.forward(input_bound, only_lower_bound=module.next_nodes is None)
 
-            print(f"    INPUT  bound: {input_bound}")
-            print(f"    OUTPUT bound: lower: {bound.l.flatten()[:5]}, upper: {bound.u.flatten()[:5] if bound.u is not None else None}")
-            print(f"{GREEN}<<< Finish processing {module} in {time.perf_counter() - start:.4f}s{RESET}")
+            # print(f"    #INPUT bound: {input_bound}")
+            # print(f"    OUTPUT bound: lower: {bound.l.flatten()[:5]}, upper: {bound.u.flatten()[:5] if bound.u is not None else None}")
+            print(f"{GREEN_BK}<<< Finish processing {module} in {time.perf_counter() - start:.4f}s{RESET}")
             module = next(modules_iter, None)
         return bound
 
