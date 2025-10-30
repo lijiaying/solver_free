@@ -46,7 +46,7 @@ def main(args):
         act_relax_mode=bp_method,
         log_file=log_file,
         opt_method=opt_method,
-        first_sample_index=args.from,
+        first_sample_index=args.start,
         num_samples=args.num,
         input_limited_range=input_limited_range,
         # device="cuda:0",  # noqa
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     parser.add_argument("--opt", type=str, default=None)
     parser.add_argument("--log_name", type=str, default=None)
     parser.add_argument("--num", type=int, default=1)
-    parser.add_argument("--from", type=int, default=0)
+    parser.add_argument("--start", type=int, default=0)
 
     args = parser.parse_args()
     if args.dataset is None:
@@ -81,7 +81,7 @@ if __name__ == "__main__":
         elif 'cifar10' in net_lower:
             args.dataset = "cifar10"
 
-    assert args.from >= 0 and args.from < 100, "from should be in [0, 100)."
+    assert args.start >= 0 and args.start < 100, "start should be in [0, 100)."
     assert args.num > 0 and args.num <= 100, "num should be positive."
         
     main(args)
