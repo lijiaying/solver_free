@@ -1,5 +1,7 @@
 source:
     mnist_sigmoid_3x500
+    cmd: python3 exp.py --net_fpath ../nets/mnist_sigmoid_3_500.onnx --epsilon 0.02 --bp deeppoly --opt mnlp --num 100
+    sample: 67 (from 0)
 
 input constraint 
     txt is located at input.txt
