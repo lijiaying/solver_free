@@ -11,7 +11,7 @@ sys.path.insert(0, "../..")
 sys.path.insert(0, "../../../ELINA/python_interface/")
 
 import numpy as np
-from utils import *
+from src.utils import *
 
 try:
     from fconv import ftanh_orthant, fsigm_orthant, fkpool  # noqa
@@ -25,10 +25,10 @@ from src.funchull.acthull import *
 from src.funchull.ablation_study import *
 
 
-def read_constraints_and_bounds(constraints_file_path: str, bounds_file_path: str):
-    with open(constraints_file_path, "r") as f:
+def read_constraints_and_bounds(constraints_fpath: str, bounds_fpath: str):
+    with open(constraints_fpath, "r") as f:
         constraints = f.readlines()
-    with open(bounds_file_path, "r") as f:
+    with open(bounds_fpath, "r") as f:
         bounds = f.readlines()
     constraints = [eval(constraint) for constraint in constraints]
     bounds = [eval(bound) for bound in bounds]
@@ -99,8 +99,8 @@ if __name__ == "__main__":
             # print('>' * 50, method, '<' * 50)
             dim = int(constraints_file.split(".")[-2].split("_")[-2][:-1])
             _constraints_file = constraints_file.replace(".txt", "_oct.txt") if "prima" in method else constraints_file
-            constraints_file_path = os.path.abspath(os.path.join(constraints_dir, _constraints_file))
-            bounds_file_path = os.path.abspath(os.path.join(bounds_dir, constraints_file.replace(".txt", "_bounds.txt")))
+            constraints_fpath = os.path.abspath(os.path.join(constraints_dir, _constraints_file))
+            bounds_fpath = os.path.abspath(os.path.join(bounds_dir, constraints_file.replace(".txt", "_bounds.txt")))
             # else:
             #     print(f"{RED}{CROSS}{RESET} Skipping {constraints_file} with {method}...")
             #     continue
@@ -116,14 +116,14 @@ if __name__ == "__main__":
                 # PRIMA does not support dimensions greater than 4
                 continue
 
-            print(f"{GREEN}{BOLD}[{method.upper()}]{RESET} --> {constraints_file_path} ...")
+            print(f"{GREEN}{BOLD}[{method.upper()}]{RESET} --> {constraints_fpath} ...")
 
-            constraints_list, bounds_list = read_constraints_and_bounds(constraints_file_path, bounds_file_path)
+            constraints_list, bounds_list = read_constraints_and_bounds(constraints_fpath, bounds_fpath)
 
-            bounds_file_path = os.path.basename(bounds_file_path)
-            saved_file_path = bounds_file_path.replace("_bounds.txt", f"_{method}.txt").split("\\")[-1]
+            bounds_fpath = os.path.basename(bounds_fpath)
+            saved_fpath = bounds_fpath.replace("_bounds.txt", f"_{method}.txt").split("\\")[-1]
 
-            file = open(saved_file_path, "w")
+            file = open(saved_fpath, "w")
             for n, (constraints, bounds) in enumerate(zip(constraints_list, bounds_list)):
                 # if n >= 5:
                 #     break
@@ -140,18 +140,18 @@ if __name__ == "__main__":
                     try:
                         output_constraints = fsigm_orthant(constraints)
                     except Exception as e:
-                        print(f"[WARNING] Failed to calculate hull for {constraints_file_path} with {method}: {e}")
+                        print(f"[WARNING] Failed to calculate hull for {constraints_fpath} with {method}: {e}")
 
                 elif method == "prima_tanh":
                     try:
                         output_constraints = ftanh_orthant(constraints)
                     except Exception as e:
-                        print(f"[WARNING] Failed to calculate hull for {constraints_file_path} with {method}: {e}")
+                        print(f"[WARNING] Failed to calculate hull for {constraints_fpath} with {method}: {e}")
                 # elif method == "prima_maxpool":
                 #     try:
                 #         output_constraints = fkpool(constraints)  # noqa
                 #     except Exception as e:
-                #         print(f"[WARNING] Failed to calculate hull for {constraints_file_path} with {method}: {e}")
+                #         print(f"[WARNING] Failed to calculate hull for {constraints_fpath} with {method}: {e}")
                 elif method == "our_sigmoid":
                     fun_hull = SigmoidHull(S=True)
                     output_constraints = fun_hull.cal_hull(constrs=constraints)
@@ -202,7 +202,7 @@ if __name__ == "__main__":
             file.close()
             method_time = time.perf_counter() - method_start
             print(f"[INFO] {method} takes {method_time:.2f} seconds for {n+1} cases.")
-            print(f"[INFO] Save to {saved_file_path}")
+            print(f"[INFO] Save to {saved_fpath}")
             print()
         u, l = get_wrongs()
         print(f"UPPER: {u}, LOWER: {l}")

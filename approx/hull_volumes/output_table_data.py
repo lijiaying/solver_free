@@ -36,14 +36,14 @@ for dim in [2, 3, 4]:  # dimension
             print(
                 f"[INFO] Processing dimension: {dim}, constraints number: {n}, method: {method}"
             )
-            file_path = f"./polytopes_{dim}d_{n}_{method}_volume.txt"
+            fpath = f"./polytopes_{dim}d_{n}_{method}_volume.txt"
             # If the file does not exist, skip it
 
-            with open(file_path, "r") as f:
+            with open(fpath, "r") as f:
                 lines = f.readlines()
 
             if not lines:
-                print(f"[WARNING] No data found for {file_path}. Skipping...")
+                print(f"[WARNING] No data found for {fpath}. Skipping...")
                 all_data[dim][n][method] = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
                 continue
 

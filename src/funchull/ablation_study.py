@@ -10,7 +10,7 @@ __all__ = [
 import numpy as np
 from numpy import ndarray
 
-from . import SShapeHull  # , MaxPoolHullDLP
+from . import SShapeHull, MaxPoolHullDLP
 
 from ..utils import *
 

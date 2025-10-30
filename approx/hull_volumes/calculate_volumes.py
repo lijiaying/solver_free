@@ -243,7 +243,7 @@ if __name__ == "__main__":
         ) as f:
             lines = f.readlines()
 
-        saved_file_path = output_constraints_file.replace(".txt", "_volume.txt")
+        saved_fpath = output_constraints_file.replace(".txt", "_volume.txt")
         if "sigmoid" in method:
             sample_area_shape = "box_sigmoid"
         elif "tanh" in method:
@@ -253,7 +253,7 @@ if __name__ == "__main__":
         else:
             sample_area_shape = "box"
 
-        file = open(saved_file_path, "w")
+        file = open(saved_fpath, "w")
         for i, line in enumerate(lines):
             line.replace("\n", "")
             line = line.split("\t")
@@ -275,7 +275,7 @@ if __name__ == "__main__":
             volume = points_in_num  # / points_num
             file.write(f"{time_cal}\t{constraints_num}\t{volume}\t{points_num}\n")
         file.close()
-        print(f"[INFO] Results saved to {saved_file_path}")
+        print(f"[INFO] Results saved to {saved_fpath}")
 
     time_end = time.perf_counter()
     print(f"[INFO] Done in {time_end - time_start:.4f} seconds.")

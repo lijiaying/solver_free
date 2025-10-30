@@ -57,15 +57,15 @@ def get_bounds_of_variables(constraints: np.ndarray) -> Tuple[List, List]:
     return lower_bounds, upper_bounds
 
 
-def cal_bounds(polytope_samples_file_path: str):
+def cal_bounds(polytope_samples_fpath: str):
 
-    with open(polytope_samples_file_path, "r") as f:
+    with open(polytope_samples_fpath, "r") as f:
         lines = f.readlines()
-    polytope_samples_file_path = (
-        "./" + polytope_samples_file_path.split("/")[-1]
+    polytope_samples_fpath = (
+        "./" + polytope_samples_fpath.split("/")[-1]
     ).replace(".txt", "_bounds.txt")
 
-    output_file = open(polytope_samples_file_path, "w")
+    output_file = open(polytope_samples_fpath, "w")
 
     for line in lines:
         constraints = np.asarray(eval(line))
@@ -73,7 +73,7 @@ def cal_bounds(polytope_samples_file_path: str):
         output_file.write(f"({lower_bounds}, {upper_bounds})\n")
 
     output_file.close()
-    print(f"[INFO] Saved to {polytope_samples_file_path}.")
+    print(f"[INFO] Saved to {polytope_samples_fpath}.")
 
 
 if __name__ == "__main__":
@@ -94,10 +94,10 @@ if __name__ == "__main__":
 
     for polytope_samples_file in polytope_samples_files:
         print(f"[INFO] Process {polytope_samples_file}...")
-        polytope_samples_file_path = os.path.join(
+        polytope_samples_fpath = os.path.join(
             polytope_samples_folder, polytope_samples_file
         )
-        cal_bounds(polytope_samples_file_path)
+        cal_bounds(polytope_samples_fpath)
         print("[INFO] Done")
 
     print(f"[INFO] Done in {time.perf_counter() - time_start:.2f} seconds")

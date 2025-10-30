@@ -121,20 +121,20 @@ def _create_octahedron_approximation(constraints: np.ndarray) -> np.ndarray:
     return np.asarray(oct_constrs)
 
 
-def generate_samples(dim: int, num: int, saved_file_path: str):
+def generate_samples(dim: int, num: int, saved_fpath: str):
     input_constrs_generator = InputConstraintsGenerator(dim)
     input_constrs_method = "box+random"
     input_constrs_box_lower_bound = -6
     input_constrs_box_upper_bound = 6
     for n in [3]:
         print(f"[INFO] Generate {dim}d polytope with {n}^{dim} constraints...")
-        file_path = f"{saved_file_path[:-4]}_{n}.txt"
-        file = open(file_path, "w")
-        file_path_oct = None
+        fpath = f"{saved_fpath[:-4]}_{n}.txt"
+        file = open(fpath, "w")
+        fpath_oct = None
         file_oct = None
         if dim <= 4:
-            file_path_oct = f"{saved_file_path[:-4]}_{n}_oct.txt"
-            file_oct = open(file_path_oct, "w")
+            fpath_oct = f"{saved_fpath[:-4]}_{n}_oct.txt"
+            file_oct = open(fpath_oct, "w")
 
         input_constrs_num = n**dim
         for _ in range(num):
@@ -151,10 +151,10 @@ def generate_samples(dim: int, num: int, saved_file_path: str):
                 file_oct.write(str(input_constrs_oct.tolist()) + "\n")
 
         file.close()
-        print(f"[INFO] Saved to {file_path}")
+        print(f"[INFO] Saved to {fpath}")
         if file_oct is not None:
             file_oct.close()
-            print(f"[INFO] Saved to {file_path_oct}")
+            print(f"[INFO] Saved to {fpath_oct}")
 
 
 if __name__ == "__main__":

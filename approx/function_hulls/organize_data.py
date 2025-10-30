@@ -21,14 +21,14 @@ for method in [
     for d in dimensions:
         for n in [3]:
 
-            file_path = f"./polytopes_{d}d_{n}_{method}.txt"
+            fpath = f"./polytopes_{d}d_{n}_{method}.txt"
 
-            print(f"[INFO] Loading data from {file_path}...")
+            print(f"[INFO] Loading data from {fpath}...")
 
             try:
-                file = open(file_path, "r")
+                file = open(fpath, "r")
             except FileNotFoundError:
-                print(f"[WARNING] {file_path} Does not found and it is skipped.")
+                print(f"[WARNING] {fpath} Does not found and it is skipped.")
                 continue
 
             lines = file.readlines()  # noqa
