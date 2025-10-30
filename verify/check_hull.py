@@ -8,7 +8,12 @@ import warnings
 
 cpu_affinity = os.sched_getaffinity(0)
 
-sys.path.insert(0, "..")
+from pathlib import Path
+# Path object for the current file
+path = Path(__file__).resolve()
+repo_root = path.parent.parent
+
+sys.path.insert(0, str(repo_root))
 import numpy as np
 from src.utils import *
 from src.funchull.acthull import *
