@@ -77,18 +77,12 @@ def generate_groups_lp(
     time_start = time.perf_counter()
 
     # Filter out unnecessary neurons
-    if act_type in {
-        ActType.RELU,
-        ActType.SIGMOID,
-        ActType.TANH,
-    }:
+    if act_type in {ActType.RELU, ActType.SIGMOID, ActType.TANH}:
         # Filter out the neurons with big ranges.
         ids = torch.arange(mask_mn.numel(), device=mask_mn.device)[mask_mn]
 
         r = (pre_u - pre_l)[mask_mn]
-        print(
-            f"Max range {torch.max(r).item():.2f}, Min range {torch.min(r).item():.2f}"
-        )
+        print(f"Max range {torch.max(r).item():.2f}, Min range {torch.min(r).item():.2f}")
         ids = ids[r.argsort(descending=True)]
         grouped_ids = _generate_grouped_ids(
             ids,
@@ -96,20 +90,14 @@ def generate_groups_lp(
             kact_args.group_size,
             kact_args.max_overlap_size,
         )
-
     elif act_type == ActType.MAXPOOL2D:
         grouped_ids = pool_input_ids[mask_mn]
-
     else:
         raise NotImplementedError(f"ActType function {act_type} is not supported.")
 
     grouped_ids = grouped_ids[: kact_args.max_groups].to(pre_l.device)
 
-    print(
-        f"Finish generating {grouped_ids.size(0)} groups for {act_type}. "
-        f"Cost time: {time.perf_counter() - time_start:.4f}s"
-    )
-
+    print(f"Finish generating {grouped_ids.size(0)} groups for {act_type} in {time.perf_counter() - time_start:.4f}s")
     return grouped_ids
 
 
@@ -125,9 +113,7 @@ def _generate_grouped_ids(
             [
                 grouped_ids,
                 _generate_grouped_ids_in_a_partition(
-                    ids[: n_partition * partition_size].reshape(
-                        n_partition, partition_size
-                    ),
+                    ids[: n_partition * partition_size].reshape(n_partition, partition_size),
                     group_dim,
                     max_overlap_size,
                 ),
@@ -139,14 +125,9 @@ def _generate_grouped_ids(
         grouped_ids = torch.vstack(
             [
                 grouped_ids,
-                _generate_grouped_ids_in_a_partition(
-                    ids[n_partition * partition_size :].reshape(1, -1),
-                    group_dim,
-                    max_overlap_size,
-                ),
+                _generate_grouped_ids_in_a_partition(ids[n_partition * partition_size :].reshape(1, -1), group_dim, max_overlap_size),
             ]
         )
-
     return grouped_ids
 
 

@@ -42,9 +42,27 @@
                 "--opt", "mnlp"
             ]
         },
+        {
+            "name": "67 MNIST sigmoid 3x500 Example",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/verify/",
+            "program": "exp.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--net_fpath", "../nets/mnist_sigmoid_3_500.onnx",
+                "--epsilon", "0.02",
+                "--bp", "stm",
+                "--opt", "mnlp",
+                "--start", "67",
+                "--num", "1"
+            ]
+        },
     ]
 }
 
+// python3 exp.py --net_fpath ../nets/mnist_sigmoid_3_500.onnx --epsilon 0.02 --bp deeppoly --opt mnlp --start 67
 
 // {
 //     // Use IntelliSense to learn about possible attributes.
