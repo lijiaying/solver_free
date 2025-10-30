@@ -1,0 +1,22 @@
+source:
+    mnist_sigmoid_3x500
+
+input constraint 
+    txt is located at input.txt
+    npy is located at input.npy
+
+min_val: 
+    -0.20195788053740416
+
+reproduce steps:
+cwd: 
+    verify/
+cmd: 
+    python check_hull.py issues/001/input.npy
+expected output: 
+    ❯ python check_hull.py issues/001/input.npy
+    [INFO] Start calculating the function hulls...
+    [OUR_SIGMOID] >>> issues/001/input.npy >>> ...
+    min: -0.20195788053740416 log path: ./soundness_error_logs/1030_153710/0.1-1.0/00001.txt
+    *SoundCheck* (80, 5)*(382, 5) -lift- (84, 9)*(9, 382)=>(+31131,-957)Minimum value: -0.201958
+    [INFO] Done in 0.01 seconds
