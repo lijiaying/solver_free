@@ -12,7 +12,6 @@ __all__ = [
     "back_sub_residual_second_path",
 ]
 
-import logging
 import time
 
 from src.boundprop.base import NonLinearNode

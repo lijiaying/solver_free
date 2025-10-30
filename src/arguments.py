@@ -5,7 +5,6 @@ This module contains the arguments for the experiment.
 __docformat__ = "restructuredtext"
 __all__ = ["Arguments"]
 
-import logging
 import os
 from dataclasses import dataclass
 
@@ -56,9 +55,6 @@ class Arguments:
 
     log_file: str | None = None
     """The name of the log file."""
-
-    log_level: int = logging.INFO
-    """The logging level."""
 
     random_seed: int = 0
     """The random seed for all random number generators (python, numpy, torch)."""

@@ -19,7 +19,6 @@ float, Numpy, and PyTorch.
 __docformat__ = "restructuredtext"
 __all__ = ["get_parallel_tangent_line", "get_second_tangent_line"]
 
-import logging
 from typing import Literal
 
 import numpy as np
@@ -37,9 +36,6 @@ _MAX_ITER = 100
 _CONVERGE_TOL = 1e-4
 _LOG_MIN_TENSOR = torch.tensor(_LOG_MIN, dtype=torch.float64)
 _ZERO_TENSOR = torch.tensor(0.0, dtype=torch.float64)
-
-# Disable the logging of Numba, which may be conflict with our logging.
-logging.getLogger("numba").setLevel(logging.CRITICAL)
 
 
 @njit

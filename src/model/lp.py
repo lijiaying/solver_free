@@ -9,7 +9,6 @@ objective function of the linear program. The linear program is solved by Gurobi
 __docformat__ = "restructuredtext"
 __all__ = ["LPBoundModel", "GRB_STATUS_MAP"]
 
-import logging
 import time
 from collections import defaultdict, OrderedDict
 from typing import Generic, TypeVar

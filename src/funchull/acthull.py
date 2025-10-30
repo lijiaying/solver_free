@@ -17,6 +17,7 @@ __all__ = [
     "get_wrongs",
 ]
 
+from datetime import datetime
 import os
 import time
 from abc import ABC  # , abstractmethod
@@ -126,7 +127,7 @@ class ActHull(ABC):
         self._check_constrs(constrs)
         self._check_inputs(constrs, lower, upper)
 
-        print("<> call cal_hull ", flush=True)
+        # print("<> call cal_hull ", flush=True)
         # print("constrs=\n", constrs, flush=True)
         d = None
         l = u = None
@@ -880,7 +881,8 @@ class SShapeHull(ActHull, ABC):
         cc_s = np.empty((0, 1 + d), dtype=np.float64)
         # M providing lower/upper output bounds
         cc_l, cc_u = c, c.copy()
-        vv = v.copy()
+        v0 = v.copy()
+        c0 = c.copy()
         v_l, v_u = v, v.copy()
 
         f, df = self._f, self._df
@@ -907,10 +909,10 @@ class SShapeHull(ActHull, ABC):
                 )
                 # print(f'l: v: {v_l.shape}, c: {cc_l.shape}; u: v: {v_u.shape}, c: {cc_u.shape}')
 
-                vvv = np.vstack((v_l, v_u))
-                ccc = np.vstack((cc_l, cc_u))
-                cc_l, cc_u = ccc, ccc
-                v_l, v_u = vvv, vvv
+                # vvv = np.vstack((v_l, v_u))
+                # ccc = np.vstack((cc_l, cc_u))
+                # cc_l, cc_u = ccc, ccc
+                # v_l, v_u = vvv, vvv
 
         cc = np.empty((0, 2 * d + 1), dtype=np.float64)
 
@@ -924,19 +926,12 @@ class SShapeHull(ActHull, ABC):
             # print(f'{YELLOW} check M: {RESET}')
             # print(f'{cc}')
             global Mlower_wrong, Mupper_wrong
-            print(f"\n{YELLOW} check M lower: {RESET}", end=" ")
-            sound = soundness_check(cc_l, vv, self._f)
-            if not sound:
-                Mlower_wrong += 1
-            print(f"\n{YELLOW} check M upper: {RESET}", end=" ")
-            sound = soundness_check(cc_u, vv, self._f)
-            if not sound:
-                Mupper_wrong += 1
-            # soundness_check(cc, vv, self._f)
-            # def soundness_check(X, V, F=None):
-            # if F is None:
-            #     F = self._f
-            # return np.all(F(X) <= V)
+            # print(f"\n{YELLOW} check M lower: {RESET}", end=" ")
+            sound = soundness_check(cc_l, v0, self._f, c0)
+            Mlower_wrong += 1 if not sound else 0
+            # print(f"\n{YELLOW} check M upper: {RESET}", end=" ")
+            sound = soundness_check(cc_u, v0, self._f, c0)
+            Mupper_wrong += 1 if not sound else 0
 
         return cc
 
@@ -1711,23 +1706,22 @@ def str_list(floatlist: List[float] | List[List[float]], precision=3, sep=", ") 
 
 
 tol = 1e-3
-SampleMore = 0
+# tol = 1e-5
 
+NN= 0
+LOG_DIRPATH = "./soundness_error_logs"
+datetime_str = datetime.today().strftime("%m%d_%H%M%S")
+LOG_DIRPATH += f"/{datetime_str}"
 
-def soundness_check(X, V, F=None):
+def soundness_check(X, V0, F=None, C0=None):
     # # print('** check whether H separate V **')
-
-    # if F is not None and X.shape[1] != V.shape[0]:
-    #     # if SampleMore > 0:
-    #     #     Vmore = sample_more_points(V, X.shape[1] * SampleMore)
-    #     #     V = np.hstack((V, Vmore))
-    #     V = np.vstack((V, F(V[1:])))
+    V = V0.copy()
     V = V.transpose()
-    if F is not None and X.shape[1] != V.shape[0]:
+    if X.shape[1] != V.shape[0]:
+        assert F is not None, "Cannot expand V to match X shape."
         V = np.vstack((V, F(V[1:])))
     if X.shape[1] != V.shape[0]:
         V = V[: X.shape[1]]
-    Vmore = np.zeros((V.shape[0], 0))
     # print('-'*60)
     # print('X:', X.shape, '\n', X, sep='', flush=True)
     # print('V:', V.shape, '\n', V, sep='', flush=True)
@@ -1743,28 +1737,56 @@ def soundness_check(X, V, F=None):
     # print('threshold:', threshold)
     # print('[H*V]:\n', normalize_numpy_array(H_V))
     # print('->', ('(+' + str(XV_pos) + ',-' + str(XV_neg) + ')').ljust(10), end='', sep='', flush=True)
-    Vstr = "+" + str(Vmore.shape[1]) if SampleMore > 0 else ""
-    print(
-        f"{BLUE}*Sound*{RESET} {GRAY}[{Vstr}]{RESET} {str(X.shape)}*{str(V.shape)} => (+{XV_pos},-{XV_neg})".ljust(
-            60
-        ),
-        end="",
-        flush=True,
-    )
     if XV_neg > 0:
-        print(
-            f"{RED_BK}[ERROR]{RESET} {str_list(list(XV[XV < threshold])[:20], 8)}",
-            end="",
-        )
-        # if XV_neg > 20:
-        #     print("... and", XV_neg - 20, "more ...", end="")
-        # if True:
-        #     print("\n-- More Info --")
-        #     print("Locations:", Loc_neg)
-        #     for i, (row, col) in enumerate(zip(Loc_neg[0], Loc_neg[1])):
-        #         if i > 5:
-        #             break
-        #         print(f'{CYAN}|----{i} loc:{(row, col)} values:{XV[row, col]}  <<== X[{row}] * V[{col}]{V[:, col].reshape((-1))} {RESET}')
-    else:
-        print(GREEN_BK, "[PASS]", RESET, sep="", end="")
+        MIN = np.min(XV)
+        # print(f"{BLUE}*SoundCheck*{RESET} {str(X.shape)}*{str(V.shape)}=>(+{XV_pos},-{XV_neg})".ljust(60), end="", flush=True)
+        # print(f"Min: {MIN:n}{RESET}", flush=True)
+        log_dirname = LOG_DIRPATH
+        if MIN >= -0.01:
+            log_dirname += "/0-0.01"
+        elif MIN >= -0.1:
+            log_dirname += "/0.01-0.1"
+        elif MIN >= -1.0:
+            log_dirname += "/0.1-1.0"
+        else:
+            log_dirname += "/1.0-inf"
+        os.makedirs(log_dirname, exist_ok=True)
+        if MIN <= -0.1:
+            global NN
+            NN += 1
+            log_fname = f"{NN:05d}.txt"
+            log_fpath = os.path.join(log_dirname, log_fname)
+            print(f'min: {MIN} log path: {log_fpath}')
+            with open(log_fpath, "w") as f:
+                f.write(f"-"*120)
+                f.write(f"Minimum value: {MIN:n}\n")
+                f.write(f"-"*120)
+                f.write(f"C0:\n{C0}\n")
+                f.write(f"-"*120)
+                f.write(f"V0:\n{V0}\n")
+                f.write(f"-"*120)
+                f.write(f"X:\n{X}\n")
+                f.write(f"-"*120)
+                f.write(f"V:\n{V}\n")
+                f.write(f"-"*120)
+                f.write(f"XV:\n{XV}\n")
+            min_fname = f"minimum.txt"
+            min_fpath = os.path.join(LOG_DIRPATH, min_fname)
+            with open(min_fpath, "a") as f:
+                f.write(f"{NN:05d}: {MIN:n}: {os.path.abspath(log_fpath)}\n")
+            print(f"{BLUE}*SoundCheck*{RESET} {str(C0.shape)}*{str(V0.shape)} -lift- {str(X.shape)}*{str(V.shape)}=>(+{XV_pos},-{XV_neg})".ljust(60), end="", flush=True)
+            print(f"{RED_BK}Minimum value: {MIN:n}{RESET}", flush=True)
+            if MIN <= -1.0:
+                print(f"{YELLOW_BK}[ERROR]{RESET} Significant unsoundness detected!", flush=True)
+                print(f"{RED}C0:\n{RESET} {C0}", flush=True)
+                print(f"{RED}V0:\n{RESET} {V0}", flush=True)
+                sys.exit(-1)
+            
+        # print(f"{BLUE}*SoundCheck*{RESET} {str(X.shape)}*{str(V.shape)}=>(+{XV_pos},-{XV_neg})".ljust(60), end="", flush=True)
+        # print(f"{RED_BK}[ERROR]{RESET} {str_list(list(XV[XV < threshold])[:10], 8)}", end="", flush=True)
+        # print(f"\n{RED}Minimum value: {MIN:n}{RESET}", flush=True)
+        # print(f"{RED}C0:{RESET} {C0}", flush=True)
+        # print(f"{RED}V0:{RESET} {V0}", flush=True)
+    # else:
+    #     print(GREEN_BK, "[PASS]", RESET, sep="", end="")
     return XV_neg == 0

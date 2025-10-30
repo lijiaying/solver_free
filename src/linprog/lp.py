@@ -48,7 +48,6 @@ __all__ = [
 ]
 
 import itertools
-import logging
 from abc import ABC, abstractmethod
 
 import gurobipy

@@ -6,7 +6,6 @@ import sys
 
 sys.path.append("../")
 
-import logging
 from datetime import datetime
 
 from src import *
@@ -44,7 +43,6 @@ def main(args):
         net_fpath=args.net_fpath,
         dataset=args.dataset,
         epsilon=args.epsilon,
-        log_level=logging.INFO,
         act_relax_mode=bp_method,
         log_file=log_file,
         opt_method=opt_method,
@@ -83,10 +81,10 @@ if __name__ == "__main__":
             args.dataset = "cifar10"
 
     if args.num_samples is not None:
-        assert args.num_samples > 0 and args.num_samples < 100, "num_samples should be positive."
+        assert args.num_samples > 0 and args.num_samples <= 100, "num_samples should be positive."
         print(f"Set num_samples to {args.num_samples}")
     else:
-        args.num_samples = 10
+        args.num_samples = 1
         
     main(args)
 

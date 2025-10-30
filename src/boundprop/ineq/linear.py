@@ -18,7 +18,6 @@ __all__ = [
     "ResidualAddIneqNode",
 ]
 
-import logging
 import math
 from abc import abstractmethod, ABC
 

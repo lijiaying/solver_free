@@ -23,7 +23,6 @@ __all__ = [
 ]
 
 import itertools
-import logging
 import multiprocessing
 import time
 from typing import Any

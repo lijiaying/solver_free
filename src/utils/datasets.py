@@ -5,7 +5,6 @@ This module provides functions to load datasets.
 __format__ = "restructuredtext"
 __all__ = ["load_dataset"]
 
-import logging
 import os
 
 import numpy as np

@@ -7,7 +7,6 @@ the specified approach to verify the given model.
 __docformat__ = "restructuredtext"
 __all__ = ["ModelFactory"]
 
-import logging
 import os
 import random
 import time
@@ -157,6 +156,10 @@ class ModelFactory:
             if num_samples <= 0:
                 break
 
+            print(f"*"*100)
+            print(f"*"*100)
+            print(f"*"*100)
+            print(f"*"*100)
             print(f"Sample {i}".center(100, "="))
             time_sample = time.perf_counter()
 

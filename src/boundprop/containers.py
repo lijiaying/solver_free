@@ -7,7 +7,6 @@ by different nodes.
 __docformat__ = "restructuredtext"
 __all__ = ["BPSharedData"]
 
-import logging
 from collections import OrderedDict
 
 import torch

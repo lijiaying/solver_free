@@ -6,7 +6,6 @@ symbolic inequalities.
 __docformat__ = "restructuredtext"
 __all__ = ["IneqBoundModel"]
 
-import logging
 import time
 from typing import TypeVar, Iterator
 

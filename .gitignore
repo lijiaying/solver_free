@@ -27,3 +27,6 @@ __pycache__
 
 # .txt
 .pdf
+
+verify/soundness_error_logs/
+*.ilp
